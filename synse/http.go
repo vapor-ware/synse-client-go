@@ -108,7 +108,7 @@ func (c *httpClient) getUnversioned(path string, okResp interface{}, errResp *Er
 	}
 
 	if *errResp != (Error{}) {
-		return errors.New(fmt.Sprintf("got an error response from synse server: %+v", errResp))
+		return errors.Errorf("got an error response from synse server: %+v", errResp)
 	}
 
 	return nil

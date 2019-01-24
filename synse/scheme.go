@@ -26,8 +26,8 @@ type Version struct {
 // Config describes a response for `/config` endpoint.
 type Config struct {
 	Logging    string           `json:"logging"`
-	PrettyJSON bool             `json:"pretty_json"`
 	Locale     string           `json:"locale"`
+	PrettyJSON bool             `json:"pretty_json"`
 	Plugin     PluginOptions    `json:"plugin"`
 	Cache      CacheOptions     `json:"cache"`
 	GRPC       GRPCOptions      `json:"grpc"`
@@ -35,74 +35,74 @@ type Config struct {
 	Transport  TransportOptions `json:"transport"`
 }
 
-// PluginsOptions
+// PluginOptions is the config options for plugin.
 type PluginOptions struct {
 	TCP      []string         `json:"tcp"`
 	Unix     []string         `json:"unix"`
 	Discover DiscoveryOptions `json:"discover"`
 }
 
-// DiscoveryOptions
+// DiscoveryOptions is the config options for service discovery.
 type DiscoveryOptions struct {
 	Kubernetes KubernetesOptions `json:"kubernetes"`
 }
 
-// KubernetesOptions
+// KubernetesOptions is the config options for kubernetes.
 type KubernetesOptions struct {
 	Namespace string           `json:"namespace"`
 	Endpoints EndpointsOptions `json:"endpoints"`
 }
 
-// EndpointsOptions
+// EndpointsOptions is the config options for kubernetes's endpoint.
 type EndpointsOptions struct {
 	Label LabelOptions `json:"label"`
 }
 
-// LabelOptions
+// LabelOptions is the config options for kubernetes's label.
 type LabelOptions struct {
 	App       string `json:"app"`
 	Component string `json:"server"`
 }
 
-// CacheOptions
+// CacheOptions is the config options for cache.
 type CacheOptions struct {
 	Meta        MetaOptions        `json:"meta"` // FIXME: not in v3
 	Device      DeviceOptions      `json:"device"`
 	Transaction TransactionOptions `json:"transaction"`
 }
 
-// MetaOptions
+// MetaOptions is the config options for meta cache.
 type MetaOptions struct {
 	TTL int `json:"ttl"`
 }
 
-// DeviceOptions
+// DeviceOptions is the config options for device cache.
 type DeviceOptions struct {
 	TTL int `json:"ttl"`
 }
 
-// TransactionOptions
+// TransactionOptions is the config options for transaction cache.
 type TransactionOptions struct {
 	TTL int `json:"ttl"`
 }
 
-// GRPCOptions
+// GRPCOptions is the config options for grpc.
 type GRPCOptions struct {
 	Timeout int        `json:"timeout"`
 	TLS     TLSOptions `json:"tls"`
 }
 
-// TLSOptions
+// TLSOptions is the config options for tls communication.
 type TLSOptions struct {
 	Cert string `json:"cert"`
 }
 
-// MetricsOptions
+// MetricsOptions is the config options for metrics.
 type MetricsOptions struct {
 	Enabled bool `json:"enabled"`
 }
 
-// TransportOptions
+// TransportOptions is the config options for transport communication layer.
 type TransportOptions struct {
 	Protocol string `json:"protocol"`
 }

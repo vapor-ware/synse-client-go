@@ -12,13 +12,13 @@ type Options struct {
 	Retry  RetryOptions
 }
 
-// ServerOptions
+// ServerOptions is the config options for server.
 type ServerOptions struct {
 	Address string
 	Timeout time.Duration
 }
 
-// RetryOptions
+// RetryOptions is the config options for backoff retry mechanism.
 type RetryOptions struct {
 	Count       int
 	WaitTime    time.Duration
