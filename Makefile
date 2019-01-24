@@ -4,6 +4,20 @@
 
 VERSION := 0.0.1
 
+HAS_LINT := $(shell which gometalinter)
+HAS_DEP  := $(shell which dep)
+
+#
+# Development Targets
+#
+
+.PHONY: dep
+dep:  ## Ensure and prune dependencies
+ifndef HAS_DEP
+	go get -u github.com/golang/dep/cmd/dep
+endif
+	dep ensure -v
+
 .PHONY: clean
 clean:  ## Remove temporary files
 	go clean -v
