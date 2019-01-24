@@ -41,6 +41,7 @@ func Get() *Info {
 		Arch:       runtime.GOARCH,
 		OS:         runtime.GOOS,
 		BuildDate:  BuildDate,
+		GitCommit:  GitCommit,
 		GitTag:     GitTag,
 		GoVersion:  GoVersion,
 		BinVersion: BinVersion,
