@@ -1,5 +1,7 @@
 package main
 
+// http.go shows a simple example of a http client's usage.
+
 import (
 	"fmt"
 
