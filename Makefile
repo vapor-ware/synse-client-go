@@ -11,16 +11,20 @@ HAS_DEP  := $(shell which dep)
 # Development Targets
 #
 
+.PHONY: clean
+clean:  ## Remove temporary files
+	go clean -v
+
+.PHONY: cover
+cover: test  ## Run unit tests and open the coverage report
+	go tool cover -html=coverage.out
+
 .PHONY: dep
 dep:  ## Ensure and prune dependencies
 ifndef HAS_DEP
 	go get -u github.com/golang/dep/cmd/dep
 endif
 	dep ensure -v
-
-.PHONY: clean
-clean:  ## Remove temporary files
-	go clean -v
 
 .PHONY: fmt
 fmt:  ## Run goimports on all go source files
@@ -40,6 +44,21 @@ lint:  ## Lint project source files
 		--aggregate \
 		--deadline=5m \
 		-e $$(go env GOROOT)
+
+.PHONY: setup
+setup:  ## Install the build and development dependencies and set up vendoring
+	go get -u github.com/alecthomas/gometalinter
+	go get -u github.com/golang/dep/cmd/dep
+	gometalinter --install
+ifeq (,$(wildcard ./Gopkg.toml))
+	dep init
+endif
+	@$(MAKE) dep
+
+.PHONY: test
+test:  ## Run all unit tests
+	@ # Note: this requires go1.10+ in order to do multi-package coverage reports
+	go test -race -coverprofile=coverage.out -covermode=atomic ./...
 
 .PHONY: version
 version:  ## Print the version of the client
