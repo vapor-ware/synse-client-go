@@ -37,16 +37,16 @@ func setupHTTPClient(opt *Options, c *resty.Client) error {
 		return errors.New("options can not be nil")
 	}
 
-	if opt.Server.Address == "" {
+	if opt.Address == "" {
 		return errors.New("no address is specified")
 	}
-	c = c.SetHostURL(fmt.Sprintf("http://%s/synse/", opt.Server.Address))
+	c = c.SetHostURL(fmt.Sprintf("http://%s/synse/", opt.Address))
 
-	if opt.Server.Timeout == 0 {
+	if opt.Timeout == 0 {
 		// FIXME - find a better way to use default options here?
-		opt.Server.Timeout = 2 * time.Second
-		c = c.SetTimeout(opt.Server.Timeout)
+		opt.Timeout = 2 * time.Second
 	}
+	c = c.SetTimeout(opt.Timeout)
 
 	// Only use retry options if set, otherwise let the resty client goes with
 	// its defaults (O Count, 100 milliseconds WaitTime, 2 seconds MaxWaitTime).

@@ -10,9 +10,7 @@ import (
 
 func main() {
 	config := &synse.Options{
-		Server: synse.ServerOptions{
-			Address: "localhost:5000",
-		},
+		Address: "localhost:5000",
 	}
 
 	client, err := synse.NewHTTPClient(config)

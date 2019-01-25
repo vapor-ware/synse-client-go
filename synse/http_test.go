@@ -16,9 +16,7 @@ func TestNewHTTPClient_NilConfig(t *testing.T) {
 
 func TestNewHTTPClient_NoAddress(t *testing.T) {
 	client, err := NewHTTPClient(&Options{
-		Server: ServerOptions{
-			Address: "",
-		},
+		Address: "",
 	})
 	assert.Nil(t, client)
 	assert.Error(t, err, "address shoud not be empty")
@@ -26,9 +24,7 @@ func TestNewHTTPClient_NoAddress(t *testing.T) {
 
 func TestNewHTTPClient_ValidAddress(t *testing.T) {
 	client, err := NewHTTPClient(&Options{
-		Server: ServerOptions{
-			Address: "localhost:5000",
-		},
+		Address: "localhost:5000",
 	})
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
@@ -36,10 +32,8 @@ func TestNewHTTPClient_ValidAddress(t *testing.T) {
 
 func TestNewHTTPClient_ValidAddressAndTimeout(t *testing.T) {
 	client, err := NewHTTPClient(&Options{
-		Server: ServerOptions{
-			Address: "localhost:5000",
-			Timeout: 3 * time.Second,
-		},
+		Address: "localhost:5000",
+		Timeout: 3 * time.Second,
 	})
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
@@ -47,9 +41,7 @@ func TestNewHTTPClient_ValidAddressAndTimeout(t *testing.T) {
 
 func TestNewHTTPClient_ValidRetry(t *testing.T) {
 	client, err := NewHTTPClient(&Options{
-		Server: ServerOptions{
-			Address: "localhost:5000",
-		},
+		Address: "localhost:5000",
 		Retry: RetryOptions{
 			Count:       3,
 			WaitTime:    5 * time.Second,
@@ -96,9 +88,7 @@ func TestHTTPClient_Unversioned_200(t *testing.T) {
 	defer server.Close()
 
 	client, err := NewHTTPClient(&Options{
-		Server: ServerOptions{
-			Address: server.URL,
-		},
+		Address: server.URL,
 	})
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
@@ -134,9 +124,7 @@ func TestHTTPClient_Unversioned_500(t *testing.T) {
 	defer server.Close()
 
 	client, err := NewHTTPClient(&Options{
-		Server: ServerOptions{
-			Address: server.URL,
-		},
+		Address: server.URL,
 	})
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
@@ -228,9 +216,7 @@ func TestHTTPClient_Versioned_200(t *testing.T) {
 	defer server.Close()
 
 	client, err := NewHTTPClient(&Options{
-		Server: ServerOptions{
-			Address: server.URL,
-		},
+		Address: server.URL,
 	})
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
@@ -263,9 +249,7 @@ func TestHTTPClient_Versioned_500(t *testing.T) {
 	defer server.Close()
 
 	client, err := NewHTTPClient(&Options{
-		Server: ServerOptions{
-			Address: server.URL,
-		},
+		Address: server.URL,
 	})
 	assert.NotNil(t, client)
 	assert.NoError(t, err)

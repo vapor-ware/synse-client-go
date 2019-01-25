@@ -8,17 +8,18 @@ import (
 
 // Options is the root config options.
 type Options struct {
-	Server ServerOptions
-	Retry  RetryOptions
-}
-
-// ServerOptions is the config options for server.
-type ServerOptions struct {
+	// Address specifies the URL of Synse Server in format host[:port]
 	Address string
+
+	// Timeout specifies a time limit for a request.
 	Timeout time.Duration
+
+	// Retry specifies the options for retry mechanism.
+	Retry RetryOptions
 }
 
 // RetryOptions is the config options for backoff retry mechanism.
+// TODO - add docs for all the fields.
 type RetryOptions struct {
 	Count       int
 	WaitTime    time.Duration
