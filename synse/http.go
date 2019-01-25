@@ -18,6 +18,7 @@ type httpClient struct {
 }
 
 // NewHTTPClient returns a new instance of a http client.
+// TODO - could have different constructors for clients (refer to #7).
 func NewHTTPClient(options *Options) (Client, error) {
 	client, err := createHTTPClient(options)
 	if err != nil {
@@ -44,7 +45,7 @@ func createHTTPClient(opt *Options) (*resty.Client, error) {
 	client = client.SetHostURL(fmt.Sprintf("http://%s/synse/", opt.Address))
 
 	if opt.Timeout == 0 {
-		// FIXME - find a better way to use default options here?
+		// FIXME - find a better way to use default options here.
 		opt.Timeout = 2 * time.Second
 	}
 	client = client.SetTimeout(opt.Timeout)
@@ -128,6 +129,8 @@ func (c *httpClient) getVersioned(path string, okResp interface{}) error {
 		return errors.Wrap(err, "failed to cache api version")
 	}
 
+	// FIXME - will want to separate out the URL construction for scalability
+	// when it comes to adding POST method.
 	versionedPath := fmt.Sprintf("%s/%s", c.apiVersion, path)
 	err = c.getUnversioned(versionedPath, okResp)
 	if err != nil {
