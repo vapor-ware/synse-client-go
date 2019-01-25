@@ -19,8 +19,7 @@ type httpClient struct {
 
 // NewHTTPClient returns a new instance of a http client.
 func NewHTTPClient(options *Options) (Client, error) {
-	client := resty.New()
-	err := setupHTTPClient(options, client)
+	client, err := createHTTPClient(options)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to setup a http client")
 	}
@@ -31,38 +30,40 @@ func NewHTTPClient(options *Options) (Client, error) {
 	}, nil
 }
 
-// setupHTTPClient setups the client with configured options.
-func setupHTTPClient(opt *Options, c *resty.Client) error {
+// createHTTPClient setups the client with configured options.
+func createHTTPClient(opt *Options) (*resty.Client, error) {
 	if opt == nil {
-		return errors.New("options can not be nil")
+		return nil, errors.New("options can not be nil")
 	}
 
 	if opt.Address == "" {
-		return errors.New("no address is specified")
+		return nil, errors.New("no address is specified")
 	}
-	c = c.SetHostURL(fmt.Sprintf("http://%s/synse/", opt.Address))
+
+	client := resty.New()
+	client = client.SetHostURL(fmt.Sprintf("http://%s/synse/", opt.Address))
 
 	if opt.Timeout == 0 {
 		// FIXME - find a better way to use default options here?
 		opt.Timeout = 2 * time.Second
 	}
-	c = c.SetTimeout(opt.Timeout)
+	client = client.SetTimeout(opt.Timeout)
 
 	// Only use retry options if set, otherwise let the resty client goes with
 	// its defaults (O Count, 100 milliseconds WaitTime, 2 seconds MaxWaitTime).
 	if opt.Retry.Count != 0 {
-		c = c.SetRetryCount(opt.Retry.Count)
+		client = client.SetRetryCount(opt.Retry.Count)
 	}
 
 	if opt.Retry.WaitTime != 0 {
-		c = c.SetRetryWaitTime(opt.Retry.WaitTime)
+		client = client.SetRetryWaitTime(opt.Retry.WaitTime)
 	}
 
 	if opt.Retry.MaxWaitTime != 0 {
-		c = c.SetRetryMaxWaitTime(opt.Retry.MaxWaitTime)
+		client = client.SetRetryMaxWaitTime(opt.Retry.MaxWaitTime)
 	}
 
-	return nil
+	return client, nil
 }
 
 // Status returns the status info.
