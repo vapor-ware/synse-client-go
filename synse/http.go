@@ -69,9 +69,8 @@ func createHTTPClient(opt *Options) (*resty.Client, error) {
 // Status returns the status info.
 func (c *httpClient) Status() (*Status, error) {
 	out := new(Status)
-	synseError := new(Error)
 
-	err := c.getUnversioned(testURI, out, synseError)
+	err := c.getUnversioned(testURI, out)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to request `/status` endpoint")
 	}
@@ -82,9 +81,8 @@ func (c *httpClient) Status() (*Status, error) {
 // Version returns the version info.
 func (c *httpClient) Version() (*Version, error) {
 	out := new(Version)
-	synseError := new(Error)
 
-	err := c.getUnversioned(versionURI, out, synseError)
+	err := c.getUnversioned(versionURI, out)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to request `/version` endpoint")
 	}
@@ -95,9 +93,8 @@ func (c *httpClient) Version() (*Version, error) {
 // Config returns the config info.
 func (c *httpClient) Config() (*Config, error) {
 	out := new(Config)
-	synseError := new(Error)
 
-	err := c.getVersioned(configURI, out, synseError)
+	err := c.getVersioned(configURI, out)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to request `/config` endpoint")
 	}
@@ -106,7 +103,9 @@ func (c *httpClient) Config() (*Config, error) {
 }
 
 // getUnversioned makes an unversioned request.
-func (c *httpClient) getUnversioned(path string, okResp interface{}, errResp *Error) error {
+func (c *httpClient) getUnversioned(path string, okResp interface{}) error {
+	errResp := new(Error)
+
 	_, err := c.client.R().
 		SetResult(okResp).
 		SetError(errResp).
@@ -123,14 +122,14 @@ func (c *httpClient) getUnversioned(path string, okResp interface{}, errResp *Er
 }
 
 // getVersioned makes a versioned request.
-func (c *httpClient) getVersioned(path string, okResp interface{}, errResp *Error) error {
+func (c *httpClient) getVersioned(path string, okResp interface{}) error {
 	err := c.cacheAPIVersion()
 	if err != nil {
 		return errors.Wrap(err, "failed to cache api version")
 	}
 
 	versionedPath := fmt.Sprintf("%s/%s", c.apiVersion, path)
-	err = c.getUnversioned(versionedPath, okResp, errResp)
+	err = c.getUnversioned(versionedPath, okResp)
 	if err != nil {
 		return errors.Wrap(err, "failed to make a versioned request to synse server")
 	}
