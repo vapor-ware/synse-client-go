@@ -141,12 +141,15 @@ func (c *httpClient) setVersioned() (*resty.Client, error) {
 // check validates returned response from the Synse Server.
 func check(err error, errResp *Error) error {
 	if err != nil {
-		return errors.Wrap(err, "failed to validate response from synse server")
+		return errors.Wrap(err, "failed to make a request to synse server")
 	}
 
 	if *errResp != (Error{}) {
-		// FIXME - should we print out the full struct with its field names here.
-		return errors.Errorf("got an error response from synse server: %+v", errResp)
+		return errors.Errorf(
+			"got a %v error response from synse server at %v, saying %v, with context: %v",
+			errResp.HTTPCode, errResp.Timestamp, errResp.Description, errResp.Context,
+		)
+
 	}
 
 	return nil
