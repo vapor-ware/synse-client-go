@@ -25,14 +25,14 @@ type Version struct {
 
 // Config describes a response for `/config` endpoint.
 type Config struct {
-	Logging    string           `json:"logging"`
 	Locale     string           `json:"locale"`
-	PrettyJSON bool             `json:"pretty_json"`
+	Logging    string           `json:"logging"`
 	Plugin     PluginOptions    `json:"plugin"`
 	Cache      CacheOptions     `json:"cache"`
 	GRPC       GRPCOptions      `json:"grpc"`
-	Metrics    MetricsOptions   `json:"metrics"`
 	Transport  TransportOptions `json:"transport"`
+	Metrics    MetricsOptions   `json:"metrics"`
+	PrettyJSON bool             `json:"pretty_json"`
 }
 
 // PluginOptions is the config options for plugin.
