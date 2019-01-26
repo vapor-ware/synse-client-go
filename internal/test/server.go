@@ -48,23 +48,6 @@ func (s MockHTTPServer) ServeVersionedFailure(t *testing.T, path string, respons
 	s.serveVersion(t, path, 500, response)
 }
 
-// Close closes the server connection.
-func (s MockHTTPServer) Close() {
-	s.Server.Close()
-}
-
-// serve registers a path handler and writes to its response.
-func (s MockHTTPServer) serve(t *testing.T, version string, path string, statusCode int, response interface{}) {
-	s.mux.HandleFunc(
-		fmt.Sprintf("%v%v", version, path),
-		func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(statusCode)
-			fprint(t, w, response)
-		},
-	)
-}
-
 // serveUnversioned registers the unversioned route.
 func (s MockHTTPServer) serveUnversion(t *testing.T, path string, statusCode int, response interface{}) {
 	s.serve(t, "/synse", path, statusCode, response)
@@ -80,6 +63,23 @@ func (s MockHTTPServer) serveVersion(t *testing.T, path string, statusCode int, 
 			w.Header().Set("Content-Type", "application/json")
 			fprint(t, w, `{"version": "3.x.x", "api_version": "v3"}`)
 		})
+}
+
+// serve registers a path handler and writes to its response.
+func (s MockHTTPServer) serve(t *testing.T, version string, path string, statusCode int, response interface{}) {
+	s.mux.HandleFunc(
+		fmt.Sprintf("%v%v", version, path),
+		func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(statusCode)
+			fprint(t, w, response)
+		},
+	)
+}
+
+// Close closes the server connection.
+func (s MockHTTPServer) Close() {
+	s.Server.Close()
 }
 
 // fprint calls fmt.Fprint and validates its returned error.
