@@ -11,7 +11,7 @@ import (
 func TestNewHTTPClient_NilConfig(t *testing.T) {
 	client, err := NewHTTPClient(nil)
 	assert.Nil(t, client)
-	assert.Error(t, err, "config shoud not be nil")
+	assert.Error(t, err)
 }
 
 func TestNewHTTPClient_NoAddress(t *testing.T) {
@@ -19,7 +19,7 @@ func TestNewHTTPClient_NoAddress(t *testing.T) {
 		Address: "",
 	})
 	assert.Nil(t, client)
-	assert.Error(t, err, "address shoud not be empty")
+	assert.Error(t, err)
 }
 
 func TestNewHTTPClient_ValidAddress(t *testing.T) {
