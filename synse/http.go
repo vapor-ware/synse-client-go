@@ -115,12 +115,7 @@ func (c *httpClient) Config() (*Config, error) {
 // getUnversioned performs a GET request against the Synse Server unversioned API.
 func (c *httpClient) getUnversioned(uri string, okScheme interface{}) error {
 	errScheme := new(Error)
-	client, err := c.setUnversioned()
-	if err != nil {
-		return errors.Wrap(err, "failed to set an unversioned host")
-	}
-
-	_, err = client.R().SetResult(okScheme).SetError(errScheme).Get(uri)
+	_, err := c.setUnversioned().R().SetResult(okScheme).SetError(errScheme).Get(uri)
 	return check(err, errScheme)
 }
 
@@ -137,8 +132,8 @@ func (c *httpClient) getVersioned(uri string, okScheme interface{}) error {
 }
 
 // setUnversioned returns a client that uses unversioned host URL.
-func (c *httpClient) setUnversioned() (*resty.Client, error) {
-	return c.client.SetHostURL(fmt.Sprintf("http://%s/synse/", c.options.Address)), nil
+func (c *httpClient) setUnversioned() *resty.Client {
+	return c.client.SetHostURL(fmt.Sprintf("http://%s/synse/", c.options.Address))
 }
 
 // setVersioned returns a client that uses versioned host URL.
