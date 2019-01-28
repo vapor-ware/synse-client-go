@@ -18,16 +18,29 @@ type httpClient struct {
 }
 
 // NewHTTPClient returns a new instance of a http client.
-// TODO - could have different constructors for clients (refer to #7).
 func NewHTTPClient(options *Options) (Client, error) {
 	client, err := createHTTPClient(options)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to setup a http client")
+		return nil, errors.Wrap(err, "failed to create a http client")
 	}
 
 	return &httpClient{
 		options: options,
 		client:  client,
+	}, nil
+}
+
+// NewHTTPClientV3 returns a new instance of a http client with API v3.
+func NewHTTPClientV3(options *Options) (Client, error) {
+	client, err := createHTTPClient(options)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create a http client")
+	}
+
+	return &httpClient{
+		options:    options,
+		client:     client,
+		apiVersion: "v3",
 	}, nil
 }
 
@@ -41,17 +54,16 @@ func createHTTPClient(opt *Options) (*resty.Client, error) {
 		return nil, errors.New("no address is specified")
 	}
 
-	client := resty.New()
-	client = client.SetHostURL(fmt.Sprintf("http://%s/synse/", opt.Address))
-
 	if opt.Timeout == 0 {
 		// FIXME - find a better way to use default options here.
 		opt.Timeout = 2 * time.Second
 	}
+
+	// FIXME - better way to handle this?
+	client := resty.New()
 	client = client.SetTimeout(opt.Timeout)
 
-	// Only use retry options if set, otherwise let the resty client goes with
-	// its defaults (O Count, 100 milliseconds WaitTime, 2 seconds MaxWaitTime).
+	// Only use retry strategy if its options are set.
 	if opt.Retry.Count != 0 {
 		client = client.SetRetryCount(opt.Retry.Count)
 	}
@@ -70,7 +82,6 @@ func createHTTPClient(opt *Options) (*resty.Client, error) {
 // Status returns the status info.
 func (c *httpClient) Status() (*Status, error) {
 	out := new(Status)
-
 	err := c.getUnversioned(testURI, out)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to request `/status` endpoint")
@@ -82,7 +93,6 @@ func (c *httpClient) Status() (*Status, error) {
 // Version returns the version info.
 func (c *httpClient) Version() (*Version, error) {
 	out := new(Version)
-
 	err := c.getUnversioned(versionURI, out)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to request `/version` endpoint")
@@ -94,7 +104,6 @@ func (c *httpClient) Version() (*Version, error) {
 // Config returns the config info.
 func (c *httpClient) Config() (*Config, error) {
 	out := new(Config)
-
 	err := c.getVersioned(configURI, out)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to request `/config` endpoint")
@@ -103,41 +112,38 @@ func (c *httpClient) Config() (*Config, error) {
 	return out, nil
 }
 
-// getUnversioned makes an unversioned request.
-func (c *httpClient) getUnversioned(path string, okResp interface{}) error {
-	errResp := new(Error)
-
-	_, err := c.client.R().
-		SetResult(okResp).
-		SetError(errResp).
-		Get(path)
-	if err != nil {
-		return errors.Wrap(err, "failed to make an unversioned request to synse server")
-	}
-
-	if *errResp != (Error{}) {
-		return errors.Errorf("got an error response from synse server: %+v", errResp)
-	}
-
-	return nil
+// getUnversioned performs a GET request against the Synse Server unversioned API.
+func (c *httpClient) getUnversioned(uri string, okScheme interface{}) error {
+	errScheme := new(Error)
+	_, err := c.setUnversioned().R().SetResult(okScheme).SetError(errScheme).Get(uri)
+	return check(err, errScheme)
 }
 
-// getVersioned makes a versioned request.
-func (c *httpClient) getVersioned(path string, okResp interface{}) error {
+// getVersioned performs a GET request against the Synse Server versioned API.
+func (c *httpClient) getVersioned(uri string, okScheme interface{}) error {
+	errScheme := new(Error)
+	client, err := c.setVersioned()
+	if err != nil {
+		return errors.Wrap(err, "failed to set a versioned host")
+	}
+
+	_, err = client.R().SetResult(okScheme).SetError(errScheme).Get(uri)
+	return check(err, errScheme)
+}
+
+// setUnversioned returns a client that uses unversioned host URL.
+func (c *httpClient) setUnversioned() *resty.Client {
+	return c.client.SetHostURL(fmt.Sprintf("http://%s/synse/", c.options.Address))
+}
+
+// setVersioned returns a client that uses versioned host URL.
+func (c *httpClient) setVersioned() (*resty.Client, error) {
 	err := c.cacheAPIVersion()
 	if err != nil {
-		return errors.Wrap(err, "failed to cache api version")
+		return nil, errors.Wrap(err, "failed to cache api version")
 	}
 
-	// FIXME - will want to separate out the URL construction for scalability
-	// when it comes to adding POST method.
-	versionedPath := fmt.Sprintf("%s/%s", c.apiVersion, path)
-	err = c.getUnversioned(versionedPath, okResp)
-	if err != nil {
-		return errors.Wrap(err, "failed to make a versioned request to synse server")
-	}
-
-	return nil
+	return c.client.SetHostURL(fmt.Sprintf("http://%s/synse/%s/", c.options.Address, c.apiVersion)), nil
 }
 
 // cacheAPIVersion caches the api version if not already.
@@ -149,6 +155,23 @@ func (c *httpClient) cacheAPIVersion() error {
 		}
 
 		c.apiVersion = client.APIVersion
+	}
+
+	return nil
+}
+
+// check validates returned response from the Synse Server.
+func check(err error, errResp *Error) error {
+	if err != nil {
+		return errors.Wrap(err, "failed to make a request to synse server")
+	}
+
+	if *errResp != (Error{}) {
+		return errors.Errorf(
+			"got a %v error response from synse server at %v, saying %v, with context: %v",
+			errResp.HTTPCode, errResp.Timestamp, errResp.Description, errResp.Context,
+		)
+
 	}
 
 	return nil
