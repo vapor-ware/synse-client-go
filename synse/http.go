@@ -114,6 +114,18 @@ func (c *httpClient) Config() (*scheme.Config, error) {
 	return out, nil
 }
 
+// Plugins returns the summary of all plugins currently registered with
+// Synse Server.
+func (c *httpClient) Plugins() (*[]scheme.PluginMeta, error) {
+	out := new([]scheme.PluginMeta)
+	err := c.getVersioned(pluginURI, out)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to request `/plugin` endpoint")
+	}
+
+	return out, nil
+}
+
 // getUnversioned performs a GET request against the Synse Server unversioned API.
 func (c *httpClient) getUnversioned(uri string, okScheme interface{}) error {
 	errScheme := new(scheme.Error)
@@ -135,7 +147,7 @@ func (c *httpClient) getVersioned(uri string, okScheme interface{}) error {
 
 // setUnversioned returns a client that uses unversioned host URL.
 func (c *httpClient) setUnversioned() *resty.Client {
-	return c.client.SetHostURL(fmt.Sprintf("http://%s/synse/", c.options.Address))
+	return c.client.SetHostURL(fmt.Sprintf("http://%s/", c.options.Address))
 }
 
 // setVersioned returns a client that uses versioned host URL.
@@ -145,7 +157,7 @@ func (c *httpClient) setVersioned() (*resty.Client, error) {
 		return nil, errors.Wrap(err, "failed to cache api version")
 	}
 
-	return c.client.SetHostURL(fmt.Sprintf("http://%s/synse/%s/", c.options.Address, c.apiVersion)), nil
+	return c.client.SetHostURL(fmt.Sprintf("http://%s/%s/", c.options.Address, c.apiVersion)), nil
 }
 
 // cacheAPIVersion caches the api version if not already.

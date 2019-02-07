@@ -86,7 +86,7 @@ func TestHTTPClient_Unversioned_200(t *testing.T) {
 		},
 	}
 
-	server := test.NewMockHTTPServer()
+	server := test.NewUnversionedHTTPServer()
 	defer server.Close()
 
 	client, err := NewHTTPClient(&Options{
@@ -96,7 +96,7 @@ func TestHTTPClient_Unversioned_200(t *testing.T) {
 	assert.NoError(t, err)
 
 	for _, tt := range tests {
-		server.ServeUnversionedSuccess(t, tt.path, tt.in)
+		server.Serve(t, tt.path, 200, tt.in)
 
 		var (
 			resp interface{}
@@ -122,7 +122,7 @@ func TestHTTPClient_Unversioned_500(t *testing.T) {
 		{"/version"},
 	}
 
-	server := test.NewMockHTTPServer()
+	server := test.NewUnversionedHTTPServer()
 	defer server.Close()
 
 	client, err := NewHTTPClient(&Options{
@@ -141,7 +141,7 @@ func TestHTTPClient_Unversioned_500(t *testing.T) {
 }
 `
 	for _, tt := range tests {
-		server.ServeUnversionedFailure(t, tt.path, in)
+		server.Serve(t, tt.path, 500, in)
 
 		var (
 			resp interface{}
@@ -254,9 +254,45 @@ func TestHTTPClient_Versioned_200(t *testing.T) {
 				},
 			},
 		},
+		{
+			"/plugin",
+			`
+		[
+		{
+		"description": "a plugin with emulated devices and data",
+		"id": "12835beffd3e6c603aa4dd92127707b5",
+		"name": "emulator plugin",
+		"maintainer": "vapor io",
+		"active": true
+		},
+		{
+		"description": "a custom third party plugin",
+		"id": "12835beffd3e6c603aa4dd92127707b6",
+		"name": "custom-plugin",
+		"maintainer": "third-party",
+		"active": true
+		}
+		]`,
+			&[]scheme.PluginMeta{
+				scheme.PluginMeta{
+					Description: "a plugin with emulated devices and data",
+					ID:          "12835beffd3e6c603aa4dd92127707b5",
+					Name:        "emulator plugin",
+					Maintainer:  "vapor io",
+					Active:      true,
+				},
+				scheme.PluginMeta{
+					Description: "a custom third party plugin",
+					ID:          "12835beffd3e6c603aa4dd92127707b6",
+					Name:        "custom-plugin",
+					Maintainer:  "third-party",
+					Active:      true,
+				},
+			},
+		},
 	}
 
-	server := test.NewMockHTTPServer()
+	server := test.NewVersionedHTTPServer()
 	defer server.Close()
 
 	client, err := NewHTTPClient(&Options{
@@ -266,7 +302,7 @@ func TestHTTPClient_Versioned_200(t *testing.T) {
 	assert.NoError(t, err)
 
 	for _, tt := range tests {
-		server.ServeVersionedSuccess(t, tt.path, tt.in)
+		server.Serve(t, tt.path, 200, tt.in)
 
 		var (
 			resp interface{}
@@ -275,6 +311,8 @@ func TestHTTPClient_Versioned_200(t *testing.T) {
 		switch tt.path {
 		case "/config":
 			resp, err = client.Config()
+		case "/plugin":
+			resp, err = client.Plugins()
 		}
 		assert.NotNil(t, resp)
 		assert.NoError(t, err)
@@ -289,7 +327,7 @@ func TestHTTPClient_Versioned_500(t *testing.T) {
 		{"/config"},
 	}
 
-	server := test.NewMockHTTPServer()
+	server := test.NewVersionedHTTPServer()
 	defer server.Close()
 
 	client, err := NewHTTPClient(&Options{
@@ -308,7 +346,7 @@ func TestHTTPClient_Versioned_500(t *testing.T) {
 }
 `
 	for _, tt := range tests {
-		server.ServeVersionedFailure(t, tt.path, in)
+		server.Serve(t, tt.path, 500, in)
 
 		var (
 			resp interface{}

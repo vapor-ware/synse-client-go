@@ -11,4 +11,7 @@ const (
 
 	// configURI is the URI for the `/config` route.
 	configURI = "config"
+
+	// pluginURI is the URI for the `/plugin` route.
+	pluginURI = "plugin"
 )

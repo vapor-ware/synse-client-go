@@ -18,44 +18,44 @@ type Client interface {
 	// Config returns the unified configuration info.
 	Config() (*scheme.Config, error)
 
+	// Plugins returns the summary of all plugins currently registered with
+	// Synse Server.
+	Plugins() (*[]scheme.PluginMeta, error)
 	/*
 		// Metrics returns the application-based metrics.
-		Metrics() (*Metrics, error)
+		Metrics() (*scheme.Metrics, error)
 
-		// Plugins returns the summary of all plugins currently registered with
-		// Synse Server.
-		Plugins() (*[]PluginOverview, error)
 
 		// Plugin returns data from a specific plugin.
-		Plugin(string) (*Plugin, error)
+		Plugin(string) (*scheme.Plugin, error)
 
 		// PluginHealth returns the summary of the health of registered plugins.
-		PluginHealth() (*PluginHealth, error)
+		PluginHealth() (*scheme.PluginHealth, error)
 
 		// Scan returns the list of devices that Synse knows about and can read
 		// from/write to via the configured plugins.
 		// It can be filtered to show only those devices which match a set
 		// of provided tags by using ScanOptions.
-		Scan(ScanOptions) (*Scan, error)
+		Scan(scheme.ScanOptions) (*scheme.Scan, error)
 
 		// Tags returns the list of all tags currently associated with devices.
 		// If no TagsOptions is specified, the default tag namespace will be used.
-		Tags(TagsOptions) (*Tags, error)
+		Tags(scheme.TagsOptions) (*scheme.Tags, error)
 
 		// Info returns the full set of meta info and capabilities for a specific
 		// device.
-		Info(string) (*Info, error)
+		Info(string) (*scheme.Info, error)
 
 		// Read returns data from devices which match the set of provided tags
 		// using ReadOptions.
-		Read(ReadOptions) (*[]Read, error)
+		Read(scheme.ReadOptions) (*[]scheme.Read, error)
 
 		// ReadDevice returns data from a specific device.
 		// It is the same as Read() where the label matches the device id tag
 		// specified in ReadOptions.
-		ReadDevice(ReadDeviceOptions) (*[]Read, error)
+		ReadDevice(scheme.ReadDeviceOptions) (*[]scheme.Read, error)
 
 		// ReadCache returns stream reading data from the registered plugins.
-		ReadCache(ReadCacheOptions) (*[]Read, error)
+		ReadCache(scheme.ReadCacheOptions) (*[]scheme.Read, error)
 	*/
 }
