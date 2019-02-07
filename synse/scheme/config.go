@@ -32,25 +32,13 @@ type KubernetesOptions struct {
 
 // EndpointsOptions is the config options for kubernetes's endpoint.
 type EndpointsOptions struct {
-	Label LabelOptions `json:"label"`
-}
-
-// LabelOptions is the config options for kubernetes's label.
-type LabelOptions struct {
-	App       string `json:"app"`
-	Component string `json:"server"`
+	Labels map[string]string `json:"labels"`
 }
 
 // CacheOptions is the config options for cache.
 type CacheOptions struct {
-	Meta        MetaOptions        `json:"meta"` // FIXME: not in v3
 	Device      DeviceOptions      `json:"device"`
 	Transaction TransactionOptions `json:"transaction"`
-}
-
-// MetaOptions is the config options for meta cache.
-type MetaOptions struct {
-	TTL int `json:"ttl"`
 }
 
 // DeviceOptions is the config options for device cache.
@@ -81,5 +69,6 @@ type MetricsOptions struct {
 
 // TransportOptions is the config options for transport communication layer.
 type TransportOptions struct {
-	Protocol string `json:"protocol"`
+	HTTP      bool `json:"http"`
+	WebSocket bool `json:"websocket"`
 }

@@ -168,39 +168,56 @@ func TestHTTPClient_Versioned_200(t *testing.T) {
 			"/config",
 			`
 {
-  "logging":"info",
-  "pretty_json":true,
-  "locale":"en_US",
-  "plugin":{
-    "tcp":[
-
-    ],
-    "unix":[
-
-    ]
-  },
-  "cache":{
-    "meta":{
-      "ttl":20
-    },
-    "transaction":{
-      "ttl":300
-    }
-  },
-  "grpc":{
-    "timeout":3
-  }
+   "logging":"info",
+   "pretty_json":true,
+   "locale":"en_US",
+   "cache":{
+      "device":{
+         "ttl":20
+      },
+      "transaction":{
+         "ttl":300
+      }
+   },
+   "grpc":{
+      "timeout":3,
+      "tls":{
+         "cert":"/tmp/ssl/synse.crt"
+      }
+   },
+   "metrics":{
+      "enabled":false
+   },
+   "transport":{
+      "http":true,
+      "websocket":true
+   },
+   "plugin":{
+      "tcp":[
+         "emulator-plugin:5001"
+      ],
+      "unix":[
+         "/tmp/synse/plugin/foo.sock"
+      ],
+      "discover":{
+         "kubernetes":{
+            "namespace":"vapor",
+            "endpoints":{
+               "labels":{
+                  "app":"synse",
+                  "component":"server"
+               }
+            }
+         }
+      }
+   }
 }`,
 			&scheme.Config{
 				Logging:    "info",
 				PrettyJSON: true,
 				Locale:     "en_US",
-				Plugin: scheme.PluginOptions{
-					TCP:  []string{},
-					Unix: []string{},
-				},
 				Cache: scheme.CacheOptions{
-					Meta: scheme.MetaOptions{
+					Device: scheme.DeviceOptions{
 						TTL: int(20),
 					},
 					Transaction: scheme.TransactionOptions{
@@ -209,6 +226,31 @@ func TestHTTPClient_Versioned_200(t *testing.T) {
 				},
 				GRPC: scheme.GRPCOptions{
 					Timeout: int(3),
+					TLS: scheme.TLSOptions{
+						Cert: "/tmp/ssl/synse.crt",
+					},
+				},
+				Metrics: scheme.MetricsOptions{
+					Enabled: false,
+				},
+				Transport: scheme.TransportOptions{
+					HTTP:      true,
+					WebSocket: true,
+				},
+				Plugin: scheme.PluginOptions{
+					TCP:  []string{"emulator-plugin:5001"},
+					Unix: []string{"/tmp/synse/plugin/foo.sock"},
+					Discover: scheme.DiscoveryOptions{
+						Kubernetes: scheme.KubernetesOptions{
+							Namespace: "vapor",
+							Endpoints: scheme.EndpointsOptions{
+								Labels: map[string]string{
+									"app":       "synse",
+									"component": "server",
+								},
+							},
+						},
+					},
 				},
 			},
 		},
