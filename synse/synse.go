@@ -21,13 +21,15 @@ type Client interface {
 	// Plugins returns the summary of all plugins currently registered with
 	// Synse Server.
 	Plugins() (*[]scheme.PluginMeta, error)
+
+	// Plugin returns data from a specific plugin.
+	Plugin(string) (*scheme.Plugin, error)
+
 	/*
 		// Metrics returns the application-based metrics.
 		Metrics() (*scheme.Metrics, error)
 
 
-		// Plugin returns data from a specific plugin.
-		Plugin(string) (*scheme.Plugin, error)
 
 		// PluginHealth returns the summary of the health of registered plugins.
 		PluginHealth() (*scheme.PluginHealth, error)

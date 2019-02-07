@@ -4,6 +4,7 @@ package synse
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/vapor-ware/synse-client-go/synse/scheme"
@@ -126,6 +127,17 @@ func (c *httpClient) Plugins() (*[]scheme.PluginMeta, error) {
 	return out, nil
 }
 
+// Plugin returns data from a specific plugin.
+func (c *httpClient) Plugin(id string) (*scheme.Plugin, error) {
+	out := new(scheme.Plugin)
+	err := c.getVersioned(makeURI(pluginURI, id), out)
+	if err != nil {
+		return nil, errors.Wrap(err, fmt.Sprintf("failed to request `/plugin/%v` endpoint", id))
+	}
+
+	return out, nil
+}
+
 // getUnversioned performs a GET request against the Synse Server unversioned API.
 func (c *httpClient) getUnversioned(uri string, okScheme interface{}) error {
 	errScheme := new(scheme.Error)
@@ -189,4 +201,10 @@ func check(err error, errResp *scheme.Error) error {
 	}
 
 	return nil
+}
+
+// makeURI joins the given components into a string, delimited with '/' which
+// can then be used as the URI for API requests.
+func makeURI(components ...string) string {
+	return strings.Join(components, "/")
 }

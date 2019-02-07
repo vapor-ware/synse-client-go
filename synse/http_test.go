@@ -290,6 +290,98 @@ func TestHTTPClient_Versioned_200(t *testing.T) {
 				},
 			},
 		},
+		{
+			"/plugin/12835beffd3e6c603aa4dd92127707b5",
+			`
+{
+   "active":true,
+   "id":"12835beffd3e6c603aa4dd92127707b5",
+   "tag":"vaporio\/emulator-plugin",
+   "name":"emulator plugin",
+   "description":"A plugin with emulated devices and data",
+   "maintainer":"vaporio",
+   "vcs":"github.com\/vapor-ware\/synse-emulator-plugin",
+   "version":{
+      "plugin_version":"2.0.0",
+      "sdk_version":"1.0.0",
+      "build_date":"2018-06-14T16:24:09",
+      "git_commit":"13e6478",
+      "git_tag":"1.0.2-5-g13e6478",
+      "arch":"amd64",
+      "os":"linux"
+   },
+   "network":{
+      "protocol":"tcp",
+      "address":"emulator-plugin:5001"
+   },
+   "health":{
+      "timestamp":"2018-06-15T20:04:33Z",
+      "status":"ok",
+      "message":"",
+      "checks":[
+         {
+            "name":"read buffer health",
+            "status":"ok",
+            "message":"",
+            "timestamp":"2018-06-15T20:04:06Z",
+            "type":"periodic"
+         },
+         {
+            "name":"write buffer health",
+            "status":"ok",
+            "message":"",
+            "timestamp":"2018-06-15T20:04:06Z",
+            "type":"periodic"
+         }
+      ]
+   }
+}`,
+			&scheme.Plugin{
+				PluginMeta: scheme.PluginMeta{
+					Active:      true,
+					ID:          "12835beffd3e6c603aa4dd92127707b5",
+					Tag:         "vaporio/emulator-plugin",
+					Name:        "emulator plugin",
+					Description: "A plugin with emulated devices and data",
+					Maintainer:  "vaporio",
+					VCS:         "github.com/vapor-ware/synse-emulator-plugin",
+					Version: scheme.VersionOptions{
+						PluginVersion: "2.0.0",
+						SDKVersion:    "1.0.0",
+						BuildDate:     "2018-06-14T16:24:09",
+						GitCommit:     "13e6478",
+						GitTag:        "1.0.2-5-g13e6478",
+						Arch:          "amd64",
+						OS:            "linux",
+					},
+				},
+				Network: scheme.NetworkOptions{
+					Protocol: "tcp",
+					Address:  "emulator-plugin:5001",
+				},
+				Health: scheme.HealthOptions{
+					Timestamp: "2018-06-15T20:04:33Z",
+					Status:    "ok",
+					Message:   "",
+					Checks: []scheme.CheckOptions{
+						scheme.CheckOptions{
+							Name:      "read buffer health",
+							Status:    "ok",
+							Message:   "",
+							Timestamp: "2018-06-15T20:04:06Z",
+							Type:      "periodic",
+						},
+						scheme.CheckOptions{
+							Name:      "write buffer health",
+							Status:    "ok",
+							Message:   "",
+							Timestamp: "2018-06-15T20:04:06Z",
+							Type:      "periodic",
+						},
+					},
+				},
+			},
+		},
 	}
 
 	server := test.NewVersionedHTTPServer()
@@ -313,6 +405,8 @@ func TestHTTPClient_Versioned_200(t *testing.T) {
 			resp, err = client.Config()
 		case "/plugin":
 			resp, err = client.Plugins()
+		case "/plugin/12835beffd3e6c603aa4dd92127707b5":
+			resp, err = client.Plugin("12835beffd3e6c603aa4dd92127707b5")
 		}
 		assert.NotNil(t, resp)
 		assert.NoError(t, err)
@@ -325,6 +419,8 @@ func TestHTTPClient_Versioned_500(t *testing.T) {
 		path string
 	}{
 		{"/config"},
+		{"/plugin"},
+		{"/plugin/12835beffd3e6c603aa4dd92127707b5"},
 	}
 
 	server := test.NewVersionedHTTPServer()
@@ -355,6 +451,10 @@ func TestHTTPClient_Versioned_500(t *testing.T) {
 		switch tt.path {
 		case "/config":
 			resp, err = client.Config()
+		case "/plugin":
+			resp, err = client.Plugins()
+		case "/plugin/12835beffd3e6c603aa4dd92127707b5":
+			resp, err = client.Plugin("12835beffd3e6c603aa4dd92127707b5")
 		}
 		assert.Nil(t, resp)
 		assert.Error(t, err)
