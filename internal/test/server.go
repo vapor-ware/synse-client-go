@@ -1,6 +1,6 @@
 package test
 
-// server.go provides testing functionalities against a test http server.
+// server.go provides testing functionalities against a mock http server.
 
 import (
 	"fmt"
@@ -10,76 +10,76 @@ import (
 	"testing"
 )
 
-// MockHTTPServer provides a test http server.
-type MockHTTPServer struct {
+// UnversionedHTTPServer describes an unversioned mock http server.
+type UnversionedHTTPServer struct {
 	URL    string
-	Server *httptest.Server
+	server *httptest.Server
 	mux    *http.ServeMux
 }
 
-// NewMockHTTPServer returns a new instance of a test http server.
-func NewMockHTTPServer() MockHTTPServer {
+// VersionedHTTPServer describes a versioned mock http server.
+type VersionedHTTPServer struct {
+	UnversionedHTTPServer
+	versionURI string
+}
+
+// NewUnversionedHTTPServer returns an instance of an unversioned mock http server.
+func NewUnversionedHTTPServer() UnversionedHTTPServer {
 	m := http.NewServeMux()
 	s := httptest.NewServer(m)
-	return MockHTTPServer{
-		mux:    m,
-		Server: s,
+	return UnversionedHTTPServer{
 		URL:    s.URL[7:],
+		server: s,
+		mux:    m,
 	}
 }
 
-// ServeUnversionedSuccess registers an unversioned success route.
-func (s MockHTTPServer) ServeUnversionedSuccess(t *testing.T, path string, response interface{}) {
-	s.serveUnversion(t, path, 200, response)
-}
-
-// ServeUnversionedFailure registers an unversioned failure route.
-func (s MockHTTPServer) ServeUnversionedFailure(t *testing.T, path string, response interface{}) {
-	s.serveUnversion(t, path, 500, response)
-}
-
-// ServeVersionedSuccess registers a versioned success route.
-func (s MockHTTPServer) ServeVersionedSuccess(t *testing.T, path string, response interface{}) {
-	s.serveVersion(t, path, 200, response)
-}
-
-// ServeVersionedFailure registers an unversioned failure route.
-func (s MockHTTPServer) ServeVersionedFailure(t *testing.T, path string, response interface{}) {
-	s.serveVersion(t, path, 500, response)
-}
-
-// serveUnversioned registers the unversioned route.
-func (s MockHTTPServer) serveUnversion(t *testing.T, path string, statusCode int, response interface{}) {
-	s.serve(t, "/synse", path, statusCode, response)
-}
-
-// serveVersioned registers the versioned route.
-func (s MockHTTPServer) serveVersion(t *testing.T, path string, statusCode int, response interface{}) {
-	s.serve(t, "/synse/v3", path, statusCode, response)
-
+// NewVersionedHTTPServer returns an instance of a versioned mock http server.
+func NewVersionedHTTPServer() VersionedHTTPServer {
+	s := NewUnversionedHTTPServer()
 	s.mux.HandleFunc(
-		"/synse/version",
+		"/version",
 		func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
-			fprint(t, w, `{"version": "3.x.x", "api_version": "v3"}`)
+			fmt.Fprint(w, `{"version": "3.x.x", "api_version": "v3"}`) // nolint
 		})
+
+	return VersionedHTTPServer{
+		UnversionedHTTPServer: s,
+		versionURI:            "/v3",
+	}
 }
 
-// serve registers a path handler and writes to its response.
-func (s MockHTTPServer) serve(t *testing.T, version string, path string, statusCode int, response interface{}) {
-	s.mux.HandleFunc(
-		fmt.Sprintf("%v%v", version, path),
+// Serve serves an unversioned endpoint.
+func (s UnversionedHTTPServer) Serve(t *testing.T, uri string, statusCode int, response interface{}) {
+	serve(s.mux, t, uri, statusCode, response)
+}
+
+// Serve serves a versioned endpoint.
+func (s VersionedHTTPServer) Serve(t *testing.T, uri string, statusCode int, response interface{}) {
+	serve(s.mux, t, fmt.Sprintf("%v%v", s.versionURI, uri), statusCode, response)
+}
+
+// Close closes the unversioned server connection.
+func (s UnversionedHTTPServer) Close() {
+	s.server.Close()
+}
+
+// Close closes the versioned server connection.
+func (s VersionedHTTPServer) Close() {
+	s.server.Close()
+}
+
+// serve registers a path handler and writes to its responses.
+func serve(m *http.ServeMux, t *testing.T, uri string, statusCode int, response interface{}) {
+	m.HandleFunc(
+		uri,
 		func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(statusCode)
 			fprint(t, w, response)
 		},
 	)
-}
-
-// Close closes the server connection.
-func (s MockHTTPServer) Close() {
-	s.Server.Close()
 }
 
 // fprint calls fmt.Fprint and validates its returned error.
