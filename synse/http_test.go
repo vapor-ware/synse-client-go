@@ -4,8 +4,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/vapor-ware/synse-client-go/internal/test"
+	"github.com/vapor-ware/synse-client-go/synse/scheme"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewHTTPClient_NilConfig(t *testing.T) {
@@ -65,7 +67,7 @@ func TestHTTPClient_Unversioned_200(t *testing.T) {
   "status":"ok",
   "timestamp":"2019-01-24T14:34:24.926108Z"
 }`,
-			&Status{
+			&scheme.Status{
 				Status:    "ok",
 				Timestamp: "2019-01-24T14:34:24.926108Z",
 			},
@@ -77,7 +79,7 @@ func TestHTTPClient_Unversioned_200(t *testing.T) {
   "version":"3.0.0",
   "api_version":"v3"
 }`,
-			&Version{
+			&scheme.Version{
 				Version:    "3.0.0",
 				APIVersion: "v3",
 			},
@@ -189,23 +191,23 @@ func TestHTTPClient_Versioned_200(t *testing.T) {
     "timeout":3
   }
 }`,
-			&Config{
+			&scheme.Config{
 				Logging:    "info",
 				PrettyJSON: true,
 				Locale:     "en_US",
-				Plugin: PluginOptions{
+				Plugin: scheme.PluginOptions{
 					TCP:  []string{},
 					Unix: []string{},
 				},
-				Cache: CacheOptions{
-					Meta: MetaOptions{
+				Cache: scheme.CacheOptions{
+					Meta: scheme.MetaOptions{
 						TTL: int(20),
 					},
-					Transaction: TransactionOptions{
+					Transaction: scheme.TransactionOptions{
 						TTL: int(300),
 					},
 				},
-				GRPC: GRPCOptions{
+				GRPC: scheme.GRPCOptions{
 					Timeout: int(3),
 				},
 			},

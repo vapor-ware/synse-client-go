@@ -2,15 +2,60 @@ package synse
 
 // synse.go provides a client API for Synse Server.
 
+import (
+	"github.com/vapor-ware/synse-client-go/synse/scheme"
+)
+
 // Client API for Synse Server.
 type Client interface {
-	// Test returns the status of Synse Sever. This is used to check if the
-	// server is reachable.
-	Status() (*Status, error)
+	// Status returns the status info. This is used to check if the server
+	// is responsive and reachable.
+	Status() (*scheme.Status, error)
 
-	// Version returns the version info for Synse Server.
-	Version() (*Version, error)
+	// Version returns the version info.
+	Version() (*scheme.Version, error)
 
-	// Config returns the config info for Synse Server.
-	Config() (*Config, error)
+	// Config returns the unified configuration info.
+	Config() (*scheme.Config, error)
+
+	/*
+		// Metrics returns the application-based metrics.
+		Metrics() (*Metrics, error)
+
+		// Plugins returns the summary of all plugins currently registered with
+		// Synse Server.
+		Plugins() (*[]PluginOverview, error)
+
+		// Plugin returns data from a specific plugin.
+		Plugin(string) (*Plugin, error)
+
+		// PluginHealth returns the summary of the health of registered plugins.
+		PluginHealth() (*PluginHealth, error)
+
+		// Scan returns the list of devices that Synse knows about and can read
+		// from/write to via the configured plugins.
+		// It can be filtered to show only those devices which match a set
+		// of provided tags by using ScanOptions.
+		Scan(ScanOptions) (*Scan, error)
+
+		// Tags returns the list of all tags currently associated with devices.
+		// If no TagsOptions is specified, the default tag namespace will be used.
+		Tags(TagsOptions) (*Tags, error)
+
+		// Info returns the full set of meta info and capabilities for a specific
+		// device.
+		Info(string) (*Info, error)
+
+		// Read returns data from devices which match the set of provided tags
+		// using ReadOptions.
+		Read(ReadOptions) (*[]Read, error)
+
+		// ReadDevice returns data from a specific device.
+		// It is the same as Read() where the label matches the device id tag
+		// specified in ReadOptions.
+		ReadDevice(ReadDeviceOptions) (*[]Read, error)
+
+		// ReadCache returns stream reading data from the registered plugins.
+		ReadCache(ReadCacheOptions) (*[]Read, error)
+	*/
 }

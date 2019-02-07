@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/vapor-ware/synse-client-go/synse/scheme"
+
 	"github.com/pkg/errors"
 	"gopkg.in/resty.v1"
 )
@@ -80,8 +82,8 @@ func createHTTPClient(opt *Options) (*resty.Client, error) {
 }
 
 // Status returns the status info.
-func (c *httpClient) Status() (*Status, error) {
-	out := new(Status)
+func (c *httpClient) Status() (*scheme.Status, error) {
+	out := new(scheme.Status)
 	err := c.getUnversioned(testURI, out)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to request `/status` endpoint")
@@ -91,8 +93,8 @@ func (c *httpClient) Status() (*Status, error) {
 }
 
 // Version returns the version info.
-func (c *httpClient) Version() (*Version, error) {
-	out := new(Version)
+func (c *httpClient) Version() (*scheme.Version, error) {
+	out := new(scheme.Version)
 	err := c.getUnversioned(versionURI, out)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to request `/version` endpoint")
@@ -102,8 +104,8 @@ func (c *httpClient) Version() (*Version, error) {
 }
 
 // Config returns the config info.
-func (c *httpClient) Config() (*Config, error) {
-	out := new(Config)
+func (c *httpClient) Config() (*scheme.Config, error) {
+	out := new(scheme.Config)
 	err := c.getVersioned(configURI, out)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to request `/config` endpoint")
@@ -114,14 +116,14 @@ func (c *httpClient) Config() (*Config, error) {
 
 // getUnversioned performs a GET request against the Synse Server unversioned API.
 func (c *httpClient) getUnversioned(uri string, okScheme interface{}) error {
-	errScheme := new(Error)
+	errScheme := new(scheme.Error)
 	_, err := c.setUnversioned().R().SetResult(okScheme).SetError(errScheme).Get(uri)
 	return check(err, errScheme)
 }
 
 // getVersioned performs a GET request against the Synse Server versioned API.
 func (c *httpClient) getVersioned(uri string, okScheme interface{}) error {
-	errScheme := new(Error)
+	errScheme := new(scheme.Error)
 	client, err := c.setVersioned()
 	if err != nil {
 		return errors.Wrap(err, "failed to set a versioned host")
@@ -161,12 +163,12 @@ func (c *httpClient) cacheAPIVersion() error {
 }
 
 // check validates returned response from the Synse Server.
-func check(err error, errResp *Error) error {
+func check(err error, errResp *scheme.Error) error {
 	if err != nil {
 		return errors.Wrap(err, "failed to make a request to synse server")
 	}
 
-	if *errResp != (Error{}) {
+	if *errResp != (scheme.Error{}) {
 		return errors.Errorf(
 			"got a %v error response from synse server at %v, saying %v, with context: %v",
 			errResp.HTTPCode, errResp.Timestamp, errResp.Description, errResp.Context,

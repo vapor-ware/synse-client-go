@@ -1,27 +1,4 @@
-package synse
-
-// scheme.go defines the scheme for the server's responses.
-
-// Error describes an error response.
-type Error struct {
-	HTTPCode    int    `json:"http_code"`
-	ErrorID     int    `json:"error_id"`
-	Description string `json:"description"`
-	Timestamp   string `json:"timestamp"`
-	Context     string `json:"context"`
-}
-
-// Status describes a response for `/test` endpoint.
-type Status struct {
-	Status    string `json:"status"`
-	Timestamp string `json:"timestamp"`
-}
-
-// Version describes a response for `version` endpoint.
-type Version struct {
-	Version    string `json:"version"`
-	APIVersion string `json:"api_version"`
-}
+package scheme
 
 // Config describes a response for `/config` endpoint.
 type Config struct {
