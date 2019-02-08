@@ -176,6 +176,18 @@ func (c *httpClient) Tags(opts scheme.TagsOptions) (*[]string, error) {
 	return out, nil
 }
 
+// Info returns the full set of meta info and capabilities for a specific
+// device.
+func (c *httpClient) Info(id string) (*scheme.Info, error) {
+	out := new(scheme.Info)
+	err := c.getVersioned(makeURI(infoURI, id), nil, out)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to request `/info` endpoint")
+	}
+
+	return out, nil
+}
+
 // getUnversioned performs a GET request against the Synse Server unversioned API.
 func (c *httpClient) getUnversioned(uri string, okScheme interface{}) error {
 	errScheme := new(scheme.Error)

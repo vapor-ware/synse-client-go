@@ -37,14 +37,15 @@ type Client interface {
 	// Tags returns the list of all tags currently associated with devices.
 	// If no TagsOptions is specified, the default tag namespace will be used.
 	Tags(scheme.TagsOptions) (*[]string, error)
+
+	// Info returns the full set of meta info and capabilities for a specific
+	// device.
+	Info(string) (*scheme.Info, error)
 	/*
 		// Metrics returns the application-based metrics.
 		Metrics() (*scheme.Metrics, error)
 
 
-		// Info returns the full set of meta info and capabilities for a specific
-		// device.
-		Info(string) (*scheme.Info, error)
 
 		// Read returns data from devices which match the set of provided tags
 		// using ReadOptions.

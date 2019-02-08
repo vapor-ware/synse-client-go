@@ -23,4 +23,7 @@ const (
 
 	// tagsURI is the URI for the `/tags` route.
 	tagsURI = "tags"
+
+	// infoURI is the URI for the `/info` route.
+	infoURI = "info"
 )

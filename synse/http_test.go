@@ -473,6 +473,126 @@ func TestHTTPClient_Versioned_200(t *testing.T) {
 				"default/type:temperature",
 			},
 		},
+		{
+			"/info/34c226b1afadaae5f172a4e1763fd1a6",
+			`
+{
+  "timestamp": "2018-06-18T13:30:15Z",
+  "id": "34c226b1afadaae5f172a4e1763fd1a6",
+  "type": "humidity",
+  "metadata": {
+    "model": "emul8-humidity"
+  },
+  "plugin": "12835beffd3e6c603aa4dd92127707b5",
+  "info": "Synse Humidity Sensor",
+  "tags": [
+      "type:humidity",
+      "humidity",
+      "vio/fan-sensor"
+  ],
+  "capabilities": {
+    "mode": "rw",
+    "read": {},
+    "write": {
+      "actions": [
+        "color", 
+        "state"
+      ]
+    }
+  },
+  "output": [
+    {
+      "name": "humidity",
+      "type": "humidity",
+      "precision": 3,
+      "scaling_factor": 1.0,
+      "units": [
+        {
+          "system": null,
+          "name": "percent humidity",
+          "symbol": "%"
+        }
+      ]
+    },
+    {
+      "name": "temperature",
+      "type": "temperature",
+      "precision": 3,
+      "scaling_factor": 1.0,
+      "units": [
+        {
+          "system": "metric",
+          "name": "celsius",
+          "symbol": "C"
+        },
+        {
+          "system": "imperial",
+          "name": "fahrenheit",
+          "symbol": "F"
+        }
+      ]
+    }
+  ]
+}`,
+			&scheme.Info{
+				Timestamp: "2018-06-18T13:30:15Z",
+				ID:        "34c226b1afadaae5f172a4e1763fd1a6",
+				Type:      "humidity",
+				Metadata: scheme.MetadataOptions{
+					Model: "emul8-humidity",
+				},
+				Plugin: "12835beffd3e6c603aa4dd92127707b5",
+				Info:   "Synse Humidity Sensor",
+				Tags: []string{
+					"type:humidity",
+					"humidity",
+					"vio/fan-sensor",
+				},
+				Capabilities: scheme.CapabilitiesOptions{
+					Mode: "rw",
+					Read: scheme.ReadOptions{},
+					Write: scheme.WriteOptions{
+						Actions: []string{
+							"color",
+							"state",
+						},
+					},
+				},
+				Output: []scheme.OutputOptions{
+					scheme.OutputOptions{
+						Name:          "humidity",
+						Type:          "humidity",
+						Precision:     int(3),
+						ScalingFactor: float32(1.0),
+						Units: []scheme.UnitOptions{
+							scheme.UnitOptions{
+								System: "",
+								Name:   "percent humidity",
+								Symbol: "%",
+							},
+						},
+					},
+					scheme.OutputOptions{
+						Name:          "temperature",
+						Type:          "temperature",
+						Precision:     int(3),
+						ScalingFactor: float32(1.0),
+						Units: []scheme.UnitOptions{
+							scheme.UnitOptions{
+								System: "metric",
+								Name:   "celsius",
+								Symbol: "C",
+							},
+							scheme.UnitOptions{
+								System: "imperial",
+								Name:   "fahrenheit",
+								Symbol: "F",
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 
 	server := test.NewVersionedHTTPServer()
@@ -506,6 +626,8 @@ func TestHTTPClient_Versioned_200(t *testing.T) {
 		case "/tags":
 			opts := scheme.TagsOptions{}
 			resp, err = client.Tags(opts)
+		case "/info/34c226b1afadaae5f172a4e1763fd1a6":
+			resp, err = client.Info("34c226b1afadaae5f172a4e1763fd1a6")
 		}
 		assert.NotNil(t, resp)
 		assert.NoError(t, err)
@@ -523,6 +645,7 @@ func TestHTTPClient_Versioned_500(t *testing.T) {
 		{"/plugin/health"},
 		{"/scan"},
 		{"/tags"},
+		{"/info/34c226b1afadaae5f172a4e1763fd1a6"},
 	}
 
 	server := test.NewVersionedHTTPServer()
@@ -565,6 +688,8 @@ func TestHTTPClient_Versioned_500(t *testing.T) {
 		case "/tags":
 			opts := scheme.TagsOptions{}
 			resp, err = client.Tags(opts)
+		case "/info/34c226b1afadaae5f172a4e1763fd1a6":
+			resp, err = client.Info("34c226b1afadaae5f172a4e1763fd1a6")
 		}
 		assert.Nil(t, resp)
 		assert.Error(t, err)
