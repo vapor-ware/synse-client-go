@@ -551,3 +551,73 @@ func TestHTTPClient_Versioned_500(t *testing.T) {
 		assert.Error(t, err)
 	}
 }
+
+func TestStructToMapString(t *testing.T) {
+	tests := []struct {
+		in       interface{}
+		expected map[string]string
+	}{
+		{
+			struct{}{},
+			map[string]string{},
+		},
+		{
+			struct {
+				foo string
+			}{
+				foo: "bar",
+			},
+			map[string]string{
+				"foo": "bar",
+			},
+		},
+		{
+			struct {
+				foo int
+			}{
+				foo: int(1),
+			},
+			map[string]string{
+				"foo": "1",
+			},
+		},
+		{
+			struct {
+				foo bool
+			}{
+				foo: true,
+			},
+			map[string]string{
+				"foo": "true",
+			},
+		},
+		{
+			struct {
+				foo []string
+			}{
+				foo: []string{"foo", "bar"},
+			},
+			map[string]string{
+				"foo": "foo,bar",
+			},
+		},
+		{
+			struct {
+				foo []string
+				bar string
+			}{
+				foo: []string{"foo", "bar", "foobar"},
+				bar: "bar",
+			},
+			map[string]string{
+				"foo": "foo,bar,foobar",
+				"bar": "bar",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		out := structToMapString(tt.in)
+		assert.Equal(t, tt.expected, out)
+	}
+}
