@@ -34,13 +34,13 @@ type Client interface {
 	// of provided tags by using ScanOptions.
 	Scan(scheme.ScanOptions) (*[]scheme.Scan, error)
 
+	// Tags returns the list of all tags currently associated with devices.
+	// If no TagsOptions is specified, the default tag namespace will be used.
+	Tags(scheme.TagsOptions) (*[]string, error)
 	/*
 		// Metrics returns the application-based metrics.
 		Metrics() (*scheme.Metrics, error)
 
-		// Tags returns the list of all tags currently associated with devices.
-		// If no TagsOptions is specified, the default tag namespace will be used.
-		Tags(scheme.TagsOptions) (*scheme.Tags, error)
 
 		// Info returns the full set of meta info and capabilities for a specific
 		// device.

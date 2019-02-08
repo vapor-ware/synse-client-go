@@ -9,7 +9,7 @@ type Scan struct {
 	Tags   []string `json:"tags"`
 }
 
-// ScanOptions holds the scan query parameters.
+// ScanOptions describes the query parameters for `/scan` endpoint.
 type ScanOptions struct {
 	NS    string
 	Tags  []string

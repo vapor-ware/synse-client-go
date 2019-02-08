@@ -461,6 +461,18 @@ func TestHTTPClient_Versioned_200(t *testing.T) {
 				},
 			},
 		},
+		{
+			"/tags",
+			`
+[
+  "default/tag1",
+  "default/type:temperature"
+]`,
+			&[]string{
+				"default/tag1",
+				"default/type:temperature",
+			},
+		},
 	}
 
 	server := test.NewVersionedHTTPServer()
@@ -491,6 +503,9 @@ func TestHTTPClient_Versioned_200(t *testing.T) {
 		case "/scan":
 			opts := scheme.ScanOptions{}
 			resp, err = client.Scan(opts)
+		case "/tags":
+			opts := scheme.TagsOptions{}
+			resp, err = client.Tags(opts)
 		}
 		assert.NotNil(t, resp)
 		assert.NoError(t, err)
@@ -507,6 +522,7 @@ func TestHTTPClient_Versioned_500(t *testing.T) {
 		{"/plugin/12835beffd3e6c603aa4dd92127707b5"},
 		{"/plugin/health"},
 		{"/scan"},
+		{"/tags"},
 	}
 
 	server := test.NewVersionedHTTPServer()
@@ -546,6 +562,9 @@ func TestHTTPClient_Versioned_500(t *testing.T) {
 		case "/scan":
 			opts := scheme.ScanOptions{}
 			resp, err = client.Scan(opts)
+		case "/tags":
+			opts := scheme.TagsOptions{}
+			resp, err = client.Tags(opts)
 		}
 		assert.Nil(t, resp)
 		assert.Error(t, err)
@@ -602,6 +621,26 @@ func TestStructToMapString(t *testing.T) {
 			},
 			map[string]string{
 				"foo": "bar",
+			},
+		},
+		{
+			struct {
+				Foo string
+			}{
+				Foo: "bar",
+			},
+			map[string]string{
+				"foo": "bar",
+			},
+		},
+		{
+			struct {
+				foo string
+			}{
+				foo: "Bar",
+			},
+			map[string]string{
+				"foo": "Bar",
 			},
 		},
 		{

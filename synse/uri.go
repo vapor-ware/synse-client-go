@@ -20,4 +20,7 @@ const (
 
 	// scanURI is the URI for the `/scan` route.
 	scanURI = "scan"
+
+	// tagsURI is the URI for the `/tags` route.
+	tagsURI = "tags"
 )

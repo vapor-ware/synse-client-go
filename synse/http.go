@@ -164,6 +164,18 @@ func (c *httpClient) Scan(opts scheme.ScanOptions) (*[]scheme.Scan, error) {
 	return out, nil
 }
 
+// Tags returns the list of all tags currently associated with devices.
+// If no TagsOptions is specified, the default tag namespace will be used.
+func (c *httpClient) Tags(opts scheme.TagsOptions) (*[]string, error) {
+	out := new([]string)
+	err := c.getVersioned(tagsURI, structToMapString(opts), out)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to request `/tags` endpoint")
+	}
+
+	return out, nil
+}
+
 // getUnversioned performs a GET request against the Synse Server unversioned API.
 func (c *httpClient) getUnversioned(uri string, okScheme interface{}) error {
 	errScheme := new(scheme.Error)
