@@ -28,17 +28,15 @@ type Client interface {
 	// PluginHealth returns the summary of the health of registered plugins.
 	PluginHealth() (*scheme.PluginHealth, error)
 
+	// Scan returns the list of devices that Synse knows about and can read
+	// from/write to via the configured plugins.
+	// It can be filtered to show only those devices which match a set
+	// of provided tags by using ScanOptions.
+	Scan(scheme.ScanOptions) (*[]scheme.Scan, error)
+
 	/*
 		// Metrics returns the application-based metrics.
 		Metrics() (*scheme.Metrics, error)
-
-
-
-		// Scan returns the list of devices that Synse knows about and can read
-		// from/write to via the configured plugins.
-		// It can be filtered to show only those devices which match a set
-		// of provided tags by using ScanOptions.
-		Scan(scheme.ScanOptions) (*scheme.Scan, error)
 
 		// Tags returns the list of all tags currently associated with devices.
 		// If no TagsOptions is specified, the default tag namespace will be used.

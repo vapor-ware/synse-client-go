@@ -411,6 +411,56 @@ func TestHTTPClient_Versioned_200(t *testing.T) {
 				Inactive:  int(0),
 			},
 		},
+		{
+			"/scan",
+			`
+[
+  {
+    "id": "0fe8f06229aa9a01ef6032d1ddaf18a5",
+    "info": "Synse Temperature Sensor",
+    "type": "temperature",
+    "plugin": "12835beffd3e6c603aa4dd92127707b5",
+    "tags": [
+      "type:temperature",
+      "temperature",
+      "vio/fan-sensor"
+    ]
+  },
+  {
+    "id": "12ea5644d052c6bf1bca3c9864fd8a44",
+    "info": "Synse LED",
+    "type": "led",
+    "plugin": "12835beffd3e6c603aa4dd92127707b5",
+    "tags": [
+      "type:led",
+      "led"
+    ]
+  }
+]`,
+			&[]scheme.Scan{
+				scheme.Scan{
+					ID:     "0fe8f06229aa9a01ef6032d1ddaf18a5",
+					Info:   "Synse Temperature Sensor",
+					Type:   "temperature",
+					Plugin: "12835beffd3e6c603aa4dd92127707b5",
+					Tags: []string{
+						"type:temperature",
+						"temperature",
+						"vio/fan-sensor",
+					},
+				},
+				scheme.Scan{
+					ID:     "12ea5644d052c6bf1bca3c9864fd8a44",
+					Info:   "Synse LED",
+					Type:   "led",
+					Plugin: "12835beffd3e6c603aa4dd92127707b5",
+					Tags: []string{
+						"type:led",
+						"led",
+					},
+				},
+			},
+		},
 	}
 
 	server := test.NewVersionedHTTPServer()
@@ -438,6 +488,9 @@ func TestHTTPClient_Versioned_200(t *testing.T) {
 			resp, err = client.Plugin("12835beffd3e6c603aa4dd92127707b5")
 		case "/plugin/health":
 			resp, err = client.PluginHealth()
+		case "/scan":
+			opts := scheme.ScanOptions{}
+			resp, err = client.Scan(opts)
 		}
 		assert.NotNil(t, resp)
 		assert.NoError(t, err)
@@ -453,6 +506,7 @@ func TestHTTPClient_Versioned_500(t *testing.T) {
 		{"/plugin"},
 		{"/plugin/12835beffd3e6c603aa4dd92127707b5"},
 		{"/plugin/health"},
+		{"/scan"},
 	}
 
 	server := test.NewVersionedHTTPServer()
@@ -489,6 +543,9 @@ func TestHTTPClient_Versioned_500(t *testing.T) {
 			resp, err = client.Plugin("12835beffd3e6c603aa4dd92127707b5")
 		case "/plugin/health":
 			resp, err = client.PluginHealth()
+		case "/scan":
+			opts := scheme.ScanOptions{}
+			resp, err = client.Scan(opts)
 		}
 		assert.Nil(t, resp)
 		assert.Error(t, err)
