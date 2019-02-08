@@ -138,6 +138,17 @@ func (c *httpClient) Plugin(id string) (*scheme.Plugin, error) {
 	return out, nil
 }
 
+// PluginHealth returns the summary of the health of registered plugins.
+func (c *httpClient) PluginHealth() (*scheme.PluginHealth, error) {
+	out := new(scheme.PluginHealth)
+	err := c.getVersioned(pluginHealthURI, out)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to request `/plugin/health` endpoint")
+	}
+
+	return out, nil
+}
+
 // getUnversioned performs a GET request against the Synse Server unversioned API.
 func (c *httpClient) getUnversioned(uri string, okScheme interface{}) error {
 	errScheme := new(scheme.Error)

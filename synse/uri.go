@@ -14,4 +14,7 @@ const (
 
 	// pluginURI is the URI for the `/plugin` route.
 	pluginURI = "plugin"
+
+	// pluginHealthURI is the URI for the `/plugin` route.
+	pluginHealthURI = "plugin/health"
 )

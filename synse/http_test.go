@@ -382,6 +382,35 @@ func TestHTTPClient_Versioned_200(t *testing.T) {
 				},
 			},
 		},
+		{
+			"/plugin/health",
+			`
+{
+  "status": "healthy",
+  "updated": "2018-06-15T20:04:33Z",
+  "healthy": [
+    "12835beffd3e6c603aa4dd92127707b5",
+    "12835beffd3e6c603aa4dd92127707b6",
+    "12835beffd3e6c603aa4dd92127707b7"
+  ],
+  "unhealthy": [],
+  "active": 3,
+  "inactive": 0
+}
+			`,
+			&scheme.PluginHealth{
+				Status:  "healthy",
+				Updated: "2018-06-15T20:04:33Z",
+				Healthy: []string{
+					"12835beffd3e6c603aa4dd92127707b5",
+					"12835beffd3e6c603aa4dd92127707b6",
+					"12835beffd3e6c603aa4dd92127707b7",
+				},
+				Unhealthy: []string{},
+				Active:    int(3),
+				Inactive:  int(0),
+			},
+		},
 	}
 
 	server := test.NewVersionedHTTPServer()
@@ -407,6 +436,8 @@ func TestHTTPClient_Versioned_200(t *testing.T) {
 			resp, err = client.Plugins()
 		case "/plugin/12835beffd3e6c603aa4dd92127707b5":
 			resp, err = client.Plugin("12835beffd3e6c603aa4dd92127707b5")
+		case "/plugin/health":
+			resp, err = client.PluginHealth()
 		}
 		assert.NotNil(t, resp)
 		assert.NoError(t, err)
@@ -421,6 +452,7 @@ func TestHTTPClient_Versioned_500(t *testing.T) {
 		{"/config"},
 		{"/plugin"},
 		{"/plugin/12835beffd3e6c603aa4dd92127707b5"},
+		{"/plugin/health"},
 	}
 
 	server := test.NewVersionedHTTPServer()
@@ -455,6 +487,8 @@ func TestHTTPClient_Versioned_500(t *testing.T) {
 			resp, err = client.Plugins()
 		case "/plugin/12835beffd3e6c603aa4dd92127707b5":
 			resp, err = client.Plugin("12835beffd3e6c603aa4dd92127707b5")
+		case "/plugin/health":
+			resp, err = client.PluginHealth()
 		}
 		assert.Nil(t, resp)
 		assert.Error(t, err)

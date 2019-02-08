@@ -53,3 +53,13 @@ type CheckOptions struct {
 	Timestamp string `json:"timestamp"`
 	Type      string `json:"type"`
 }
+
+// PluginHealth describes a response for `plugin/health` endpoint.
+type PluginHealth struct {
+	Status    string   `json:"status"`
+	Updated   string   `json:"updated"`
+	Healthy   []string `json:"healthy"`
+	Unhealthy []string `json:"unhealthy"`
+	Active    int      `json:"active"`
+	Inactive  int      `json:"inactive"`
+}

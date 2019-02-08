@@ -25,14 +25,14 @@ type Client interface {
 	// Plugin returns data from a specific plugin.
 	Plugin(string) (*scheme.Plugin, error)
 
+	// PluginHealth returns the summary of the health of registered plugins.
+	PluginHealth() (*scheme.PluginHealth, error)
+
 	/*
 		// Metrics returns the application-based metrics.
 		Metrics() (*scheme.Metrics, error)
 
 
-
-		// PluginHealth returns the summary of the health of registered plugins.
-		PluginHealth() (*scheme.PluginHealth, error)
 
 		// Scan returns the list of devices that Synse knows about and can read
 		// from/write to via the configured plugins.
