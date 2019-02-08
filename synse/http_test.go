@@ -552,6 +552,39 @@ func TestHTTPClient_Versioned_500(t *testing.T) {
 	}
 }
 
+func TestMakeURI(t *testing.T) {
+	tests := []struct {
+		in       []string
+		expected string
+	}{
+		{
+			in:       []string{""},
+			expected: "",
+		},
+		{
+			in:       []string{"foo"},
+			expected: "foo",
+		},
+		{
+			in:       []string{"foo", "bar"},
+			expected: "foo/bar",
+		},
+		{
+			in:       []string{"foo", "bar", "baz/"},
+			expected: "foo/bar/baz/",
+		},
+		{
+			in:       []string{"foo/", "/bar"},
+			expected: "foo///bar",
+		},
+	}
+
+	for _, tt := range tests {
+		out := makeURI(tt.in...)
+		assert.Equal(t, tt.expected, out)
+	}
+}
+
 func TestStructToMapString(t *testing.T) {
 	tests := []struct {
 		in       interface{}
