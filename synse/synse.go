@@ -46,14 +46,14 @@ type Client interface {
 	// using ReadOptions.
 	Read(scheme.ReadOptions) (*[]scheme.Read, error)
 
+	// ReadDevice returns data from a specific device.
+	// It is the same as Read() where the label matches the device id tag
+	// specified in ReadOptions.
+	ReadDevice(string, scheme.ReadOptions) (*[]scheme.Read, error)
 	/*
 		// Metrics returns the application-based metrics.
 		Metrics() (*scheme.Metrics, error)
 
-		// ReadDevice returns data from a specific device.
-		// It is the same as Read() where the label matches the device id tag
-		// specified in ReadOptions.
-		ReadDevice(scheme.ReadDeviceOptions) (*[]scheme.Read, error)
 
 		// ReadCache returns stream reading data from the registered plugins.
 		ReadCache(scheme.ReadCacheOptions) (*[]scheme.Read, error)

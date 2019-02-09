@@ -689,6 +689,46 @@ func TestHTTPClient_Versioned_200(t *testing.T) {
 				},
 			},
 		},
+		{
+			"/read/12bb12c1f86a86e",
+			`
+[
+  {
+    "device": "12bb12c1f86a86e",
+    "device_type": "temperature",
+    "type": "temperature",
+    "value": 20.3,
+    "timestamp": "2018-02-01T13:47:40Z",
+    "unit": {
+      "system": "metric",
+      "symbol": "C",
+      "name": "degrees celsius"
+    },
+    "context": {
+      "host": "127.0.0.1",
+      "sample_rate": 8
+    }
+  }
+]`,
+			&[]scheme.Read{
+				scheme.Read{
+					Device:     "12bb12c1f86a86e",
+					DeviceType: "temperature",
+					Type:       "temperature",
+					Value:      float64(20.3),
+					Timestamp:  "2018-02-01T13:47:40Z",
+					Unit: scheme.UnitOptions{
+						System: "metric",
+						Symbol: "C",
+						Name:   "degrees celsius",
+					},
+					Context: map[string]interface{}{
+						"host":        "127.0.0.1",
+						"sample_rate": float64(8),
+					},
+				},
+			},
+		},
 	}
 
 	server := test.NewVersionedHTTPServer()
@@ -727,6 +767,9 @@ func TestHTTPClient_Versioned_200(t *testing.T) {
 		case "/read":
 			opts := scheme.ReadOptions{}
 			resp, err = client.Read(opts)
+		case "/read/12bb12c1f86a86e":
+			opts := scheme.ReadOptions{}
+			resp, err = client.ReadDevice("12bb12c1f86a86e", opts)
 		}
 		assert.NotNil(t, resp)
 		assert.NoError(t, err)
@@ -746,6 +789,7 @@ func TestHTTPClient_Versioned_500(t *testing.T) {
 		{"/tags"},
 		{"/info/34c226b1afadaae5f172a4e1763fd1a6"},
 		{"/read"},
+		{"/read/12bb12c1f86a86e"},
 	}
 
 	server := test.NewVersionedHTTPServer()
@@ -793,6 +837,9 @@ func TestHTTPClient_Versioned_500(t *testing.T) {
 		case "/read":
 			opts := scheme.ReadOptions{}
 			resp, err = client.Read(opts)
+		case "/read/12bb12c1f86a86e":
+			opts := scheme.ReadOptions{}
+			resp, err = client.ReadDevice("12bb12c1f86a86e", opts)
 		}
 		assert.Nil(t, resp)
 		assert.Error(t, err)

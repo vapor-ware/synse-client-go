@@ -200,6 +200,19 @@ func (c *httpClient) Read(opts scheme.ReadOptions) (*[]scheme.Read, error) {
 	return out, nil
 }
 
+// ReadDevice returns data from a specific device.
+// It is the same as Read() where the label matches the device id tag
+// specified in ReadOptions.
+func (c *httpClient) ReadDevice(id string, opts scheme.ReadOptions) (*[]scheme.Read, error) {
+	out := new([]scheme.Read)
+	err := c.getVersionedQueryParams(makeURI(readURI, id), opts, out)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to request `/read` endpoint")
+	}
+
+	return out, nil
+}
+
 // getVersionedQueryParams performs a GET request using query parameters against the Synse Server versioned API.
 func (c *httpClient) getVersionedQueryParams(uri string, params interface{}, okScheme interface{}) error {
 	errScheme := new(scheme.Error)
