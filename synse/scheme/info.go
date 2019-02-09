@@ -24,6 +24,8 @@ type CapabilitiesOptions struct {
 	Read  map[string]string `json:"read"`
 	Write WriteOptions      `json:"write"`
 }
+
+// WriteOptions holds the write info.
 type WriteOptions struct {
 	Actions []string `json:"actions"`
 }

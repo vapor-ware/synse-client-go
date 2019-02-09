@@ -1,5 +1,5 @@
 package scheme
 
-// Transaction...
+// Transaction TODO
 type Transaction struct {
 }

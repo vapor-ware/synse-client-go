@@ -158,7 +158,7 @@ func TestHTTPClient_Unversioned_500(t *testing.T) {
 	}
 }
 
-func TestHTTPClient_Versioned_200(t *testing.T) {
+func TestHTTPClient_Versioned_200(t *testing.T) { // nolint
 	tests := []struct {
 		path     string
 		in       string
@@ -777,7 +777,7 @@ func TestHTTPClient_Versioned_200(t *testing.T) {
 	}
 }
 
-func TestHTTPClient_Versioned_500(t *testing.T) {
+func TestHTTPClient_Versioned_500(t *testing.T) { // nolint
 	tests := []struct {
 		path string
 	}{

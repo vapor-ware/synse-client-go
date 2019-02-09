@@ -1,9 +1,9 @@
 package scheme
 
-// Write...
+// Write TODO
 type Write struct {
 }
 
-// WriteData...
+// WriteData TODO
 type WriteData struct {
 }
