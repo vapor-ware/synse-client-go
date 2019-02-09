@@ -26,4 +26,7 @@ const (
 
 	// infoURI is the URI for the `/info` route.
 	infoURI = "info"
+
+	// readURI is the URI for the `/read` route.
+	readURI = "read"
 )

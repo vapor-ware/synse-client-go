@@ -20,16 +20,10 @@ type MetadataOptions struct {
 
 // CapabilitiesOptions holds the capabilities info.
 type CapabilitiesOptions struct {
-	Mode  string       `json:"mode"`
-	Read  ReadOptions  `json:"read"`
-	Write WriteOptions `json:"write"`
+	Mode  string            `json:"mode"`
+	Read  map[string]string `json:"read"`
+	Write WriteOptions      `json:"write"`
 }
-
-// ReadOptions holds the read info.
-type ReadOptions struct {
-}
-
-// WriteOptions holds the write info.
 type WriteOptions struct {
 	Actions []string `json:"actions"`
 }

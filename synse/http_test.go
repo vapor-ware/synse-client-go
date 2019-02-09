@@ -550,7 +550,7 @@ func TestHTTPClient_Versioned_200(t *testing.T) {
 				},
 				Capabilities: scheme.CapabilitiesOptions{
 					Mode: "rw",
-					Read: scheme.ReadOptions{},
+					Read: map[string]string{},
 					Write: scheme.WriteOptions{
 						Actions: []string{
 							"color",
@@ -593,6 +593,102 @@ func TestHTTPClient_Versioned_200(t *testing.T) {
 				},
 			},
 		},
+		{
+			"/read",
+			`
+[
+   {
+      "device":"a72cs6519ee675b",
+      "device_type":"temperature",
+      "type":"temperature",
+      "value":20.3,
+      "timestamp":"2018-02-01T13:47:40Z",
+      "unit":{
+         "system":"metric",
+         "symbol":"C",
+         "name":"degrees celsius"
+      },
+      "context":{
+         "host":"127.0.0.1",
+         "sample_rate":8
+      }
+   },
+   {
+      "device":"929b923de65a811",
+      "device_type":"led",
+      "type":"state",
+      "value":"off",
+      "timestamp":"2018-02-01T13:47:40Z",
+      "unit":null
+   },
+   {
+      "device":"929b923de65a811",
+      "device_type":"led",
+      "type":"color",
+      "value":"000000",
+      "timestamp":"2018-02-01T13:47:40Z",
+      "unit":null
+   },
+   {
+      "device":"12bb12c1f86a86e",
+      "device_type":"door_lock",
+      "type":"status",
+      "value":"locked",
+      "timestamp":"2018-02-01T13:47:40Z",
+      "unit":null,
+      "context":{
+         "wedge":1,
+         "zone":"6B"
+      }
+   }
+]`,
+			&[]scheme.Read{
+				scheme.Read{
+					Device:     "a72cs6519ee675b",
+					DeviceType: "temperature",
+					Type:       "temperature",
+					Value:      float64(20.3),
+					Timestamp:  "2018-02-01T13:47:40Z",
+					Unit: scheme.UnitOptions{
+						System: "metric",
+						Symbol: "C",
+						Name:   "degrees celsius",
+					},
+					Context: map[string]interface{}{
+						"host":        "127.0.0.1",
+						"sample_rate": float64(8),
+					},
+				},
+				scheme.Read{
+					Device:     "929b923de65a811",
+					DeviceType: "led",
+					Type:       "state",
+					Value:      "off",
+					Timestamp:  "2018-02-01T13:47:40Z",
+					Unit:       scheme.UnitOptions{},
+				},
+				scheme.Read{
+					Device:     "929b923de65a811",
+					DeviceType: "led",
+					Type:       "color",
+					Value:      "000000",
+					Timestamp:  "2018-02-01T13:47:40Z",
+					Unit:       scheme.UnitOptions{},
+				},
+				scheme.Read{
+					Device:     "12bb12c1f86a86e",
+					DeviceType: "door_lock",
+					Type:       "status",
+					Value:      "locked",
+					Timestamp:  "2018-02-01T13:47:40Z",
+					Unit:       scheme.UnitOptions{},
+					Context: map[string]interface{}{
+						"wedge": float64(1),
+						"zone":  "6B",
+					},
+				},
+			},
+		},
 	}
 
 	server := test.NewVersionedHTTPServer()
@@ -628,6 +724,9 @@ func TestHTTPClient_Versioned_200(t *testing.T) {
 			resp, err = client.Tags(opts)
 		case "/info/34c226b1afadaae5f172a4e1763fd1a6":
 			resp, err = client.Info("34c226b1afadaae5f172a4e1763fd1a6")
+		case "/read":
+			opts := scheme.ReadOptions{}
+			resp, err = client.Read(opts)
 		}
 		assert.NotNil(t, resp)
 		assert.NoError(t, err)
@@ -646,6 +745,7 @@ func TestHTTPClient_Versioned_500(t *testing.T) {
 		{"/scan"},
 		{"/tags"},
 		{"/info/34c226b1afadaae5f172a4e1763fd1a6"},
+		{"/read"},
 	}
 
 	server := test.NewVersionedHTTPServer()
@@ -690,6 +790,9 @@ func TestHTTPClient_Versioned_500(t *testing.T) {
 			resp, err = client.Tags(opts)
 		case "/info/34c226b1afadaae5f172a4e1763fd1a6":
 			resp, err = client.Info("34c226b1afadaae5f172a4e1763fd1a6")
+		case "/read":
+			opts := scheme.ReadOptions{}
+			resp, err = client.Read(opts)
 		}
 		assert.Nil(t, resp)
 		assert.Error(t, err)

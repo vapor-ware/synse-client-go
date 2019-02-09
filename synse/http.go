@@ -108,7 +108,7 @@ func (c *httpClient) Version() (*scheme.Version, error) {
 // Config returns the config info.
 func (c *httpClient) Config() (*scheme.Config, error) {
 	out := new(scheme.Config)
-	err := c.getVersioned(configURI, nil, out)
+	err := c.getVersioned(configURI, out)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to request `/config` endpoint")
 	}
@@ -120,7 +120,7 @@ func (c *httpClient) Config() (*scheme.Config, error) {
 // Synse Server.
 func (c *httpClient) Plugins() (*[]scheme.PluginMeta, error) {
 	out := new([]scheme.PluginMeta)
-	err := c.getVersioned(pluginURI, nil, out)
+	err := c.getVersioned(pluginURI, out)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to request `/plugin` endpoint")
 	}
@@ -131,7 +131,7 @@ func (c *httpClient) Plugins() (*[]scheme.PluginMeta, error) {
 // Plugin returns data from a specific plugin.
 func (c *httpClient) Plugin(id string) (*scheme.Plugin, error) {
 	out := new(scheme.Plugin)
-	err := c.getVersioned(makeURI(pluginURI, id), nil, out)
+	err := c.getVersioned(makeURI(pluginURI, id), out)
 	if err != nil {
 		return nil, errors.Wrap(err, fmt.Sprintf("failed to request `/plugin/%v` endpoint", id))
 	}
@@ -142,7 +142,7 @@ func (c *httpClient) Plugin(id string) (*scheme.Plugin, error) {
 // PluginHealth returns the summary of the health of registered plugins.
 func (c *httpClient) PluginHealth() (*scheme.PluginHealth, error) {
 	out := new(scheme.PluginHealth)
-	err := c.getVersioned(pluginHealthURI, nil, out)
+	err := c.getVersioned(pluginHealthURI, out)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to request `/plugin/health` endpoint")
 	}
@@ -156,7 +156,7 @@ func (c *httpClient) PluginHealth() (*scheme.PluginHealth, error) {
 // of provided tags by using ScanOptions.
 func (c *httpClient) Scan(opts scheme.ScanOptions) (*[]scheme.Scan, error) {
 	out := new([]scheme.Scan)
-	err := c.getVersioned(scanURI, structToMapString(opts), out)
+	err := c.getVersionedQueryParams(scanURI, opts, out)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to request `/scan` endpoint")
 	}
@@ -168,7 +168,7 @@ func (c *httpClient) Scan(opts scheme.ScanOptions) (*[]scheme.Scan, error) {
 // If no TagsOptions is specified, the default tag namespace will be used.
 func (c *httpClient) Tags(opts scheme.TagsOptions) (*[]string, error) {
 	out := new([]string)
-	err := c.getVersioned(tagsURI, structToMapString(opts), out)
+	err := c.getVersionedQueryParams(tagsURI, opts, out)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to request `/tags` endpoint")
 	}
@@ -180,7 +180,7 @@ func (c *httpClient) Tags(opts scheme.TagsOptions) (*[]string, error) {
 // device.
 func (c *httpClient) Info(id string) (*scheme.Info, error) {
 	out := new(scheme.Info)
-	err := c.getVersioned(makeURI(infoURI, id), nil, out)
+	err := c.getVersioned(makeURI(infoURI, id), out)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to request `/info` endpoint")
 	}
@@ -188,22 +188,41 @@ func (c *httpClient) Info(id string) (*scheme.Info, error) {
 	return out, nil
 }
 
-// getUnversioned performs a GET request against the Synse Server unversioned API.
-func (c *httpClient) getUnversioned(uri string, okScheme interface{}) error {
-	errScheme := new(scheme.Error)
-	_, err := c.setUnversioned().R().SetResult(okScheme).SetError(errScheme).Get(uri)
-	return check(err, errScheme)
+// Read returns data from devices which match the set of provided tags
+// using ReadOptions.
+func (c *httpClient) Read(opts scheme.ReadOptions) (*[]scheme.Read, error) {
+	out := new([]scheme.Read)
+	err := c.getVersionedQueryParams(readURI, opts, out)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to request `/read` endpoint")
+	}
+
+	return out, nil
 }
 
-// getVersioned performs a GET request against the Synse Server versioned API.
-func (c *httpClient) getVersioned(uri string, params map[string]string, okScheme interface{}) error {
+// getVersionedQueryParams performs a GET request using query parameters against the Synse Server versioned API.
+func (c *httpClient) getVersionedQueryParams(uri string, params interface{}, okScheme interface{}) error {
 	errScheme := new(scheme.Error)
 	client, err := c.setVersioned()
 	if err != nil {
 		return errors.Wrap(err, "failed to set a versioned host")
 	}
 
-	_, err = client.R().SetQueryParams(params).SetResult(okScheme).SetError(errScheme).Get(uri)
+	_, err = client.R().SetQueryParams(structToMapString(params)).SetResult(okScheme).SetError(errScheme).Get(uri)
+	return check(err, errScheme)
+
+}
+
+// getVersioned performs a GET request against the Synse Server versioned API.
+func (c *httpClient) getVersioned(uri string, okScheme interface{}) error {
+	params := struct{}{}
+	return c.getVersionedQueryParams(uri, params, okScheme)
+}
+
+// getUnversioned performs a GET request against the Synse Server unversioned API.
+func (c *httpClient) getUnversioned(uri string, okScheme interface{}) error {
+	errScheme := new(scheme.Error)
+	_, err := c.setUnversioned().R().SetResult(okScheme).SetError(errScheme).Get(uri)
 	return check(err, errScheme)
 }
 

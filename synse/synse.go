@@ -41,15 +41,14 @@ type Client interface {
 	// Info returns the full set of meta info and capabilities for a specific
 	// device.
 	Info(string) (*scheme.Info, error)
+
+	// Read returns data from devices which match the set of provided tags
+	// using ReadOptions.
+	Read(scheme.ReadOptions) (*[]scheme.Read, error)
+
 	/*
 		// Metrics returns the application-based metrics.
 		Metrics() (*scheme.Metrics, error)
-
-
-
-		// Read returns data from devices which match the set of provided tags
-		// using ReadOptions.
-		Read(scheme.ReadOptions) (*[]scheme.Read, error)
 
 		// ReadDevice returns data from a specific device.
 		// It is the same as Read() where the label matches the device id tag
