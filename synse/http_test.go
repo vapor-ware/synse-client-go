@@ -563,7 +563,7 @@ func TestHTTPClient_Versioned_200(t *testing.T) {
 						Name:          "humidity",
 						Type:          "humidity",
 						Precision:     int(3),
-						ScalingFactor: float32(1.0),
+						ScalingFactor: float64(1.0),
 						Units: []scheme.UnitOptions{
 							scheme.UnitOptions{
 								System: "",
@@ -576,7 +576,7 @@ func TestHTTPClient_Versioned_200(t *testing.T) {
 						Name:          "temperature",
 						Type:          "temperature",
 						Precision:     int(3),
-						ScalingFactor: float32(1.0),
+						ScalingFactor: float64(1.0),
 						Units: []scheme.UnitOptions{
 							scheme.UnitOptions{
 								System: "metric",

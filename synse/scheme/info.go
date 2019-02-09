@@ -33,7 +33,7 @@ type OutputOptions struct {
 	Name          string        `json:"name"`
 	Type          string        `json:"type"`
 	Precision     int           `json:"precision"`
-	ScalingFactor float32       `json:"scaling_factor"`
+	ScalingFactor float64       `json:"scaling_factor"`
 	Units         []UnitOptions `json:"units"`
 }
 
