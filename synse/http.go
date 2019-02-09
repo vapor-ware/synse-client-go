@@ -278,7 +278,9 @@ func makeURI(components ...string) string {
 	return strings.Join(components, "/")
 }
 
-// structToMapString decodes a struct value into a map[string]string.
+// structToMapString decodes a struct value into a map[string]string that can
+// be used as query parameters. It assumes that the struct fields follow one of
+// these types: bool, string, int, float, slice.
 func structToMapString(s interface{}) map[string]string {
 	out := map[string]string{}
 	v := ""
