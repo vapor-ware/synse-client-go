@@ -213,6 +213,31 @@ func (c *httpClient) ReadDevice(id string, opts scheme.ReadOptions) (*[]scheme.R
 	return out, nil
 }
 
+// ReadCache returns stream reading data from the registered plugins.
+func (c *httpClient) ReadCache(opts scheme.ReadOptions) (*[]scheme.Read, error) {
+	return nil, errors.New("not yet implemented")
+}
+
+// Write data to a device.
+func (c *httpClient) Write(mode string, id string, opts scheme.WriteData) (*[]scheme.Write, error) {
+	return nil, errors.New("not yet implemented")
+}
+
+// Transactions returns the sorted list of all cached transaction IDs.
+func (c *httpClient) Transactions() (*[]string, error) {
+	return nil, errors.New("not yet implemented")
+}
+
+// Transaction returns the state and status of a write transaction.
+func (c *httpClient) Transaction(id string) (*scheme.Transaction, error) {
+	return nil, errors.New("not yet implemented")
+}
+
+// Metrics returns the application-based metrics.
+func (c *httpClient) Metrics() (*scheme.Metrics, error) {
+	return nil, errors.New("not yet implemented")
+}
+
 // getVersionedQueryParams performs a GET request using query parameters against the Synse Server versioned API.
 func (c *httpClient) getVersionedQueryParams(uri string, params interface{}, okScheme interface{}) error {
 	errScheme := new(scheme.Error)

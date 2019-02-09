@@ -50,12 +50,19 @@ type Client interface {
 	// It is the same as Read() where the label matches the device id tag
 	// specified in ReadOptions.
 	ReadDevice(string, scheme.ReadOptions) (*[]scheme.Read, error)
-	/*
-		// Metrics returns the application-based metrics.
-		Metrics() (*scheme.Metrics, error)
 
+	// ReadCache returns stream reading data from the registered plugins.
+	ReadCache(scheme.ReadOptions) (*[]scheme.Read, error)
 
-		// ReadCache returns stream reading data from the registered plugins.
-		ReadCache(scheme.ReadCacheOptions) (*[]scheme.Read, error)
-	*/
+	// Write data to a device.
+	Write(string, string, scheme.WriteData) (*[]scheme.Write, error)
+
+	// Transactions returns the sorted list of all cached transaction IDs.
+	Transactions() (*[]string, error)
+
+	// Transaction returns the state and status of a write transaction.
+	Transaction(string) (*scheme.Transaction, error)
+
+	// Metrics returns the application-based metrics.
+	Metrics() (*scheme.Metrics, error)
 }
