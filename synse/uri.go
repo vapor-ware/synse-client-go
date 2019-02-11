@@ -31,7 +31,7 @@ const (
 	readURI = "read"
 
 	// readcacheURI is the URI for the `/readcache` route.
-	// readcacheURI = "readcache"
+	readcacheURI = "readcache"
 
 	// writeURI is the URI for the `/write` route.
 	writeURI = "write"

@@ -730,6 +730,44 @@ func TestHTTPClient_Versioned_200(t *testing.T) { // nolint
 			},
 		},
 		{
+			"/readcache",
+			`
+{
+  "device":"929b923de65a811",
+  "device_type":"led",
+  "type":"state",
+  "value":"off",
+  "timestamp":"2018-02-01T13:47:40Z",
+  "unit":null
+}
+{
+  "device":"929b923de65a811",
+  "device_type":"led",
+  "type":"color",
+  "value":"000000",
+  "timestamp":"2018-02-01T13:47:40Z",
+  "unit":null
+}`,
+			&[]scheme.Read{
+				scheme.Read{
+					Device:     "929b923de65a811",
+					DeviceType: "led",
+					Type:       "state",
+					Value:      "off",
+					Timestamp:  "2018-02-01T13:47:40Z",
+					Unit:       scheme.UnitOptions{},
+				},
+				scheme.Read{
+					Device:     "929b923de65a811",
+					DeviceType: "led",
+					Type:       "color",
+					Value:      "000000",
+					Timestamp:  "2018-02-01T13:47:40Z",
+					Unit:       scheme.UnitOptions{},
+				},
+			},
+		},
+		{
 			"/write/0fe8f06229aa9a01ef6032d1ddaf18a2",
 			`
 [
@@ -892,6 +930,9 @@ func TestHTTPClient_Versioned_200(t *testing.T) { // nolint
 		case "/read/12bb12c1f86a86e":
 			opts := scheme.ReadOptions{}
 			resp, err = client.ReadDevice("12bb12c1f86a86e", opts)
+		case "/readcache":
+			opts := scheme.ReadCacheOptions{}
+			resp, err = client.ReadCache(opts)
 		case "/write/0fe8f06229aa9a01ef6032d1ddaf18a2":
 			opts := []scheme.WriteData{}
 			resp, err = client.Write("0fe8f06229aa9a01ef6032d1ddaf18a2", opts)
@@ -922,6 +963,7 @@ func TestHTTPClient_Versioned_500(t *testing.T) { // nolint
 		{"/info/34c226b1afadaae5f172a4e1763fd1a6"},
 		{"/read"},
 		{"/read/12bb12c1f86a86e"},
+		{"/readcache"},
 		{"/write/0fe8f06229aa9a01ef6032d1ddaf18a2"},
 		{"/write/wait/0fe8f06229aa9a01ef6032d1ddaf18a5"},
 		{"/transaction"},
@@ -976,6 +1018,9 @@ func TestHTTPClient_Versioned_500(t *testing.T) { // nolint
 		case "/read/12bb12c1f86a86e":
 			opts := scheme.ReadOptions{}
 			resp, err = client.ReadDevice("12bb12c1f86a86e", opts)
+		case "/readcache":
+			opts := scheme.ReadCacheOptions{}
+			resp, err = client.ReadCache(opts)
 		case "/write/0fe8f06229aa9a01ef6032d1ddaf18a2":
 			opts := []scheme.WriteData{}
 			resp, err = client.Write("0fe8f06229aa9a01ef6032d1ddaf18a2", opts)

@@ -3,6 +3,7 @@ package synse
 // http.go implements a http client.
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
@@ -212,8 +213,33 @@ func (c *httpClient) ReadDevice(id string, opts scheme.ReadOptions) (*[]scheme.R
 }
 
 // ReadCache returns stream reading data from the registered plugins.
-func (c *httpClient) ReadCache(opts scheme.ReadOptions) (*[]scheme.Read, error) {
-	return nil, errors.New("not yet implemented")
+func (c *httpClient) ReadCache(opts scheme.ReadCacheOptions) (*[]scheme.Read, error) {
+	var out []scheme.Read
+	errScheme := new(scheme.Error)
+
+	client, err := c.setVersioned()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to set a versioned host while performing a GET request")
+	}
+
+	resp, err := client.R().SetDoNotParseResponse(true).SetQueryParams(structToMapString(opts)).SetError(errScheme).Get(readcacheURI)
+	e := check(err, errScheme)
+	if e != nil {
+		return nil, errors.Wrap(err, "failed to request `/readcache` endpoint")
+	}
+
+	dec := json.NewDecoder(resp.RawBody())
+	for dec.More() {
+		var read scheme.Read
+		err := dec.Decode(&read)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to decode a JSON response into an appropriate struct")
+		}
+
+		out = append(out, read)
+	}
+
+	return &out, nil
 }
 
 // Write writes data to a device, in an asynchronous manner.
