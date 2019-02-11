@@ -151,9 +151,8 @@ func (c *httpClient) PluginHealth() (*scheme.PluginHealth, error) {
 }
 
 // Scan returns the list of devices that Synse knows about and can read
-// from/write to via the configured plugins.
-// It can be filtered to show only those devices which match a set
-// of provided tags by using ScanOptions.
+// from/write to via the configured plugins. It can be filtered to show
+// only those devices which match a set of provided tags by using ScanOptions.
 func (c *httpClient) Scan(opts scheme.ScanOptions) (*[]scheme.Scan, error) {
 	out := new([]scheme.Scan)
 	err := c.getVersionedQueryParams(scanURI, opts, out)
@@ -200,9 +199,8 @@ func (c *httpClient) Read(opts scheme.ReadOptions) (*[]scheme.Read, error) {
 	return out, nil
 }
 
-// ReadDevice returns data from a specific device.
-// It is the same as Read() where the label matches the device id tag
-// specified in ReadOptions.
+// ReadDevice returns data from a specific device. It is the same as Read()
+// where the label matches the device id tag specified in ReadOptions.
 func (c *httpClient) ReadDevice(id string, opts scheme.ReadOptions) (*[]scheme.Read, error) {
 	out := new([]scheme.Read)
 	err := c.getVersionedQueryParams(makeURI(readURI, id), opts, out)
@@ -218,9 +216,26 @@ func (c *httpClient) ReadCache(opts scheme.ReadOptions) (*[]scheme.Read, error) 
 	return nil, errors.New("not yet implemented")
 }
 
-// Write data to a device.
-func (c *httpClient) Write(mode string, id string, opts scheme.WriteData) (*[]scheme.Write, error) {
-	return nil, errors.New("not yet implemented")
+// Write writes data to a device, in an asynchronous manner.
+func (c *httpClient) Write(id string, opts []scheme.WriteData) (*[]scheme.Write, error) {
+	out := new([]scheme.Write)
+	err := c.postVersioned(makeURI(writeURI, id), opts, out)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to request `/write` endpoint")
+	}
+
+	return out, nil
+}
+
+// WriteWait writes data to a device, waiting for the write to complete.
+func (c *httpClient) WriteWait(id string, opts []scheme.WriteData) (*[]scheme.Transaction, error) {
+	out := new([]scheme.Transaction)
+	err := c.postVersioned(makeURI(writeWaitURI, id), opts, out)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to request `/write/wait` endpoint")
+	}
+
+	return out, nil
 }
 
 // Transactions returns the sorted list of all cached transaction IDs.
@@ -238,12 +253,13 @@ func (c *httpClient) Metrics() (*scheme.Metrics, error) {
 	return nil, errors.New("not yet implemented")
 }
 
-// getVersionedQueryParams performs a GET request using query parameters against the Synse Server versioned API.
+// getVersionedQueryParams performs a GET request using query parameters
+// against the Synse Server versioned API.
 func (c *httpClient) getVersionedQueryParams(uri string, params interface{}, okScheme interface{}) error {
 	errScheme := new(scheme.Error)
 	client, err := c.setVersioned()
 	if err != nil {
-		return errors.Wrap(err, "failed to set a versioned host")
+		return errors.Wrap(err, "failed to set a versioned host while performing a GET request")
 	}
 
 	_, err = client.R().SetQueryParams(structToMapString(params)).SetResult(okScheme).SetError(errScheme).Get(uri)
@@ -261,6 +277,18 @@ func (c *httpClient) getVersioned(uri string, okScheme interface{}) error {
 func (c *httpClient) getUnversioned(uri string, okScheme interface{}) error {
 	errScheme := new(scheme.Error)
 	_, err := c.setUnversioned().R().SetResult(okScheme).SetError(errScheme).Get(uri)
+	return check(err, errScheme)
+}
+
+// postVersioned performs a POST request against the Synse Server versioned API.
+func (c *httpClient) postVersioned(uri string, body interface{}, okScheme interface{}) error {
+	errScheme := new(scheme.Error)
+	client, err := c.setVersioned()
+	if err != nil {
+		return errors.Wrap(err, "failed to set a versioned host while performing a POST request")
+	}
+
+	_, err = client.R().SetBody(body).SetResult(okScheme).SetError(errScheme).Post(uri)
 	return check(err, errScheme)
 }
 

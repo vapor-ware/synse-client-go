@@ -729,6 +729,84 @@ func TestHTTPClient_Versioned_200(t *testing.T) { // nolint
 				},
 			},
 		},
+		{
+			"/write/0fe8f06229aa9a01ef6032d1ddaf18a2",
+			`
+[
+  {
+    "context": {
+      "action": "color",
+      "data": "f38ac2"
+    },
+    "device": "0fe8f06229aa9a01ef6032d1ddaf18a2",
+    "transaction": "56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
+    "timeout": "10s"
+  },
+  {
+    "context": {
+      "action": "state",
+      "data": "blink"
+    },
+    "device": "0fe8f06229aa9a01ef6032d1ddaf18a2",
+    "transaction": "56a32eba-1aa6-4868-84ee-fe01af8b2e6e",
+    "timeout": "10s"
+  }
+]`,
+			&[]scheme.Write{
+				scheme.Write{
+					Context: scheme.WriteData{
+						Action: "color",
+						Data:   "f38ac2",
+					},
+					Device:      "0fe8f06229aa9a01ef6032d1ddaf18a2",
+					Transaction: "56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
+					Timeout:     "10s",
+				},
+				scheme.Write{
+					Context: scheme.WriteData{
+						Action: "state",
+						Data:   "blink",
+					},
+					Device:      "0fe8f06229aa9a01ef6032d1ddaf18a2",
+					Transaction: "56a32eba-1aa6-4868-84ee-fe01af8b2e6e",
+					Timeout:     "10s",
+				},
+			},
+		},
+		{
+			"/write/wait/0fe8f06229aa9a01ef6032d1ddaf18a5",
+			`
+[
+ {
+   "id": "56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
+   "timeout": "10s",
+   "device": "0fe8f06229aa9a01ef6032d1ddaf18a5",
+   "context": {
+     "action": "color",
+     "data": "f38ac2"
+   },
+   "status": "done",
+   "created": "2018-02-01T15:00:51Z",
+   "updated": "2018-02-01T15:00:51Z",
+   "message": ""
+ }
+]`,
+			&[]scheme.Transaction{
+				scheme.Transaction{
+					ID:      "56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
+					Timeout: "10s",
+					Device:  "0fe8f06229aa9a01ef6032d1ddaf18a5",
+					Context: scheme.WriteData{
+						Action: "color",
+						Data:   "f38ac2",
+					},
+					Status:  "done",
+					Created: "2018-02-01T15:00:51Z",
+					Updated: "2018-02-01T15:00:51Z",
+					Message: "",
+				},
+			},
+		},
 	}
 
 	server := test.NewVersionedHTTPServer()
@@ -770,6 +848,12 @@ func TestHTTPClient_Versioned_200(t *testing.T) { // nolint
 		case "/read/12bb12c1f86a86e":
 			opts := scheme.ReadOptions{}
 			resp, err = client.ReadDevice("12bb12c1f86a86e", opts)
+		case "/write/0fe8f06229aa9a01ef6032d1ddaf18a2":
+			opts := []scheme.WriteData{}
+			resp, err = client.Write("0fe8f06229aa9a01ef6032d1ddaf18a2", opts)
+		case "/write/wait/0fe8f06229aa9a01ef6032d1ddaf18a5":
+			opts := []scheme.WriteData{}
+			resp, err = client.WriteWait("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
 		}
 		assert.NotNil(t, resp)
 		assert.NoError(t, err)
@@ -790,6 +874,8 @@ func TestHTTPClient_Versioned_500(t *testing.T) { // nolint
 		{"/info/34c226b1afadaae5f172a4e1763fd1a6"},
 		{"/read"},
 		{"/read/12bb12c1f86a86e"},
+		{"/write/0fe8f06229aa9a01ef6032d1ddaf18a2"},
+		{"/write/wait/0fe8f06229aa9a01ef6032d1ddaf18a5"},
 	}
 
 	server := test.NewVersionedHTTPServer()
@@ -840,6 +926,12 @@ func TestHTTPClient_Versioned_500(t *testing.T) { // nolint
 		case "/read/12bb12c1f86a86e":
 			opts := scheme.ReadOptions{}
 			resp, err = client.ReadDevice("12bb12c1f86a86e", opts)
+		case "/write/0fe8f06229aa9a01ef6032d1ddaf18a2":
+			opts := []scheme.WriteData{}
+			resp, err = client.Write("0fe8f06229aa9a01ef6032d1ddaf18a2", opts)
+		case "/write/wait/0fe8f06229aa9a01ef6032d1ddaf18a5":
+			opts := []scheme.WriteData{}
+			resp, err = client.WriteWait("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
 		}
 		assert.Nil(t, resp)
 		assert.Error(t, err)

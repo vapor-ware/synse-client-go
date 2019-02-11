@@ -54,8 +54,11 @@ type Client interface {
 	// ReadCache returns stream reading data from the registered plugins.
 	ReadCache(scheme.ReadOptions) (*[]scheme.Read, error)
 
-	// Write data to a device.
-	Write(string, string, scheme.WriteData) (*[]scheme.Write, error)
+	// Write writes data to a device, in an asynchronous manner.
+	Write(string, []scheme.WriteData) (*[]scheme.Write, error)
+
+	// WriteWait writes data to a device, waiting for the write to complete.
+	WriteWait(string, []scheme.WriteData) (*[]scheme.Transaction, error)
 
 	// Transactions returns the sorted list of all cached transaction IDs.
 	Transactions() (*[]string, error)

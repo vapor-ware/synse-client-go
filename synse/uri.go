@@ -34,10 +34,10 @@ const (
 	// readcacheURI = "readcache"
 
 	// writeURI is the URI for the `/write` route.
-	// writeURI = "write"
+	writeURI = "write"
 
 	// writeWaitURI is the URI for the `/write/wait` route.
-	// writeWaitURI = "write/wait"
+	writeWaitURI = "write/wait"
 
 	// transaction is the URI for the `/transaction` route.
 	// transactionURI = "transaction"
