@@ -40,7 +40,7 @@ const (
 	writeWaitURI = "write/wait"
 
 	// transaction is the URI for the `/transaction` route.
-	// transactionURI = "transaction"
+	transactionURI = "transaction"
 
 	// metricseURI is the URI for the `/metrics` route.
 	// metricsURI = "metrics"

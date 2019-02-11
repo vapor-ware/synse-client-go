@@ -240,12 +240,24 @@ func (c *httpClient) WriteWait(id string, opts []scheme.WriteData) (*[]scheme.Tr
 
 // Transactions returns the sorted list of all cached transaction IDs.
 func (c *httpClient) Transactions() (*[]string, error) {
-	return nil, errors.New("not yet implemented")
+	out := new([]string)
+	err := c.getVersioned(transactionURI, out)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to request `/transaction` endpoint")
+	}
+
+	return out, nil
 }
 
 // Transaction returns the state and status of a write transaction.
 func (c *httpClient) Transaction(id string) (*scheme.Transaction, error) {
-	return nil, errors.New("not yet implemented")
+	out := new(scheme.Transaction)
+	err := c.getVersioned(makeURI(transactionURI, id), out)
+	if err != nil {
+		return nil, errors.Wrap(err, fmt.Sprintf("failed to request `/transaction/%v` endpoint", id))
+	}
+
+	return out, nil
 }
 
 // Metrics returns the application-based metrics.

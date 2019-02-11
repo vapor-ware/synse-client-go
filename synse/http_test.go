@@ -807,6 +807,50 @@ func TestHTTPClient_Versioned_200(t *testing.T) { // nolint
 				},
 			},
 		},
+		{
+			"/transaction",
+			`
+[
+  "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
+  "56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
+  "56a32eba-1aa6-4868-84ee-fe01af8b2e6d"
+]`,
+			&[]string{
+				"56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
+				"56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
+				"56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
+			},
+		},
+		{
+			"/transaction/56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
+			`
+{
+  "id": "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
+  "timeout": "10s",
+  "device": "0fe8f06229aa9a01ef6032d1ddaf18a5",
+  "context": {
+    "action": "color",
+    "data": "f38ac2"
+  },
+  "status": "done",
+  "created": "2018-02-01T15:00:51Z",
+  "updated": "2018-02-01T15:00:51Z",
+  "message": ""
+}`,
+			&scheme.Transaction{
+				ID:      "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
+				Timeout: "10s",
+				Device:  "0fe8f06229aa9a01ef6032d1ddaf18a5",
+				Context: scheme.WriteData{
+					Action: "color",
+					Data:   "f38ac2",
+				},
+				Status:  "done",
+				Created: "2018-02-01T15:00:51Z",
+				Updated: "2018-02-01T15:00:51Z",
+				Message: "",
+			},
+		},
 	}
 
 	server := test.NewVersionedHTTPServer()
@@ -854,6 +898,10 @@ func TestHTTPClient_Versioned_200(t *testing.T) { // nolint
 		case "/write/wait/0fe8f06229aa9a01ef6032d1ddaf18a5":
 			opts := []scheme.WriteData{}
 			resp, err = client.WriteWait("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
+		case "/transaction":
+			resp, err = client.Transactions()
+		case "/transaction/56a32eba-1aa6-4868-84ee-fe01af8b2e6b":
+			resp, err = client.Transaction("56a32eba-1aa6-4868-84ee-fe01af8b2e6b")
 		}
 		assert.NotNil(t, resp)
 		assert.NoError(t, err)
@@ -876,6 +924,8 @@ func TestHTTPClient_Versioned_500(t *testing.T) { // nolint
 		{"/read/12bb12c1f86a86e"},
 		{"/write/0fe8f06229aa9a01ef6032d1ddaf18a2"},
 		{"/write/wait/0fe8f06229aa9a01ef6032d1ddaf18a5"},
+		{"/transaction"},
+		{"/transaction/56a32eba-1aa6-4868-84ee-fe01af8b2e6b"},
 	}
 
 	server := test.NewVersionedHTTPServer()
@@ -932,6 +982,10 @@ func TestHTTPClient_Versioned_500(t *testing.T) { // nolint
 		case "/write/wait/0fe8f06229aa9a01ef6032d1ddaf18a5":
 			opts := []scheme.WriteData{}
 			resp, err = client.WriteWait("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
+		case "/transaction":
+			resp, err = client.Transactions()
+		case "/transaction/56a32eba-1aa6-4868-84ee-fe01af8b2e6b":
+			resp, err = client.Transaction("56a32eba-1aa6-4868-84ee-fe01af8b2e6b")
 		}
 		assert.Nil(t, resp)
 		assert.Error(t, err)
