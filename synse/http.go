@@ -223,8 +223,8 @@ func (c *httpClient) ReadCache(opts scheme.ReadCacheOptions) (*[]scheme.Read, er
 	}
 
 	resp, err := client.R().SetDoNotParseResponse(true).SetQueryParams(structToMapString(opts)).SetError(errScheme).Get(readcacheURI)
-	e := check(err, errScheme)
-	if e != nil {
+	err = check(err, errScheme)
+	if err != nil {
 		return nil, errors.Wrap(err, "failed to request `/readcache` endpoint")
 	}
 
