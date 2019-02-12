@@ -935,10 +935,10 @@ func TestHTTPClient_Versioned_200(t *testing.T) { // nolint
 			resp, err = client.ReadCache(opts)
 		case "/write/0fe8f06229aa9a01ef6032d1ddaf18a2":
 			opts := []scheme.WriteData{}
-			resp, err = client.Write("0fe8f06229aa9a01ef6032d1ddaf18a2", opts)
+			resp, err = client.WriteAsync("0fe8f06229aa9a01ef6032d1ddaf18a2", opts)
 		case "/write/wait/0fe8f06229aa9a01ef6032d1ddaf18a5":
 			opts := []scheme.WriteData{}
-			resp, err = client.WriteWait("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
+			resp, err = client.WriteSync("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
 		case "/transaction":
 			resp, err = client.Transactions()
 		case "/transaction/56a32eba-1aa6-4868-84ee-fe01af8b2e6b":
@@ -1023,10 +1023,10 @@ func TestHTTPClient_Versioned_500(t *testing.T) { // nolint
 			resp, err = client.ReadCache(opts)
 		case "/write/0fe8f06229aa9a01ef6032d1ddaf18a2":
 			opts := []scheme.WriteData{}
-			resp, err = client.Write("0fe8f06229aa9a01ef6032d1ddaf18a2", opts)
+			resp, err = client.WriteAsync("0fe8f06229aa9a01ef6032d1ddaf18a2", opts)
 		case "/write/wait/0fe8f06229aa9a01ef6032d1ddaf18a5":
 			opts := []scheme.WriteData{}
-			resp, err = client.WriteWait("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
+			resp, err = client.WriteSync("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
 		case "/transaction":
 			resp, err = client.Transactions()
 		case "/transaction/56a32eba-1aa6-4868-84ee-fe01af8b2e6b":

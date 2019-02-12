@@ -242,8 +242,8 @@ func (c *httpClient) ReadCache(opts scheme.ReadCacheOptions) (*[]scheme.Read, er
 	return &out, nil
 }
 
-// Write writes data to a device, in an asynchronous manner.
-func (c *httpClient) Write(id string, opts []scheme.WriteData) (*[]scheme.Write, error) {
+// WriteAsync writes data to a device, in an asynchronous manner.
+func (c *httpClient) WriteAsync(id string, opts []scheme.WriteData) (*[]scheme.Write, error) {
 	out := new([]scheme.Write)
 	err := c.postVersioned(makeURI(writeURI, id), opts, out)
 	if err != nil {
@@ -253,8 +253,8 @@ func (c *httpClient) Write(id string, opts []scheme.WriteData) (*[]scheme.Write,
 	return out, nil
 }
 
-// WriteWait writes data to a device, waiting for the write to complete.
-func (c *httpClient) WriteWait(id string, opts []scheme.WriteData) (*[]scheme.Transaction, error) {
+// WriteSync writes data to a device, waiting for the write to complete.
+func (c *httpClient) WriteSync(id string, opts []scheme.WriteData) (*[]scheme.Transaction, error) {
 	out := new([]scheme.Transaction)
 	err := c.postVersioned(makeURI(writeWaitURI, id), opts, out)
 	if err != nil {
