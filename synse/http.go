@@ -286,11 +286,6 @@ func (c *httpClient) Transaction(id string) (*scheme.Transaction, error) {
 	return out, nil
 }
 
-// Metrics returns the application-based metrics.
-func (c *httpClient) Metrics() (*scheme.Metrics, error) {
-	return nil, errors.New("not yet implemented")
-}
-
 // getVersionedQueryParams performs a GET request using query parameters
 // against the Synse Server versioned API.
 func (c *httpClient) getVersionedQueryParams(uri string, params interface{}, okScheme interface{}) error {

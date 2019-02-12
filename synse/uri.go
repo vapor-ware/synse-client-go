@@ -41,7 +41,4 @@ const (
 
 	// transaction is the URI for the `/transaction` route.
 	transactionURI = "transaction"
-
-	// metricseURI is the URI for the `/metrics` route.
-	// metricsURI = "metrics"
 )

@@ -65,7 +65,4 @@ type Client interface {
 
 	// Transaction returns the state and status of a write transaction.
 	Transaction(string) (*scheme.Transaction, error)
-
-	// Metrics returns the application-based metrics.
-	Metrics() (*scheme.Metrics, error)
 }
