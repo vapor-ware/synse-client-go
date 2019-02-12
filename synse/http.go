@@ -109,9 +109,8 @@ func (c *httpClient) Version() (*scheme.Version, error) {
 // Config returns the config info.
 func (c *httpClient) Config() (*scheme.Config, error) {
 	out := new(scheme.Config)
-	err := c.getVersioned(configURI, out)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to request `/config` endpoint")
+	if err := c.getVersioned(configURI, out); err != nil {
+		return nil, err
 	}
 
 	return out, nil
@@ -121,9 +120,8 @@ func (c *httpClient) Config() (*scheme.Config, error) {
 // Synse Server.
 func (c *httpClient) Plugins() (*[]scheme.PluginMeta, error) {
 	out := new([]scheme.PluginMeta)
-	err := c.getVersioned(pluginURI, out)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to request `/plugin` endpoint")
+	if err := c.getVersioned(pluginURI, out); err != nil {
+		return nil, err
 	}
 
 	return out, nil
@@ -132,9 +130,8 @@ func (c *httpClient) Plugins() (*[]scheme.PluginMeta, error) {
 // Plugin returns data from a specific plugin.
 func (c *httpClient) Plugin(id string) (*scheme.Plugin, error) {
 	out := new(scheme.Plugin)
-	err := c.getVersioned(makeURI(pluginURI, id), out)
-	if err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("failed to request `/plugin/%v` endpoint", id))
+	if err := c.getVersioned(makeURI(pluginURI, id), out); err != nil {
+		return nil, err
 	}
 
 	return out, nil
@@ -143,9 +140,8 @@ func (c *httpClient) Plugin(id string) (*scheme.Plugin, error) {
 // PluginHealth returns the summary of the health of registered plugins.
 func (c *httpClient) PluginHealth() (*scheme.PluginHealth, error) {
 	out := new(scheme.PluginHealth)
-	err := c.getVersioned(pluginHealthURI, out)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to request `/plugin/health` endpoint")
+	if err := c.getVersioned(pluginHealthURI, out); err != nil {
+		return nil, err
 	}
 
 	return out, nil
@@ -156,9 +152,8 @@ func (c *httpClient) PluginHealth() (*scheme.PluginHealth, error) {
 // only those devices which match a set of provided tags by using ScanOptions.
 func (c *httpClient) Scan(opts scheme.ScanOptions) (*[]scheme.Scan, error) {
 	out := new([]scheme.Scan)
-	err := c.getVersionedQueryParams(scanURI, opts, out)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to request `/scan` endpoint")
+	if err := c.getVersionedQueryParams(scanURI, opts, out); err != nil {
+		return nil, err
 	}
 
 	return out, nil
@@ -168,9 +163,8 @@ func (c *httpClient) Scan(opts scheme.ScanOptions) (*[]scheme.Scan, error) {
 // If no TagsOptions is specified, the default tag namespace will be used.
 func (c *httpClient) Tags(opts scheme.TagsOptions) (*[]string, error) {
 	out := new([]string)
-	err := c.getVersionedQueryParams(tagsURI, opts, out)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to request `/tags` endpoint")
+	if err := c.getVersionedQueryParams(tagsURI, opts, out); err != nil {
+		return nil, err
 	}
 
 	return out, nil
@@ -180,9 +174,8 @@ func (c *httpClient) Tags(opts scheme.TagsOptions) (*[]string, error) {
 // device.
 func (c *httpClient) Info(id string) (*scheme.Info, error) {
 	out := new(scheme.Info)
-	err := c.getVersioned(makeURI(infoURI, id), out)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to request `/info` endpoint")
+	if err := c.getVersioned(makeURI(infoURI, id), out); err != nil {
+		return nil, err
 	}
 
 	return out, nil
@@ -192,9 +185,8 @@ func (c *httpClient) Info(id string) (*scheme.Info, error) {
 // using ReadOptions.
 func (c *httpClient) Read(opts scheme.ReadOptions) (*[]scheme.Read, error) {
 	out := new([]scheme.Read)
-	err := c.getVersionedQueryParams(readURI, opts, out)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to request `/read` endpoint")
+	if err := c.getVersionedQueryParams(readURI, opts, out); err != nil {
+		return nil, err
 	}
 
 	return out, nil
@@ -204,9 +196,8 @@ func (c *httpClient) Read(opts scheme.ReadOptions) (*[]scheme.Read, error) {
 // where the label matches the device id tag specified in ReadOptions.
 func (c *httpClient) ReadDevice(id string, opts scheme.ReadOptions) (*[]scheme.Read, error) {
 	out := new([]scheme.Read)
-	err := c.getVersionedQueryParams(makeURI(readURI, id), opts, out)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to request `/read` endpoint")
+	if err := c.getVersionedQueryParams(makeURI(readURI, id), opts, out); err != nil {
+		return nil, err
 	}
 
 	return out, nil
@@ -223,9 +214,8 @@ func (c *httpClient) ReadCache(opts scheme.ReadCacheOptions) (*[]scheme.Read, er
 	}
 
 	resp, err := client.R().SetDoNotParseResponse(true).SetQueryParams(structToMapString(opts)).SetError(errScheme).Get(readcacheURI)
-	err = check(err, errScheme)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to request `/readcache` endpoint")
+	if err = check(err, errScheme); err != nil {
+		return nil, err
 	}
 
 	dec := json.NewDecoder(resp.RawBody())
@@ -245,9 +235,8 @@ func (c *httpClient) ReadCache(opts scheme.ReadCacheOptions) (*[]scheme.Read, er
 // WriteAsync writes data to a device, in an asynchronous manner.
 func (c *httpClient) WriteAsync(id string, opts []scheme.WriteData) (*[]scheme.Write, error) {
 	out := new([]scheme.Write)
-	err := c.postVersioned(makeURI(writeURI, id), opts, out)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to request `/write` endpoint")
+	if err := c.postVersioned(makeURI(writeURI, id), opts, out); err != nil {
+		return nil, err
 	}
 
 	return out, nil
@@ -256,9 +245,8 @@ func (c *httpClient) WriteAsync(id string, opts []scheme.WriteData) (*[]scheme.W
 // WriteSync writes data to a device, waiting for the write to complete.
 func (c *httpClient) WriteSync(id string, opts []scheme.WriteData) (*[]scheme.Transaction, error) {
 	out := new([]scheme.Transaction)
-	err := c.postVersioned(makeURI(writeWaitURI, id), opts, out)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to request `/write/wait` endpoint")
+	if err := c.postVersioned(makeURI(writeWaitURI, id), opts, out); err != nil {
+		return nil, err
 	}
 
 	return out, nil
@@ -267,9 +255,8 @@ func (c *httpClient) WriteSync(id string, opts []scheme.WriteData) (*[]scheme.Tr
 // Transactions returns the sorted list of all cached transaction IDs.
 func (c *httpClient) Transactions() (*[]string, error) {
 	out := new([]string)
-	err := c.getVersioned(transactionURI, out)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to request `/transaction` endpoint")
+	if err := c.getVersioned(transactionURI, out); err != nil {
+		return nil, err
 	}
 
 	return out, nil
@@ -278,9 +265,8 @@ func (c *httpClient) Transactions() (*[]string, error) {
 // Transaction returns the state and status of a write transaction.
 func (c *httpClient) Transaction(id string) (*scheme.Transaction, error) {
 	out := new(scheme.Transaction)
-	err := c.getVersioned(makeURI(transactionURI, id), out)
-	if err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("failed to request `/transaction/%v` endpoint", id))
+	if err := c.getVersioned(makeURI(transactionURI, id), out); err != nil {
+		return nil, err
 	}
 
 	return out, nil
