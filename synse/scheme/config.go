@@ -1,27 +1,4 @@
-package synse
-
-// scheme.go defines the scheme for the server's responses.
-
-// Error describes an error response.
-type Error struct {
-	HTTPCode    int    `json:"http_code"`
-	ErrorID     int    `json:"error_id"`
-	Description string `json:"description"`
-	Timestamp   string `json:"timestamp"`
-	Context     string `json:"context"`
-}
-
-// Status describes a response for `/test` endpoint.
-type Status struct {
-	Status    string `json:"status"`
-	Timestamp string `json:"timestamp"`
-}
-
-// Version describes a response for `version` endpoint.
-type Version struct {
-	Version    string `json:"version"`
-	APIVersion string `json:"api_version"`
-}
+package scheme
 
 // Config describes a response for `/config` endpoint.
 type Config struct {
@@ -55,25 +32,13 @@ type KubernetesOptions struct {
 
 // EndpointsOptions is the config options for kubernetes's endpoint.
 type EndpointsOptions struct {
-	Label LabelOptions `json:"label"`
-}
-
-// LabelOptions is the config options for kubernetes's label.
-type LabelOptions struct {
-	App       string `json:"app"`
-	Component string `json:"server"`
+	Labels map[string]string `json:"labels"`
 }
 
 // CacheOptions is the config options for cache.
 type CacheOptions struct {
-	Meta        MetaOptions        `json:"meta"` // FIXME: not in v3
 	Device      DeviceOptions      `json:"device"`
 	Transaction TransactionOptions `json:"transaction"`
-}
-
-// MetaOptions is the config options for meta cache.
-type MetaOptions struct {
-	TTL int `json:"ttl"`
 }
 
 // DeviceOptions is the config options for device cache.
@@ -104,5 +69,6 @@ type MetricsOptions struct {
 
 // TransportOptions is the config options for transport communication layer.
 type TransportOptions struct {
-	Protocol string `json:"protocol"`
+	HTTP      bool `json:"http"`
+	WebSocket bool `json:"websocket"`
 }
