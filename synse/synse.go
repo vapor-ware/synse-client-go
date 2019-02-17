@@ -65,4 +65,7 @@ type Client interface {
 
 	// Transaction returns the state and status of a write transaction.
 	Transaction(string) (*scheme.Transaction, error)
+
+	// GetOptions returns the current config options of the client.
+	GetOptions() *Options
 }
