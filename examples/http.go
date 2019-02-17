@@ -13,7 +13,7 @@ func main() {
 		Address: "localhost:5000",
 	}
 
-	client, err := synse.NewHTTPClient(config)
+	client, err := synse.NewHTTPClientV3(config)
 	fmt.Printf("%+v, %+v\n", client, err)
 
 	r1, err := client.Status()
