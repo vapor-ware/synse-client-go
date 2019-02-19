@@ -10,14 +10,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewHTTPClient_NilConfig(t *testing.T) {
-	client, err := NewHTTPClient(nil)
+func TestNewHTTPClientV3_NilConfig(t *testing.T) {
+	client, err := NewHTTPClientV3(nil)
 	assert.Nil(t, client)
 	assert.Error(t, err)
 }
 
-func TestNewHTTPClient_NoAddress(t *testing.T) {
-	client, err := NewHTTPClient(&Options{
+func TestNewHTTPClientV3_NoAddress(t *testing.T) {
+	client, err := NewHTTPClientV3(&Options{
 		Address: "",
 	})
 	assert.Nil(t, client)
@@ -37,16 +37,16 @@ func TestNewHTTPClientV3_defaults(t *testing.T) {
 	assert.Equal(t, 2*time.Second, client.GetOptions().Retry.MaxWaitTime)
 }
 
-func TestNewHTTPClient_ValidAddress(t *testing.T) {
-	client, err := NewHTTPClient(&Options{
+func TestNewHTTPClientV3_ValidAddress(t *testing.T) {
+	client, err := NewHTTPClientV3(&Options{
 		Address: "localhost:5000",
 	})
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
 }
 
-func TestNewHTTPClient_ValidAddressAndTimeout(t *testing.T) {
-	client, err := NewHTTPClient(&Options{
+func TestNewHTTPClientV3_ValidAddressAndTimeout(t *testing.T) {
+	client, err := NewHTTPClientV3(&Options{
 		Address: "localhost:5000",
 		Timeout: 3 * time.Second,
 	})
@@ -54,8 +54,8 @@ func TestNewHTTPClient_ValidAddressAndTimeout(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestNewHTTPClient_ValidRetry(t *testing.T) {
-	client, err := NewHTTPClient(&Options{
+func TestNewHTTPClientV3_ValidRetry(t *testing.T) {
+	client, err := NewHTTPClientV3(&Options{
 		Address: "localhost:5000",
 		Retry: RetryOptions{
 			Count:       3,
@@ -67,7 +67,7 @@ func TestNewHTTPClient_ValidRetry(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestHTTPClient_Unversioned_200(t *testing.T) {
+func TestHTTPClientV3_Unversioned_200(t *testing.T) {
 	tests := []struct {
 		path     string
 		in       string
@@ -102,7 +102,7 @@ func TestHTTPClient_Unversioned_200(t *testing.T) {
 	server := test.NewUnversionedHTTPServer()
 	defer server.Close()
 
-	client, err := NewHTTPClient(&Options{
+	client, err := NewHTTPClientV3(&Options{
 		Address: server.URL,
 	})
 	assert.NotNil(t, client)
@@ -127,7 +127,7 @@ func TestHTTPClient_Unversioned_200(t *testing.T) {
 	}
 }
 
-func TestHTTPClient_Unversioned_500(t *testing.T) {
+func TestHTTPClientV3_Unversioned_500(t *testing.T) {
 	tests := []struct {
 		path string
 	}{
@@ -138,7 +138,7 @@ func TestHTTPClient_Unversioned_500(t *testing.T) {
 	server := test.NewUnversionedHTTPServer()
 	defer server.Close()
 
-	client, err := NewHTTPClient(&Options{
+	client, err := NewHTTPClientV3(&Options{
 		Address: server.URL,
 	})
 	assert.NotNil(t, client)
@@ -907,7 +907,7 @@ func TestHTTPClient_Versioned_200(t *testing.T) { // nolint
 	server := test.NewVersionedHTTPServer()
 	defer server.Close()
 
-	client, err := NewHTTPClient(&Options{
+	client, err := NewHTTPClientV3(&Options{
 		Address: server.URL,
 	})
 	assert.NotNil(t, client)
@@ -963,7 +963,7 @@ func TestHTTPClient_Versioned_200(t *testing.T) { // nolint
 	}
 }
 
-func TestHTTPClient_Versioned_500(t *testing.T) { // nolint
+func TestHTTPClientV3_Versioned_500(t *testing.T) { // nolint
 	tests := []struct {
 		path string
 	}{
@@ -986,7 +986,7 @@ func TestHTTPClient_Versioned_500(t *testing.T) { // nolint
 	server := test.NewVersionedHTTPServer()
 	defer server.Close()
 
-	client, err := NewHTTPClient(&Options{
+	client, err := NewHTTPClientV3(&Options{
 		Address: server.URL,
 	})
 	assert.NotNil(t, client)

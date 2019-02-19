@@ -22,19 +22,6 @@ type httpClient struct {
 	apiVersion string
 }
 
-// NewHTTPClient returns a new instance of a http client.
-func NewHTTPClient(options *Options) (Client, error) {
-	client, err := createHTTPClient(options)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to create a http client")
-	}
-
-	return &httpClient{
-		options: options,
-		client:  client,
-	}, nil
-}
-
 // NewHTTPClientV3 returns a new instance of a http client with API v3.
 func NewHTTPClientV3(options *Options) (Client, error) {
 	client, err := createHTTPClient(options)
@@ -312,26 +299,7 @@ func (c *httpClient) setUnversioned() *resty.Client {
 
 // setVersioned returns a client that uses versioned host URL.
 func (c *httpClient) setVersioned() (*resty.Client, error) {
-	err := c.cacheAPIVersion()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to cache api version")
-	}
-
 	return c.client.SetHostURL(fmt.Sprintf("http://%s/%s/", c.options.Address, c.apiVersion)), nil
-}
-
-// cacheAPIVersion caches the api version if not already.
-func (c *httpClient) cacheAPIVersion() error {
-	if c.apiVersion == "" {
-		client, err := c.Version()
-		if err != nil {
-			return errors.Wrap(err, "failed to get synse version for caching")
-		}
-
-		c.apiVersion = client.APIVersion
-	}
-
-	return nil
 }
 
 // check validates returned response from the Synse Server.
