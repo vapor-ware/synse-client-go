@@ -9,10 +9,10 @@ import (
 // Options is the root config options.
 type Options struct {
 	// Address specifies the URL of Synse Server in the format `host[:port]`.
-	Address string
+	Address string `default:"-"`
 
 	// Timeout specifies a time limit for a request.
-	Timeout time.Duration
+	Timeout time.Duration `default:"2s"`
 
 	// Retry specifies the options for retry mechanism.
 	Retry RetryOptions
@@ -23,15 +23,13 @@ type Options struct {
 // value.
 type RetryOptions struct {
 	// Count specifies the number of retry attempts. Zero value means no retry.
-	Count int
+	Count int `default:"3"`
 
 	// WaitTime specifies the wait time before retrying request. It is
 	// increased after each attempt.
-	// Default is 100 milliseconds.
-	WaitTime time.Duration
+	WaitTime time.Duration `default:"100ms"`
 
 	// MaxWaitTime specifies the maximum wait time, the cap, of all retry
 	// requests that are made.
-	// Default is 2 seconds
-	MaxWaitTime time.Duration
+	MaxWaitTime time.Duration `default:"2s"`
 }

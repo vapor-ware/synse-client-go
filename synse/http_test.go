@@ -24,6 +24,19 @@ func TestNewHTTPClientV3_NoAddress(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestNewHTTPClientV3_defaults(t *testing.T) {
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	assert.Equal(t, 2*time.Second, client.GetOptions().Timeout)
+	assert.Equal(t, int(3), client.GetOptions().Retry.Count)
+	assert.Equal(t, 100*time.Millisecond, client.GetOptions().Retry.WaitTime)
+	assert.Equal(t, 2*time.Second, client.GetOptions().Retry.MaxWaitTime)
+}
+
 func TestNewHTTPClientV3_ValidAddress(t *testing.T) {
 	client, err := NewHTTPClientV3(&Options{
 		Address: "localhost:5000",

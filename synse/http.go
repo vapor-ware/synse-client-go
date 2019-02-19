@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-	"time"
 
 	"github.com/vapor-ware/synse-client-go/synse/scheme"
 
+	"github.com/creasty/defaults"
 	"github.com/pkg/errors"
 	"gopkg.in/resty.v1"
 )
@@ -46,29 +46,18 @@ func createHTTPClient(opt *Options) (*resty.Client, error) {
 		return nil, errors.New("no address is specified")
 	}
 
-	if opt.Timeout == 0 {
-		// FIXME - find a better way to use default options here.
-		opt.Timeout = 2 * time.Second
+	err := defaults.Set(opt)
+	if err != nil {
+		return nil, errors.New("failed to set default configs")
 	}
 
-	// FIXME - better way to handle this?
+	// Create a new resty client with configured options.
 	client := resty.New()
-	client = client.SetTimeout(opt.Timeout)
-
-	// Only use retry strategy if its options are set.
-	if opt.Retry.Count != 0 {
-		client = client.SetRetryCount(opt.Retry.Count)
-	}
-
-	if opt.Retry.WaitTime != 0 {
-		client = client.SetRetryWaitTime(opt.Retry.WaitTime)
-	}
-
-	if opt.Retry.MaxWaitTime != 0 {
-		client = client.SetRetryMaxWaitTime(opt.Retry.MaxWaitTime)
-	}
-
-	return client, nil
+	return client.
+		SetTimeout(opt.Timeout).
+		SetRetryCount(opt.Retry.Count).
+		SetRetryWaitTime(opt.Retry.WaitTime).
+		SetRetryMaxWaitTime(opt.Retry.MaxWaitTime), nil
 }
 
 // Status returns the status info.
@@ -257,6 +246,11 @@ func (c *httpClient) Transaction(id string) (*scheme.Transaction, error) {
 	}
 
 	return out, nil
+}
+
+// GetOptions returns the current config options of the client.
+func (c *httpClient) GetOptions() *Options {
+	return c.options
 }
 
 // getVersionedQueryParams performs a GET request using query parameters
