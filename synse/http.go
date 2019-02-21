@@ -3,6 +3,7 @@ package synse
 // http.go implements a http client.
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"reflect"
@@ -17,22 +18,46 @@ import (
 
 // httpClient implements a http client.
 type httpClient struct {
-	options    *Options
-	client     *resty.Client
+	// options is the global config options of the client.
+	options *Options
+
+	// client holds the resty.Client.
+	client *resty.Client
+
+	// apiVersion is the current api version of Synse Server that we are
+	// communicating with.
 	apiVersion string
+
+	// scheme could either be `https` or `http`, depends on the TLS/SSL
+	// configuration.
+	scheme string
 }
 
 // NewHTTPClientV3 returns a new instance of a http client with API v3.
 func NewHTTPClientV3(options *Options) (Client, error) {
+	scheme := "http"
 	client, err := createHTTPClient(options)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create a http client")
+	}
+
+	// If TLS/SSL options is set, change the scheme to `https` and register the
+	// certificates.
+	if options.TLS.CertFile != "" && options.TLS.KeyFile != "" {
+		scheme = "https"
+		cert, err := tls.LoadX509KeyPair(options.TLS.CertFile, options.TLS.KeyFile)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to set client certificates")
+		}
+
+		client.SetCertificates(cert)
 	}
 
 	return &httpClient{
 		options:    options,
 		client:     client,
 		apiVersion: "v3",
+		scheme:     scheme,
 	}, nil
 }
 
@@ -294,12 +319,12 @@ func (c *httpClient) postVersioned(uri string, body interface{}, okScheme interf
 
 // setUnversioned returns a client that uses unversioned host URL.
 func (c *httpClient) setUnversioned() *resty.Client {
-	return c.client.SetHostURL(fmt.Sprintf("http://%s/", c.options.Address))
+	return c.client.SetHostURL(fmt.Sprintf("%s://%s/", c.scheme, c.options.Address))
 }
 
 // setVersioned returns a client that uses versioned host URL.
 func (c *httpClient) setVersioned() (*resty.Client, error) {
-	return c.client.SetHostURL(fmt.Sprintf("http://%s/%s/", c.options.Address, c.apiVersion)), nil
+	return c.client.SetHostURL(fmt.Sprintf("%s://%s/%s/", c.scheme, c.options.Address, c.apiVersion)), nil
 }
 
 // check validates returned response from the Synse Server.

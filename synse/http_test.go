@@ -31,10 +31,13 @@ func TestNewHTTPClientV3_defaults(t *testing.T) {
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
 
+	assert.Equal(t, "localhost:5000", client.GetOptions().Address)
 	assert.Equal(t, 2*time.Second, client.GetOptions().Timeout)
 	assert.Equal(t, int(3), client.GetOptions().Retry.Count)
 	assert.Equal(t, 100*time.Millisecond, client.GetOptions().Retry.WaitTime)
 	assert.Equal(t, 2*time.Second, client.GetOptions().Retry.MaxWaitTime)
+	assert.Empty(t, client.GetOptions().TLS.CertFile)
+	assert.Empty(t, client.GetOptions().TLS.KeyFile)
 }
 
 func TestNewHTTPClientV3_ValidAddress(t *testing.T) {
