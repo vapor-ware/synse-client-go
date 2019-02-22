@@ -26,7 +26,7 @@ type httpClient struct {
 	// communicating with.
 	apiVersion string
 
-	// scheme could either be `https` or `http`, depends on the TLS/SSL
+	// scheme could either be `http` or `https`, depends on the TLS
 	// configuration.
 	scheme string
 }
@@ -39,16 +39,22 @@ func NewHTTPClientV3(options *Options) (Client, error) {
 		return nil, errors.Wrap(err, "failed to create a http client")
 	}
 
-	// If TLS/SSL options is set, change the scheme to `https` and register the
-	// certificates.
+	// FIXME - clean this up once it works!
+	// Check if TLS options are set.
 	if options.TLS.CertFile != "" && options.TLS.KeyFile != "" {
+		// Change the scheme to `https`
 		scheme = "https"
+
+		// Register the certificates.
 		cert, err := tls.LoadX509KeyPair(options.TLS.CertFile, options.TLS.KeyFile)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to set client certificates")
 		}
 
 		client.SetCertificates(cert)
+
+		// Set the security check.
+		client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: options.TLS.SkipVerify})
 	}
 
 	return &httpClient{

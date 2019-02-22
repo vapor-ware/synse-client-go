@@ -43,4 +43,7 @@ type TLSOptions struct {
 	// use when communicating with Synse Server.
 	CertFile string `default:"-"`
 	KeyFile  string `default:"-"`
+
+	// SkipVerify controls whether the client can skip certificate checks.
+	SkipVerify bool `default:"false"`
 }

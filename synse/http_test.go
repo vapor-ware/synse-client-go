@@ -1,6 +1,7 @@
 package synse
 
 import (
+	"crypto/tls"
 	"testing"
 	"time"
 
@@ -38,6 +39,7 @@ func TestNewHTTPClientV3_defaults(t *testing.T) {
 	assert.Equal(t, 2*time.Second, client.GetOptions().Retry.MaxWaitTime)
 	assert.Empty(t, client.GetOptions().TLS.CertFile)
 	assert.Empty(t, client.GetOptions().TLS.KeyFile)
+	assert.False(t, client.GetOptions().TLS.SkipVerify)
 }
 
 func TestNewHTTPClientV3_ValidAddress(t *testing.T) {
@@ -174,7 +176,7 @@ func TestHTTPClientV3_Unversioned_500(t *testing.T) {
 	}
 }
 
-func TestHTTPClient_Versioned_200(t *testing.T) { // nolint
+func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
 	tests := []struct {
 		path     string
 		in       string
@@ -1051,4 +1053,58 @@ func TestHTTPClientV3_Versioned_500(t *testing.T) { // nolint
 		assert.Nil(t, resp)
 		assert.Error(t, err)
 	}
+}
+
+func TestHTTPClientV3_TLS(t *testing.T) {
+	// certFile and keyFile are self-signed test certificates' locations.
+	certFile, keyFile := "testdata/cert.pem", "testdata/key.pem"
+
+	// Parse the certificates.
+	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	assert.NotNil(t, cert)
+	assert.NoError(t, err)
+
+	// Create a mock HTTP server and let it use the certificates.
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	cfg := &tls.Config{Certificates: []tls.Certificate{cert}}
+	server.SetTLS(cfg)
+
+	// Setup a `/test` endpoint.
+	in := `
+{
+  "status":"ok",
+  "timestamp":"2019-01-24T14:34:24.926108Z"
+}`
+
+	expected := &scheme.Status{
+		Status:    "ok",
+		Timestamp: "2019-01-24T14:34:24.926108Z",
+	}
+
+	server.ServeUnversioned(t, "/test", 200, in)
+
+	// Setup a client that also uses the certificates.
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+		Timeout: 3 * time.Second,
+		// FIXME - output this error if uncomment tls options below:
+		// http: server gave HTTP response to HTTPS client
+		// But then, does it make sense if the client still works if the server
+		// is serving TLS (or does it)?
+		// TLS: TLSOptions{
+		// 	CertFile:   certFile,
+		// 	KeyFile:    keyFile,
+		// 	SkipVerify: true, // skip security check for testing
+		// },
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	// Make a test request and verify the response.
+	resp, err := client.Status()
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
 }

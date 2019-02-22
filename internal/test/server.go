@@ -16,8 +16,8 @@ type HTTPServer struct {
 	// URL is the base URL form http://ipaddr:port with no trailing slash.
 	URL string
 
-	// TLS holds the TLS/SSL configuration.
-	TLS *tls.Config
+	// tls holds the TLS configuration.
+	tls *tls.Config
 
 	// server is the mock http server.
 	server *httptest.Server
@@ -53,6 +53,11 @@ func (s HTTPServer) ServeVersioned(t *testing.T, uri string, statusCode int, res
 	// FIXME - need a better way to handle this. This might relate to #6 with
 	// the use of https://golang.org/pkg/net/url/.
 	serve(s.mux, t, fmt.Sprintf("/%v%v", s.version, uri), statusCode, response)
+}
+
+// SetTLS starts TLS using the configured options.
+func (s HTTPServer) SetTLS(cfg *tls.Config) {
+	s.tls = cfg
 }
 
 // Close closes the unversioned server connection.
