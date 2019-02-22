@@ -20,7 +20,7 @@ type UnversionedHTTPServer struct {
 // VersionedHTTPServer describes a versioned mock http server.
 type VersionedHTTPServer struct {
 	UnversionedHTTPServer
-	versionURI string
+	version string
 }
 
 // NewUnversionedHTTPServer returns an instance of an unversioned mock http server.
@@ -46,7 +46,7 @@ func NewVersionedHTTPServer() VersionedHTTPServer {
 
 	return VersionedHTTPServer{
 		UnversionedHTTPServer: s,
-		versionURI:            "/v3",
+		version:               "v3",
 	}
 }
 
@@ -57,7 +57,7 @@ func (s UnversionedHTTPServer) Serve(t *testing.T, uri string, statusCode int, r
 
 // Serve serves a versioned endpoint.
 func (s VersionedHTTPServer) Serve(t *testing.T, uri string, statusCode int, response interface{}) {
-	serve(s.mux, t, fmt.Sprintf("%v%v", s.versionURI, uri), statusCode, response)
+	serve(s.mux, t, fmt.Sprintf("/%v%v", s.version, uri), statusCode, response)
 }
 
 // Close closes the unversioned server connection.
