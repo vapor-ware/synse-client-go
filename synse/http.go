@@ -33,7 +33,7 @@ type httpClient struct {
 	scheme string
 }
 
-// NewHTTPClientV3 returns a new instance of a http client with API v3.
+// NewHTTPClientV3 returns a new instance of a http client for v3 API.
 func NewHTTPClientV3(options *Options) (Client, error) {
 	scheme := "http"
 	client, err := createHTTPClient(options)

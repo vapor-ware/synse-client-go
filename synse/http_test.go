@@ -102,7 +102,7 @@ func TestHTTPClientV3_Unversioned_200(t *testing.T) {
 		},
 	}
 
-	server := test.NewUnversionedHTTPServer()
+	server := test.NewHTTPServerV3()
 	defer server.Close()
 
 	client, err := NewHTTPClientV3(&Options{
@@ -112,7 +112,7 @@ func TestHTTPClientV3_Unversioned_200(t *testing.T) {
 	assert.NoError(t, err)
 
 	for _, tt := range tests {
-		server.Serve(t, tt.path, 200, tt.in)
+		server.ServeUnversioned(t, tt.path, 200, tt.in)
 
 		var (
 			resp interface{}
@@ -138,7 +138,7 @@ func TestHTTPClientV3_Unversioned_500(t *testing.T) {
 		{"/version"},
 	}
 
-	server := test.NewUnversionedHTTPServer()
+	server := test.NewHTTPServerV3()
 	defer server.Close()
 
 	client, err := NewHTTPClientV3(&Options{
@@ -157,7 +157,7 @@ func TestHTTPClientV3_Unversioned_500(t *testing.T) {
 }
 `
 	for _, tt := range tests {
-		server.Serve(t, tt.path, 500, in)
+		server.ServeUnversioned(t, tt.path, 500, in)
 
 		var (
 			resp interface{}
@@ -907,7 +907,7 @@ func TestHTTPClient_Versioned_200(t *testing.T) { // nolint
 		},
 	}
 
-	server := test.NewVersionedHTTPServer()
+	server := test.NewHTTPServerV3()
 	defer server.Close()
 
 	client, err := NewHTTPClientV3(&Options{
@@ -917,7 +917,7 @@ func TestHTTPClient_Versioned_200(t *testing.T) { // nolint
 	assert.NoError(t, err)
 
 	for _, tt := range tests {
-		server.Serve(t, tt.path, 200, tt.in)
+		server.ServeVersioned(t, tt.path, 200, tt.in)
 
 		var (
 			resp interface{}
@@ -986,7 +986,7 @@ func TestHTTPClientV3_Versioned_500(t *testing.T) { // nolint
 		{"/transaction/56a32eba-1aa6-4868-84ee-fe01af8b2e6b"},
 	}
 
-	server := test.NewVersionedHTTPServer()
+	server := test.NewHTTPServerV3()
 	defer server.Close()
 
 	client, err := NewHTTPClientV3(&Options{
@@ -1005,7 +1005,7 @@ func TestHTTPClientV3_Versioned_500(t *testing.T) { // nolint
 }
 `
 	for _, tt := range tests {
-		server.Serve(t, tt.path, 500, in)
+		server.ServeVersioned(t, tt.path, 500, in)
 
 		var (
 			resp interface{}

@@ -3,6 +3,7 @@ package test
 // server.go provides testing functionalities against a mock http server.
 
 import (
+	"crypto/tls"
 	"fmt"
 	"io"
 	"net/http"
@@ -10,63 +11,52 @@ import (
 	"testing"
 )
 
-// UnversionedHTTPServer describes an unversioned mock http server.
-type UnversionedHTTPServer struct {
-	URL    string
-	server *httptest.Server
-	mux    *http.ServeMux
-}
+// HTTPServer describes a mock http server.
+type HTTPServer struct {
+	// URL is the base URL form http://ipaddr:port with no trailing slash.
+	URL string
 
-// VersionedHTTPServer describes a versioned mock http server.
-type VersionedHTTPServer struct {
-	UnversionedHTTPServer
+	// TLS holds the TLS/SSL configuration.
+	TLS *tls.Config
+
+	// server is the mock http server.
+	server *httptest.Server
+
+	// mux is the http request multiplexer.
+	mux *http.ServeMux
+
+	// version is the current api version of Synse Server that we are
+	// communicating with.
 	version string
 }
 
-// NewUnversionedHTTPServer returns an instance of an unversioned mock http server.
-func NewUnversionedHTTPServer() UnversionedHTTPServer {
+// NewHTTPServerV3 returns an instance of a mock http server for v3 API.
+func NewHTTPServerV3() HTTPServer {
 	m := http.NewServeMux()
 	s := httptest.NewServer(m)
-	return UnversionedHTTPServer{
-		URL:    s.URL[7:],
-		server: s,
-		mux:    m,
+
+	return HTTPServer{
+		URL:     s.URL[7:],
+		server:  s,
+		mux:     m,
+		version: "v3",
 	}
 }
 
-// NewVersionedHTTPServer returns an instance of a versioned mock http server.
-func NewVersionedHTTPServer() VersionedHTTPServer {
-	s := NewUnversionedHTTPServer()
-	s.mux.HandleFunc(
-		"/version",
-		func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			fmt.Fprint(w, `{"version": "3.x.x", "api_version": "v3"}`) // nolint
-		})
-
-	return VersionedHTTPServer{
-		UnversionedHTTPServer: s,
-		version:               "v3",
-	}
-}
-
-// Serve serves an unversioned endpoint.
-func (s UnversionedHTTPServer) Serve(t *testing.T, uri string, statusCode int, response interface{}) {
+// ServeUnversioned serves an unversioned endpoint.
+func (s HTTPServer) ServeUnversioned(t *testing.T, uri string, statusCode int, response interface{}) {
 	serve(s.mux, t, uri, statusCode, response)
 }
 
-// Serve serves a versioned endpoint.
-func (s VersionedHTTPServer) Serve(t *testing.T, uri string, statusCode int, response interface{}) {
+// ServeVersioned serves a versioned endpoint.
+func (s HTTPServer) ServeVersioned(t *testing.T, uri string, statusCode int, response interface{}) {
+	// FIXME - need a better way to handle this. This might relate to #6 with
+	// the use of https://golang.org/pkg/net/url/.
 	serve(s.mux, t, fmt.Sprintf("/%v%v", s.version, uri), statusCode, response)
 }
 
 // Close closes the unversioned server connection.
-func (s UnversionedHTTPServer) Close() {
-	s.server.Close()
-}
-
-// Close closes the versioned server connection.
-func (s VersionedHTTPServer) Close() {
+func (s HTTPServer) Close() {
 	s.server.Close()
 }
 
