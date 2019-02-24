@@ -4,6 +4,7 @@ package test
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"io"
 	"net/http"
@@ -11,9 +12,9 @@ import (
 	"testing"
 )
 
-// HTTPServer describes a mock http server.
-type HTTPServer struct {
-	// URL is the base URL form http://ipaddr:port with no trailing slash.
+// Server describes a mock http/https server.
+type Server struct {
+	// URL has the `host:port` format.
 	URL string
 
 	// tls holds the TLS configuration.
@@ -30,12 +31,12 @@ type HTTPServer struct {
 	version string
 }
 
-// NewHTTPServerV3 returns an instance of a mock http server for v3 API.
-func NewHTTPServerV3() HTTPServer {
+// NewServerV3 returns an instance of a mock http server for v3 API.
+func NewServerV3() Server {
 	m := http.NewServeMux()
 	s := httptest.NewServer(m)
 
-	return HTTPServer{
+	return Server{
 		URL:     s.URL[7:],
 		server:  s,
 		mux:     m,
@@ -43,25 +44,43 @@ func NewHTTPServerV3() HTTPServer {
 	}
 }
 
+// NewTLSServerV3 returns an instance of a mock https server for v3 API.
+func NewTLSServerV3() Server {
+	m := http.NewServeMux()
+	s := httptest.NewTLSServer(m)
+
+	return Server{
+		URL:     s.URL[8:],
+		server:  s,
+		mux:     m,
+		version: "v3",
+	}
+}
+
 // ServeUnversioned serves an unversioned endpoint.
-func (s HTTPServer) ServeUnversioned(t *testing.T, uri string, statusCode int, response interface{}) {
+func (s Server) ServeUnversioned(t *testing.T, uri string, statusCode int, response interface{}) {
 	serve(s.mux, t, uri, statusCode, response)
 }
 
 // ServeVersioned serves a versioned endpoint.
-func (s HTTPServer) ServeVersioned(t *testing.T, uri string, statusCode int, response interface{}) {
+func (s Server) ServeVersioned(t *testing.T, uri string, statusCode int, response interface{}) {
 	// FIXME - need a better way to handle this. This might relate to #6 with
 	// the use of https://golang.org/pkg/net/url/.
 	serve(s.mux, t, fmt.Sprintf("/%v%v", s.version, uri), statusCode, response)
 }
 
 // SetTLS starts TLS using the configured options.
-func (s HTTPServer) SetTLS(cfg *tls.Config) {
+func (s Server) SetTLS(cfg *tls.Config) {
 	s.tls = cfg
 }
 
+// GetCertificates returns the certificate used by the server.
+func (s Server) GetCertificates() *x509.Certificate {
+	return s.server.Certificate()
+}
+
 // Close closes the unversioned server connection.
-func (s HTTPServer) Close() {
+func (s Server) Close() {
 	s.server.Close()
 }
 

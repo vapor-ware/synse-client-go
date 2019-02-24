@@ -104,7 +104,7 @@ func TestHTTPClientV3_Unversioned_200(t *testing.T) {
 		},
 	}
 
-	server := test.NewHTTPServerV3()
+	server := test.NewServerV3()
 	defer server.Close()
 
 	client, err := NewHTTPClientV3(&Options{
@@ -140,7 +140,7 @@ func TestHTTPClientV3_Unversioned_500(t *testing.T) {
 		{"/version"},
 	}
 
-	server := test.NewHTTPServerV3()
+	server := test.NewServerV3()
 	defer server.Close()
 
 	client, err := NewHTTPClientV3(&Options{
@@ -909,7 +909,7 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
 		},
 	}
 
-	server := test.NewHTTPServerV3()
+	server := test.NewServerV3()
 	defer server.Close()
 
 	client, err := NewHTTPClientV3(&Options{
@@ -988,7 +988,7 @@ func TestHTTPClientV3_Versioned_500(t *testing.T) { // nolint
 		{"/transaction/56a32eba-1aa6-4868-84ee-fe01af8b2e6b"},
 	}
 
-	server := test.NewHTTPServerV3()
+	server := test.NewServerV3()
 	defer server.Close()
 
 	client, err := NewHTTPClientV3(&Options{
@@ -1065,11 +1065,12 @@ func TestHTTPClientV3_TLS(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Create a mock HTTP server and let it use the certificates.
-	server := test.NewHTTPServerV3()
+	server := test.NewTLSServerV3()
 	defer server.Close()
 
 	cfg := &tls.Config{Certificates: []tls.Certificate{cert}}
 	server.SetTLS(cfg)
+	assert.NotNil(t, server.GetCertificates())
 
 	// Setup a `/test` endpoint.
 	in := `
@@ -1089,15 +1090,11 @@ func TestHTTPClientV3_TLS(t *testing.T) {
 	client, err := NewHTTPClientV3(&Options{
 		Address: server.URL,
 		Timeout: 3 * time.Second,
-		// FIXME - output this error if uncomment tls options below:
-		// http: server gave HTTP response to HTTPS client
-		// But then, does it make sense if the client still works if the server
-		// is serving TLS (or does it)?
-		// TLS: TLSOptions{
-		// 	CertFile:   certFile,
-		// 	KeyFile:    keyFile,
-		// 	SkipVerify: true, // skip security check for testing
-		// },
+		TLS: TLSOptions{
+			CertFile:   certFile,
+			KeyFile:    keyFile,
+			SkipVerify: true, // skip known authority check
+		},
 	})
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
