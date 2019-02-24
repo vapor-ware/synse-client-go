@@ -134,7 +134,7 @@ func (c *httpClient) Plugins() (*[]scheme.PluginMeta, error) {
 // Plugin returns data from a specific plugin.
 func (c *httpClient) Plugin(id string) (*scheme.Plugin, error) {
 	out := new(scheme.Plugin)
-	if err := c.getVersioned(makeURI(pluginURI, id), out); err != nil {
+	if err := c.getVersioned(makePath(pluginURI, id), out); err != nil {
 		return nil, err
 	}
 
@@ -178,7 +178,7 @@ func (c *httpClient) Tags(opts scheme.TagsOptions) (*[]string, error) {
 // device.
 func (c *httpClient) Info(id string) (*scheme.Info, error) {
 	out := new(scheme.Info)
-	if err := c.getVersioned(makeURI(infoURI, id), out); err != nil {
+	if err := c.getVersioned(makePath(infoURI, id), out); err != nil {
 		return nil, err
 	}
 
@@ -200,7 +200,7 @@ func (c *httpClient) Read(opts scheme.ReadOptions) (*[]scheme.Read, error) {
 // where the label matches the device id tag specified in ReadOptions.
 func (c *httpClient) ReadDevice(id string, opts scheme.ReadOptions) (*[]scheme.Read, error) {
 	out := new([]scheme.Read)
-	if err := c.getVersionedQueryParams(makeURI(readURI, id), opts, out); err != nil {
+	if err := c.getVersionedQueryParams(makePath(readURI, id), opts, out); err != nil {
 		return nil, err
 	}
 
@@ -212,12 +212,7 @@ func (c *httpClient) ReadCache(opts scheme.ReadCacheOptions) (*[]scheme.Read, er
 	var out []scheme.Read
 	errScheme := new(scheme.Error)
 
-	client, err := c.setVersioned()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to set a versioned host while performing a GET request")
-	}
-
-	resp, err := client.R().SetDoNotParseResponse(true).SetQueryParams(structToMapString(opts)).SetError(errScheme).Get(readcacheURI)
+	resp, err := c.setVersioned().R().SetDoNotParseResponse(true).SetQueryParams(structToMapString(opts)).SetError(errScheme).Get(readcacheURI)
 	if err = check(err, errScheme); err != nil {
 		return nil, err
 	}
@@ -239,7 +234,7 @@ func (c *httpClient) ReadCache(opts scheme.ReadCacheOptions) (*[]scheme.Read, er
 // WriteAsync writes data to a device, in an asynchronous manner.
 func (c *httpClient) WriteAsync(id string, opts []scheme.WriteData) (*[]scheme.Write, error) {
 	out := new([]scheme.Write)
-	if err := c.postVersioned(makeURI(writeURI, id), opts, out); err != nil {
+	if err := c.postVersioned(makePath(writeURI, id), opts, out); err != nil {
 		return nil, err
 	}
 
@@ -249,7 +244,7 @@ func (c *httpClient) WriteAsync(id string, opts []scheme.WriteData) (*[]scheme.W
 // WriteSync writes data to a device, waiting for the write to complete.
 func (c *httpClient) WriteSync(id string, opts []scheme.WriteData) (*[]scheme.Transaction, error) {
 	out := new([]scheme.Transaction)
-	if err := c.postVersioned(makeURI(writeWaitURI, id), opts, out); err != nil {
+	if err := c.postVersioned(makePath(writeWaitURI, id), opts, out); err != nil {
 		return nil, err
 	}
 
@@ -269,7 +264,7 @@ func (c *httpClient) Transactions() (*[]string, error) {
 // Transaction returns the state and status of a write transaction.
 func (c *httpClient) Transaction(id string) (*scheme.Transaction, error) {
 	out := new(scheme.Transaction)
-	if err := c.getVersioned(makeURI(transactionURI, id), out); err != nil {
+	if err := c.getVersioned(makePath(transactionURI, id), out); err != nil {
 		return nil, err
 	}
 
@@ -285,12 +280,7 @@ func (c *httpClient) GetOptions() *Options {
 // against the Synse Server versioned API.
 func (c *httpClient) getVersionedQueryParams(uri string, params interface{}, okScheme interface{}) error {
 	errScheme := new(scheme.Error)
-	client, err := c.setVersioned()
-	if err != nil {
-		return errors.Wrap(err, "failed to set a versioned host while performing a GET request")
-	}
-
-	_, err = client.R().SetQueryParams(structToMapString(params)).SetResult(okScheme).SetError(errScheme).Get(uri)
+	_, err := c.setVersioned().R().SetQueryParams(structToMapString(params)).SetResult(okScheme).SetError(errScheme).Get(uri)
 	return check(err, errScheme)
 
 }
@@ -311,12 +301,7 @@ func (c *httpClient) getUnversioned(uri string, okScheme interface{}) error {
 // postVersioned performs a POST request against the Synse Server versioned API.
 func (c *httpClient) postVersioned(uri string, body interface{}, okScheme interface{}) error {
 	errScheme := new(scheme.Error)
-	client, err := c.setVersioned()
-	if err != nil {
-		return errors.Wrap(err, "failed to set a versioned host while performing a POST request")
-	}
-
-	_, err = client.R().SetBody(body).SetResult(okScheme).SetError(errScheme).Post(uri)
+	_, err := c.setVersioned().R().SetBody(body).SetResult(okScheme).SetError(errScheme).Post(uri)
 	return check(err, errScheme)
 }
 
@@ -326,8 +311,8 @@ func (c *httpClient) setUnversioned() *resty.Client {
 }
 
 // setVersioned returns a client that uses versioned host URL.
-func (c *httpClient) setVersioned() (*resty.Client, error) {
-	return c.client.SetHostURL(fmt.Sprintf("%s://%s/%s/", c.scheme, c.options.Address, c.apiVersion)), nil
+func (c *httpClient) setVersioned() *resty.Client {
+	return c.client.SetHostURL(fmt.Sprintf("%s://%s/%s/", c.scheme, c.options.Address, c.apiVersion))
 }
 
 // check validates returned response from the Synse Server.

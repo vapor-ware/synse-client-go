@@ -4,13 +4,25 @@ package synse
 
 import (
 	"fmt"
+	"net/url"
 	"reflect"
 	"strings"
 )
 
-// makeURI joins the given components into a string, delimited with '/' which
+// buildURL builds up a complete URL from given scheme, host and path.
+func buildURL(scheme string, host string, path ...string) string {
+	u := &url.URL{
+		Scheme: scheme,
+		Host:   host,
+		Path:   strings.Join(path, "/"),
+	}
+
+	return u.String()
+}
+
+// makePath joins the given components into a string, delimited with '/' which
 // can then be used as the URI for API requests.
-func makeURI(components ...string) string {
+func makePath(components ...string) string {
 	return strings.Join(components, "/")
 }
 

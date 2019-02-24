@@ -6,7 +6,44 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMakeURI(t *testing.T) {
+func TestBuildURL(t *testing.T) {
+	tests := []struct {
+		in       map[string]interface{}
+		expected string
+	}{
+		{
+			in: map[string]interface{}{
+				"scheme": "http",
+				"host":   "localhost:5000",
+				"path":   []string{"test"},
+			},
+			expected: "http://localhost:5000/test",
+		},
+		{
+			in: map[string]interface{}{
+				"scheme": "http",
+				"host":   "localhost:5000",
+				"path":   []string{"v3", "test"},
+			},
+			expected: "http://localhost:5000/v3/test",
+		},
+		{
+			in: map[string]interface{}{
+				"scheme": "https",
+				"host":   "localhost:5000",
+				"path":   []string{"v3", "test"},
+			},
+			expected: "https://localhost:5000/v3/test",
+		},
+	}
+
+	for _, tt := range tests {
+		out := buildURL(tt.in["scheme"].(string), tt.in["host"].(string), tt.in["path"].([]string)...)
+		assert.Equal(t, tt.expected, out)
+	}
+}
+
+func TestMakePath(t *testing.T) {
 	tests := []struct {
 		in       []string
 		expected string
@@ -34,7 +71,7 @@ func TestMakeURI(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		out := makeURI(tt.in...)
+		out := makePath(tt.in...)
 		assert.Equal(t, tt.expected, out)
 	}
 }
