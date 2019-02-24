@@ -40,7 +40,6 @@ func NewHTTPClientV3(options *Options) (Client, error) {
 	}
 
 	// Check if TLS options are set.
-	// FIXME - clean this up once it works!
 	if options.TLS.CertFile != "" && options.TLS.KeyFile != "" {
 		// Change the scheme to `https`
 		scheme = "https"
@@ -54,8 +53,6 @@ func NewHTTPClientV3(options *Options) (Client, error) {
 		client.SetCertificates(cert)
 
 		// Set the security check.
-		// FIXME - there may be some bad practices while setting tls config
-		// here that i need to disable linting temporarily.
 		client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: options.TLS.SkipVerify}) // nolint
 	}
 
