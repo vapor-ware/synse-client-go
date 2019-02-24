@@ -275,22 +275,22 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
 		{
 			"/plugin",
 			`
-		[
-		{
-		"description": "a plugin with emulated devices and data",
-		"id": "12835beffd3e6c603aa4dd92127707b5",
-		"name": "emulator plugin",
-		"maintainer": "vapor io",
-		"active": true
-		},
-		{
-		"description": "a custom third party plugin",
-		"id": "12835beffd3e6c603aa4dd92127707b6",
-		"name": "custom-plugin",
-		"maintainer": "third-party",
-		"active": true
-		}
-		]`,
+[
+  {
+    "description": "a plugin with emulated devices and data",
+    "id": "12835beffd3e6c603aa4dd92127707b5",
+    "name": "emulator plugin",
+    "maintainer": "vapor io",
+    "active": true
+  },
+  {
+    "description": "a custom third party plugin",
+    "id": "12835beffd3e6c603aa4dd92127707b6",
+    "name": "custom-plugin",
+    "maintainer": "third-party",
+    "active": true
+  }
+]`,
 			&[]scheme.PluginMeta{
 				scheme.PluginMeta{
 					Description: "a plugin with emulated devices and data",
@@ -1064,7 +1064,7 @@ func TestHTTPClientV3_TLS(t *testing.T) {
 	assert.NotNil(t, cert)
 	assert.NoError(t, err)
 
-	// Create a mock HTTP server and let it use the certificates.
+	// Create a mock https server and let it use the certificates.
 	server := test.NewTLSServerV3()
 	defer server.Close()
 
@@ -1072,19 +1072,18 @@ func TestHTTPClientV3_TLS(t *testing.T) {
 	server.SetTLS(cfg)
 	assert.NotNil(t, server.GetCertificates())
 
-	// Setup a `/test` endpoint.
-	in := `
+	// Only need to setup one arbitrary unversioned endpoint and another
+	// versioned one to make requests against since we already have tests for
+	// all the endpoints and the works there are pretty much same.
+	server.ServeUnversioned(t, "/test", 200, `
 {
   "status":"ok",
   "timestamp":"2019-01-24T14:34:24.926108Z"
-}`
-
+}`)
 	expected := &scheme.Status{
 		Status:    "ok",
 		Timestamp: "2019-01-24T14:34:24.926108Z",
 	}
-
-	server.ServeUnversioned(t, "/test", 200, in)
 
 	// Setup a client that also uses the certificates.
 	client, err := NewHTTPClientV3(&Options{
@@ -1093,7 +1092,7 @@ func TestHTTPClientV3_TLS(t *testing.T) {
 		TLS: TLSOptions{
 			CertFile:   certFile,
 			KeyFile:    keyFile,
-			SkipVerify: true, // skip known authority check
+			SkipVerify: true, // skip CA known authority check
 		},
 	})
 	assert.NotNil(t, client)
@@ -1104,4 +1103,47 @@ func TestHTTPClientV3_TLS(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_TLS_UnknownCA(t *testing.T) {
+	// certFile and keyFile are self-signed test certificates' locations.
+	certFile, keyFile := "testdata/cert.pem", "testdata/key.pem"
+
+	// Parse the certificates.
+	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	assert.NotNil(t, cert)
+	assert.NoError(t, err)
+
+	// Create a mock https server and let it use the certificates.
+	server := test.NewTLSServerV3()
+	defer server.Close()
+
+	cfg := &tls.Config{Certificates: []tls.Certificate{cert}}
+	server.SetTLS(cfg)
+	assert.NotNil(t, server.GetCertificates())
+
+	// Setup a `/test` endpoint.
+	server.ServeUnversioned(t, "/test", 200, `
+{
+  "status":"ok",
+  "timestamp":"2019-01-24T14:34:24.926108Z"
+}`)
+
+	// Setup a client that also uses the certificates. However, this time we
+	// don't skip the CA known security check.
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+		Timeout: 3 * time.Second,
+		TLS: TLSOptions{
+			CertFile: certFile,
+			KeyFile:  keyFile,
+		},
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	// Make a test request and verify the response. Expect the client to fail.
+	resp, err := client.Status()
+	assert.Nil(t, resp)
+	assert.Error(t, err)
 }
