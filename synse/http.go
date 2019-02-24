@@ -5,7 +5,6 @@ package synse
 import (
 	"crypto/tls"
 	"encoding/json"
-	"fmt"
 
 	"github.com/vapor-ware/synse-client-go/synse/scheme"
 
@@ -307,12 +306,14 @@ func (c *httpClient) postVersioned(uri string, body interface{}, okScheme interf
 
 // setUnversioned returns a client that uses unversioned host URL.
 func (c *httpClient) setUnversioned() *resty.Client {
-	return c.client.SetHostURL(fmt.Sprintf("%s://%s/", c.scheme, c.options.Address))
+	// return c.client.SetHostURL(fmt.Sprintf("%s://%s/", c.scheme, c.options.Address))
+	return c.client.SetHostURL(buildURL(c.scheme, c.options.Address))
 }
 
 // setVersioned returns a client that uses versioned host URL.
 func (c *httpClient) setVersioned() *resty.Client {
-	return c.client.SetHostURL(fmt.Sprintf("%s://%s/%s/", c.scheme, c.options.Address, c.apiVersion))
+	// return c.client.SetHostURL(fmt.Sprintf("%s://%s/%s/", c.scheme, c.options.Address, c.apiVersion))
+	return c.client.SetHostURL(buildURL(c.scheme, c.options.Address, c.apiVersion))
 }
 
 // check validates returned response from the Synse Server.

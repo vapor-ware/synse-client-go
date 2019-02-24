@@ -64,8 +64,6 @@ func (s Server) ServeUnversioned(t *testing.T, uri string, statusCode int, respo
 
 // ServeVersioned serves a versioned endpoint.
 func (s Server) ServeVersioned(t *testing.T, uri string, statusCode int, response interface{}) {
-	// FIXME - need a better way to handle this. This might relate to #6 with
-	// the use of https://golang.org/pkg/net/url/.
 	serve(s.mux, t, fmt.Sprintf("/%v%v", s.version, uri), statusCode, response)
 }
 

@@ -15,6 +15,14 @@ func TestBuildURL(t *testing.T) {
 			in: map[string]interface{}{
 				"scheme": "http",
 				"host":   "localhost:5000",
+				"path":   []string{""},
+			},
+			expected: "http://localhost:5000",
+		},
+		{
+			in: map[string]interface{}{
+				"scheme": "http",
+				"host":   "localhost:5000",
 				"path":   []string{"test"},
 			},
 			expected: "http://localhost:5000/test",
@@ -55,6 +63,14 @@ func TestMakePath(t *testing.T) {
 		{
 			in:       []string{"foo"},
 			expected: "foo",
+		},
+		{
+			in:       []string{"/foo"},
+			expected: "/foo",
+		},
+		{
+			in:       []string{"/foo", "bar"},
+			expected: "/foo/bar",
 		},
 		{
 			in:       []string{"foo", "bar"},
