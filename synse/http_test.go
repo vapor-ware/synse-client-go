@@ -1072,19 +1072,6 @@ func TestHTTPClientV3_TLS(t *testing.T) {
 	server.SetTLS(cfg)
 	assert.NotNil(t, server.GetCertificates())
 
-	// Only need to setup one arbitrary unversioned endpoint and another
-	// versioned one to make requests against since we already have tests for
-	// all the endpoints and the works there are pretty much same.
-	server.ServeUnversioned(t, "/test", 200, `
-{
-  "status":"ok",
-  "timestamp":"2019-01-24T14:34:24.926108Z"
-}`)
-	expected := &scheme.Status{
-		Status:    "ok",
-		Timestamp: "2019-01-24T14:34:24.926108Z",
-	}
-
 	// Setup a client that also uses the certificates.
 	client, err := NewHTTPClientV3(&Options{
 		Address: server.URL,
@@ -1098,11 +1085,59 @@ func TestHTTPClientV3_TLS(t *testing.T) {
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
 
-	// Make a test request and verify the response.
-	resp, err := client.Status()
-	assert.NotNil(t, resp)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, resp)
+	// Only need to setup one arbitrary unversioned endpoint and another
+	// versioned one to make requests against since we already have tests for
+	// all the endpoints and the works there are pretty much same.
+	tests := []struct {
+		path     string
+		in       string
+		expected interface{}
+	}{
+		{
+			"/test",
+			`
+{
+  "status":"ok",
+  "timestamp":"2019-01-24T14:34:24.926108Z"
+}`,
+			&scheme.Status{
+				Status:    "ok",
+				Timestamp: "2019-01-24T14:34:24.926108Z",
+			},
+		},
+		{
+			"/transaction",
+			`
+[
+  "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
+  "56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
+  "56a32eba-1aa6-4868-84ee-fe01af8b2e6d"
+]`,
+			&[]string{
+				"56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
+				"56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
+				"56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		var (
+			resp interface{}
+			err  error
+		)
+		switch tt.path {
+		case "/test":
+			server.ServeUnversioned(t, tt.path, 200, tt.in)
+			resp, err = client.Status()
+		case "/transaction":
+			server.ServeVersioned(t, tt.path, 200, tt.in)
+			resp, err = client.Transactions()
+		}
+		assert.NotNil(t, resp)
+		assert.NoError(t, err)
+		assert.Equal(t, tt.expected, resp)
+	}
 }
 
 func TestHTTPClientV3_TLS_UnknownCA(t *testing.T) {
@@ -1122,13 +1157,6 @@ func TestHTTPClientV3_TLS_UnknownCA(t *testing.T) {
 	server.SetTLS(cfg)
 	assert.NotNil(t, server.GetCertificates())
 
-	// Setup a `/test` endpoint.
-	server.ServeUnversioned(t, "/test", 200, `
-{
-  "status":"ok",
-  "timestamp":"2019-01-24T14:34:24.926108Z"
-}`)
-
 	// Setup a client that also uses the certificates. However, this time we
 	// don't skip the CA known security check.
 	client, err := NewHTTPClientV3(&Options{
@@ -1142,8 +1170,46 @@ func TestHTTPClientV3_TLS_UnknownCA(t *testing.T) {
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
 
-	// Make a test request and verify the response. Expect the client to fail.
-	resp, err := client.Status()
-	assert.Nil(t, resp)
-	assert.Error(t, err)
+	// Only need to setup one arbitrary unversioned endpoint and another
+	// versioned one to make requests against since we already have tests for
+	// all the endpoints and the works there are pretty much same.
+	tests := []struct {
+		path string
+		in   string
+	}{
+		{
+			"/test",
+			`
+{
+  "status":"ok",
+  "timestamp":"2019-01-24T14:34:24.926108Z"
+}`,
+		},
+		{
+			"/transaction",
+			`
+[
+  "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
+  "56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
+  "56a32eba-1aa6-4868-84ee-fe01af8b2e6d"
+]`,
+		},
+	}
+
+	for _, tt := range tests {
+		var (
+			resp interface{}
+			err  error
+		)
+		switch tt.path {
+		case "/test":
+			server.ServeUnversioned(t, tt.path, 200, tt.in)
+			resp, err = client.Status()
+		case "/transaction":
+			server.ServeVersioned(t, tt.path, 200, tt.in)
+			resp, err = client.Transactions()
+		}
+		assert.Nil(t, resp)
+		assert.Error(t, err)
+	}
 }
