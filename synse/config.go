@@ -16,6 +16,9 @@ type Options struct {
 
 	// Retry specifies the options for retry mechanism.
 	Retry RetryOptions
+
+	// TLS sepcifies the options for TLS/SSL communication.
+	TLS TLSOptions
 }
 
 // RetryOptions is the config options for backoff retry mechanism. Its strategy
@@ -32,4 +35,15 @@ type RetryOptions struct {
 	// MaxWaitTime specifies the maximum wait time, the cap, of all retry
 	// requests that are made.
 	MaxWaitTime time.Duration `default:"2s"`
+}
+
+// TLSOptions is the config options for TLS/SSL communication.
+type TLSOptions struct {
+	// CertFile and KeyFile are public/private key pair from a pair of files to
+	// use when communicating with Synse Server.
+	CertFile string `default:"-"`
+	KeyFile  string `default:"-"`
+
+	// SkipVerify controls whether the client can skip certificate checks.
+	SkipVerify bool `default:"false"`
 }

@@ -1,6 +1,7 @@
 package synse
 
 import (
+	"crypto/tls"
 	"testing"
 	"time"
 
@@ -31,10 +32,14 @@ func TestNewHTTPClientV3_defaults(t *testing.T) {
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
 
+	assert.Equal(t, "localhost:5000", client.GetOptions().Address)
 	assert.Equal(t, 2*time.Second, client.GetOptions().Timeout)
 	assert.Equal(t, int(3), client.GetOptions().Retry.Count)
 	assert.Equal(t, 100*time.Millisecond, client.GetOptions().Retry.WaitTime)
 	assert.Equal(t, 2*time.Second, client.GetOptions().Retry.MaxWaitTime)
+	assert.Empty(t, client.GetOptions().TLS.CertFile)
+	assert.Empty(t, client.GetOptions().TLS.KeyFile)
+	assert.False(t, client.GetOptions().TLS.SkipVerify)
 }
 
 func TestNewHTTPClientV3_ValidAddress(t *testing.T) {
@@ -99,7 +104,7 @@ func TestHTTPClientV3_Unversioned_200(t *testing.T) {
 		},
 	}
 
-	server := test.NewUnversionedHTTPServer()
+	server := test.NewServerV3()
 	defer server.Close()
 
 	client, err := NewHTTPClientV3(&Options{
@@ -109,7 +114,7 @@ func TestHTTPClientV3_Unversioned_200(t *testing.T) {
 	assert.NoError(t, err)
 
 	for _, tt := range tests {
-		server.Serve(t, tt.path, 200, tt.in)
+		server.ServeUnversioned(t, tt.path, 200, tt.in)
 
 		var (
 			resp interface{}
@@ -135,7 +140,7 @@ func TestHTTPClientV3_Unversioned_500(t *testing.T) {
 		{"/version"},
 	}
 
-	server := test.NewUnversionedHTTPServer()
+	server := test.NewServerV3()
 	defer server.Close()
 
 	client, err := NewHTTPClientV3(&Options{
@@ -154,7 +159,7 @@ func TestHTTPClientV3_Unversioned_500(t *testing.T) {
 }
 `
 	for _, tt := range tests {
-		server.Serve(t, tt.path, 500, in)
+		server.ServeUnversioned(t, tt.path, 500, in)
 
 		var (
 			resp interface{}
@@ -171,7 +176,7 @@ func TestHTTPClientV3_Unversioned_500(t *testing.T) {
 	}
 }
 
-func TestHTTPClient_Versioned_200(t *testing.T) { // nolint
+func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
 	tests := []struct {
 		path     string
 		in       string
@@ -270,22 +275,22 @@ func TestHTTPClient_Versioned_200(t *testing.T) { // nolint
 		{
 			"/plugin",
 			`
-		[
-		{
-		"description": "a plugin with emulated devices and data",
-		"id": "12835beffd3e6c603aa4dd92127707b5",
-		"name": "emulator plugin",
-		"maintainer": "vapor io",
-		"active": true
-		},
-		{
-		"description": "a custom third party plugin",
-		"id": "12835beffd3e6c603aa4dd92127707b6",
-		"name": "custom-plugin",
-		"maintainer": "third-party",
-		"active": true
-		}
-		]`,
+[
+  {
+    "description": "a plugin with emulated devices and data",
+    "id": "12835beffd3e6c603aa4dd92127707b5",
+    "name": "emulator plugin",
+    "maintainer": "vapor io",
+    "active": true
+  },
+  {
+    "description": "a custom third party plugin",
+    "id": "12835beffd3e6c603aa4dd92127707b6",
+    "name": "custom-plugin",
+    "maintainer": "third-party",
+    "active": true
+  }
+]`,
 			&[]scheme.PluginMeta{
 				scheme.PluginMeta{
 					Description: "a plugin with emulated devices and data",
@@ -904,7 +909,7 @@ func TestHTTPClient_Versioned_200(t *testing.T) { // nolint
 		},
 	}
 
-	server := test.NewVersionedHTTPServer()
+	server := test.NewServerV3()
 	defer server.Close()
 
 	client, err := NewHTTPClientV3(&Options{
@@ -914,7 +919,7 @@ func TestHTTPClient_Versioned_200(t *testing.T) { // nolint
 	assert.NoError(t, err)
 
 	for _, tt := range tests {
-		server.Serve(t, tt.path, 200, tt.in)
+		server.ServeVersioned(t, tt.path, 200, tt.in)
 
 		var (
 			resp interface{}
@@ -983,7 +988,7 @@ func TestHTTPClientV3_Versioned_500(t *testing.T) { // nolint
 		{"/transaction/56a32eba-1aa6-4868-84ee-fe01af8b2e6b"},
 	}
 
-	server := test.NewVersionedHTTPServer()
+	server := test.NewServerV3()
 	defer server.Close()
 
 	client, err := NewHTTPClientV3(&Options{
@@ -1002,7 +1007,7 @@ func TestHTTPClientV3_Versioned_500(t *testing.T) { // nolint
 }
 `
 	for _, tt := range tests {
-		server.Serve(t, tt.path, 500, in)
+		server.ServeVersioned(t, tt.path, 500, in)
 
 		var (
 			resp interface{}
@@ -1050,125 +1055,161 @@ func TestHTTPClientV3_Versioned_500(t *testing.T) { // nolint
 	}
 }
 
-func TestMakeURI(t *testing.T) {
+func TestHTTPClientV3_TLS(t *testing.T) {
+	// certFile and keyFile are self-signed test certificates' locations.
+	certFile, keyFile := "testdata/cert.pem", "testdata/key.pem"
+
+	// Parse the certificates.
+	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	assert.NotNil(t, cert)
+	assert.NoError(t, err)
+
+	// Create a mock https server and let it use the certificates.
+	server := test.NewTLSServerV3()
+	defer server.Close()
+
+	cfg := &tls.Config{Certificates: []tls.Certificate{cert}}
+	server.SetTLS(cfg)
+	assert.NotNil(t, server.GetCertificates())
+
+	// Setup a client that also uses the certificates.
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+		Timeout: 3 * time.Second,
+		TLS: TLSOptions{
+			CertFile:   certFile,
+			KeyFile:    keyFile,
+			SkipVerify: true, // skip CA known authority check
+		},
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	// Only need to setup one arbitrary unversioned endpoint and another
+	// versioned one to make requests against since we already have tests for
+	// all the endpoints and the works there are pretty much same.
 	tests := []struct {
-		in       []string
-		expected string
+		path     string
+		in       string
+		expected interface{}
 	}{
 		{
-			in:       []string{""},
-			expected: "",
+			"/test",
+			`
+{
+  "status":"ok",
+  "timestamp":"2019-01-24T14:34:24.926108Z"
+}`,
+			&scheme.Status{
+				Status:    "ok",
+				Timestamp: "2019-01-24T14:34:24.926108Z",
+			},
 		},
 		{
-			in:       []string{"foo"},
-			expected: "foo",
-		},
-		{
-			in:       []string{"foo", "bar"},
-			expected: "foo/bar",
-		},
-		{
-			in:       []string{"foo", "bar", "baz/"},
-			expected: "foo/bar/baz/",
-		},
-		{
-			in:       []string{"foo/", "/bar"},
-			expected: "foo///bar",
+			"/transaction",
+			`
+[
+  "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
+  "56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
+  "56a32eba-1aa6-4868-84ee-fe01af8b2e6d"
+]`,
+			&[]string{
+				"56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
+				"56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
+				"56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
+			},
 		},
 	}
 
 	for _, tt := range tests {
-		out := makeURI(tt.in...)
-		assert.Equal(t, tt.expected, out)
+		var (
+			resp interface{}
+			err  error
+		)
+		switch tt.path {
+		case "/test":
+			server.ServeUnversioned(t, tt.path, 200, tt.in)
+			resp, err = client.Status()
+		case "/transaction":
+			server.ServeVersioned(t, tt.path, 200, tt.in)
+			resp, err = client.Transactions()
+		}
+		assert.NotNil(t, resp)
+		assert.NoError(t, err)
+		assert.Equal(t, tt.expected, resp)
 	}
 }
 
-func TestStructToMapString(t *testing.T) {
+func TestHTTPClientV3_TLS_UnknownCA(t *testing.T) {
+	// certFile and keyFile are self-signed test certificates' locations.
+	certFile, keyFile := "testdata/cert.pem", "testdata/key.pem"
+
+	// Parse the certificates.
+	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	assert.NotNil(t, cert)
+	assert.NoError(t, err)
+
+	// Create a mock https server and let it use the certificates.
+	server := test.NewTLSServerV3()
+	defer server.Close()
+
+	cfg := &tls.Config{Certificates: []tls.Certificate{cert}}
+	server.SetTLS(cfg)
+	assert.NotNil(t, server.GetCertificates())
+
+	// Setup a client that also uses the certificates. However, this time we
+	// don't skip the CA known security check.
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+		Timeout: 3 * time.Second,
+		TLS: TLSOptions{
+			CertFile: certFile,
+			KeyFile:  keyFile,
+		},
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	// Only need to setup one arbitrary unversioned endpoint and another
+	// versioned one to make requests against since we already have tests for
+	// all the endpoints and the works there are pretty much same.
 	tests := []struct {
-		in       interface{}
-		expected map[string]string
+		path string
+		in   string
 	}{
 		{
-			struct{}{},
-			map[string]string{},
+			"/test",
+			`
+{
+  "status":"ok",
+  "timestamp":"2019-01-24T14:34:24.926108Z"
+}`,
 		},
 		{
-			struct {
-				foo string
-			}{
-				foo: "bar",
-			},
-			map[string]string{
-				"foo": "bar",
-			},
-		},
-		{
-			struct {
-				Foo string
-			}{
-				Foo: "bar",
-			},
-			map[string]string{
-				"foo": "bar",
-			},
-		},
-		{
-			struct {
-				foo string
-			}{
-				foo: "Bar",
-			},
-			map[string]string{
-				"foo": "Bar",
-			},
-		},
-		{
-			struct {
-				foo int
-			}{
-				foo: int(1),
-			},
-			map[string]string{
-				"foo": "1",
-			},
-		},
-		{
-			struct {
-				foo bool
-			}{
-				foo: true,
-			},
-			map[string]string{
-				"foo": "true",
-			},
-		},
-		{
-			struct {
-				foo []string
-			}{
-				foo: []string{"foo", "bar"},
-			},
-			map[string]string{
-				"foo": "foo,bar",
-			},
-		},
-		{
-			struct {
-				foo []string
-				bar string
-			}{
-				foo: []string{"foo", "bar", "foobar"},
-				bar: "bar",
-			},
-			map[string]string{
-				"foo": "foo,bar,foobar",
-				"bar": "bar",
-			},
+			"/transaction",
+			`
+[
+  "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
+  "56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
+  "56a32eba-1aa6-4868-84ee-fe01af8b2e6d"
+]`,
 		},
 	}
 
 	for _, tt := range tests {
-		out := structToMapString(tt.in)
-		assert.Equal(t, tt.expected, out)
+		var (
+			resp interface{}
+			err  error
+		)
+		switch tt.path {
+		case "/test":
+			server.ServeUnversioned(t, tt.path, 200, tt.in)
+			resp, err = client.Status()
+		case "/transaction":
+			server.ServeVersioned(t, tt.path, 200, tt.in)
+			resp, err = client.Transactions()
+		}
+		assert.Nil(t, resp)
+		assert.Error(t, err)
 	}
 }

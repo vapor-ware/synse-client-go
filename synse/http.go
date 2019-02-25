@@ -3,10 +3,8 @@ package synse
 // http.go implements a http client.
 
 import (
+	"crypto/tls"
 	"encoding/json"
-	"fmt"
-	"reflect"
-	"strings"
 
 	"github.com/vapor-ware/synse-client-go/synse/scheme"
 
@@ -17,22 +15,53 @@ import (
 
 // httpClient implements a http client.
 type httpClient struct {
-	options    *Options
-	client     *resty.Client
+	// options is the global config options of the client.
+	options *Options
+
+	// client holds the resty.Client.
+	client *resty.Client
+
+	// apiVersion is the current api version of Synse Server that we are
+	// communicating with.
 	apiVersion string
+
+	// scheme could either be `http` or `https`, depends on the TLS
+	// configuration.
+	scheme string
 }
 
-// NewHTTPClientV3 returns a new instance of a http client with API v3.
+// NewHTTPClientV3 returns a new instance of a http client for v3 API.
 func NewHTTPClientV3(options *Options) (Client, error) {
+	scheme := "http"
 	client, err := createHTTPClient(options)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create a http client")
+	}
+
+	// Check if TLS options are set.
+	if options.TLS.CertFile != "" && options.TLS.KeyFile != "" {
+		// Change the scheme to `https`
+		scheme = "https"
+
+		// Register the certificates.
+		cert, err := tls.LoadX509KeyPair(options.TLS.CertFile, options.TLS.KeyFile)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to set client certificates")
+		}
+
+		client.SetCertificates(cert)
+
+		// Set the security check.
+		// FIXME - if not disable linting here, it will yield: warning: TLS
+		// InsecureSkipVerify may be true.,HIGH,LOW (gosec)
+		client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: options.TLS.SkipVerify}) // nolint
 	}
 
 	return &httpClient{
 		options:    options,
 		client:     client,
 		apiVersion: "v3",
+		scheme:     scheme,
 	}, nil
 }
 
@@ -106,7 +135,7 @@ func (c *httpClient) Plugins() (*[]scheme.PluginMeta, error) {
 // Plugin returns data from a specific plugin.
 func (c *httpClient) Plugin(id string) (*scheme.Plugin, error) {
 	out := new(scheme.Plugin)
-	if err := c.getVersioned(makeURI(pluginURI, id), out); err != nil {
+	if err := c.getVersioned(makePath(pluginURI, id), out); err != nil {
 		return nil, err
 	}
 
@@ -150,7 +179,7 @@ func (c *httpClient) Tags(opts scheme.TagsOptions) (*[]string, error) {
 // device.
 func (c *httpClient) Info(id string) (*scheme.Info, error) {
 	out := new(scheme.Info)
-	if err := c.getVersioned(makeURI(infoURI, id), out); err != nil {
+	if err := c.getVersioned(makePath(infoURI, id), out); err != nil {
 		return nil, err
 	}
 
@@ -172,7 +201,7 @@ func (c *httpClient) Read(opts scheme.ReadOptions) (*[]scheme.Read, error) {
 // where the label matches the device id tag specified in ReadOptions.
 func (c *httpClient) ReadDevice(id string, opts scheme.ReadOptions) (*[]scheme.Read, error) {
 	out := new([]scheme.Read)
-	if err := c.getVersionedQueryParams(makeURI(readURI, id), opts, out); err != nil {
+	if err := c.getVersionedQueryParams(makePath(readURI, id), opts, out); err != nil {
 		return nil, err
 	}
 
@@ -184,12 +213,7 @@ func (c *httpClient) ReadCache(opts scheme.ReadCacheOptions) (*[]scheme.Read, er
 	var out []scheme.Read
 	errScheme := new(scheme.Error)
 
-	client, err := c.setVersioned()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to set a versioned host while performing a GET request")
-	}
-
-	resp, err := client.R().SetDoNotParseResponse(true).SetQueryParams(structToMapString(opts)).SetError(errScheme).Get(readcacheURI)
+	resp, err := c.setVersioned().R().SetDoNotParseResponse(true).SetQueryParams(structToMapString(opts)).SetError(errScheme).Get(readcacheURI)
 	if err = check(err, errScheme); err != nil {
 		return nil, err
 	}
@@ -211,7 +235,7 @@ func (c *httpClient) ReadCache(opts scheme.ReadCacheOptions) (*[]scheme.Read, er
 // WriteAsync writes data to a device, in an asynchronous manner.
 func (c *httpClient) WriteAsync(id string, opts []scheme.WriteData) (*[]scheme.Write, error) {
 	out := new([]scheme.Write)
-	if err := c.postVersioned(makeURI(writeURI, id), opts, out); err != nil {
+	if err := c.postVersioned(makePath(writeURI, id), opts, out); err != nil {
 		return nil, err
 	}
 
@@ -221,7 +245,7 @@ func (c *httpClient) WriteAsync(id string, opts []scheme.WriteData) (*[]scheme.W
 // WriteSync writes data to a device, waiting for the write to complete.
 func (c *httpClient) WriteSync(id string, opts []scheme.WriteData) (*[]scheme.Transaction, error) {
 	out := new([]scheme.Transaction)
-	if err := c.postVersioned(makeURI(writeWaitURI, id), opts, out); err != nil {
+	if err := c.postVersioned(makePath(writeWaitURI, id), opts, out); err != nil {
 		return nil, err
 	}
 
@@ -241,7 +265,7 @@ func (c *httpClient) Transactions() (*[]string, error) {
 // Transaction returns the state and status of a write transaction.
 func (c *httpClient) Transaction(id string) (*scheme.Transaction, error) {
 	out := new(scheme.Transaction)
-	if err := c.getVersioned(makeURI(transactionURI, id), out); err != nil {
+	if err := c.getVersioned(makePath(transactionURI, id), out); err != nil {
 		return nil, err
 	}
 
@@ -257,12 +281,7 @@ func (c *httpClient) GetOptions() *Options {
 // against the Synse Server versioned API.
 func (c *httpClient) getVersionedQueryParams(uri string, params interface{}, okScheme interface{}) error {
 	errScheme := new(scheme.Error)
-	client, err := c.setVersioned()
-	if err != nil {
-		return errors.Wrap(err, "failed to set a versioned host while performing a GET request")
-	}
-
-	_, err = client.R().SetQueryParams(structToMapString(params)).SetResult(okScheme).SetError(errScheme).Get(uri)
+	_, err := c.setVersioned().R().SetQueryParams(structToMapString(params)).SetResult(okScheme).SetError(errScheme).Get(uri)
 	return check(err, errScheme)
 
 }
@@ -283,23 +302,18 @@ func (c *httpClient) getUnversioned(uri string, okScheme interface{}) error {
 // postVersioned performs a POST request against the Synse Server versioned API.
 func (c *httpClient) postVersioned(uri string, body interface{}, okScheme interface{}) error {
 	errScheme := new(scheme.Error)
-	client, err := c.setVersioned()
-	if err != nil {
-		return errors.Wrap(err, "failed to set a versioned host while performing a POST request")
-	}
-
-	_, err = client.R().SetBody(body).SetResult(okScheme).SetError(errScheme).Post(uri)
+	_, err := c.setVersioned().R().SetBody(body).SetResult(okScheme).SetError(errScheme).Post(uri)
 	return check(err, errScheme)
 }
 
 // setUnversioned returns a client that uses unversioned host URL.
 func (c *httpClient) setUnversioned() *resty.Client {
-	return c.client.SetHostURL(fmt.Sprintf("http://%s/", c.options.Address))
+	return c.client.SetHostURL(buildURL(c.scheme, c.options.Address))
 }
 
 // setVersioned returns a client that uses versioned host URL.
-func (c *httpClient) setVersioned() (*resty.Client, error) {
-	return c.client.SetHostURL(fmt.Sprintf("http://%s/%s/", c.options.Address, c.apiVersion)), nil
+func (c *httpClient) setVersioned() *resty.Client {
+	return c.client.SetHostURL(buildURL(c.scheme, c.options.Address, c.apiVersion))
 }
 
 // check validates returned response from the Synse Server.
@@ -317,42 +331,4 @@ func check(err error, errResp *scheme.Error) error {
 	}
 
 	return nil
-}
-
-// makeURI joins the given components into a string, delimited with '/' which
-// can then be used as the URI for API requests.
-func makeURI(components ...string) string {
-	return strings.Join(components, "/")
-}
-
-// structToMapString decodes a struct value into a map[string]string that can
-// be used as query parameters. It assumes that the struct fields follow one of
-// these types: bool, string, int, float, slice.
-func structToMapString(s interface{}) map[string]string {
-	out := map[string]string{}
-	v := ""
-
-	fields := reflect.TypeOf(s)
-	values := reflect.ValueOf(s)
-
-	for i := 0; i < fields.NumField(); i++ {
-		field := fields.Field(i)
-		value := values.Field(i)
-
-		switch value.Kind() {
-		case reflect.Slice:
-			s := []string{}
-			for i := 0; i < value.Len(); i++ {
-				s = append(s, fmt.Sprint(value.Index(i)))
-			}
-
-			v = strings.Join(s, ",")
-		default:
-			v = fmt.Sprint(value)
-		}
-
-		out[strings.ToLower(field.Name)] = v
-	}
-
-	return out
 }

@@ -3,6 +3,8 @@ package test
 // server.go provides testing functionalities against a mock http server.
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"io"
 	"net/http"
@@ -10,63 +12,73 @@ import (
 	"testing"
 )
 
-// UnversionedHTTPServer describes an unversioned mock http server.
-type UnversionedHTTPServer struct {
-	URL    string
+// Server describes a mock http/https server.
+type Server struct {
+	// URL has the `host:port` format.
+	URL string
+
+	// tls holds the TLS configuration.
+	tls *tls.Config
+
+	// server is the mock http server.
 	server *httptest.Server
-	mux    *http.ServeMux
+
+	// mux is the http request multiplexer.
+	mux *http.ServeMux
+
+	// version is the current api version of Synse Server that we are
+	// communicating with.
+	version string
 }
 
-// VersionedHTTPServer describes a versioned mock http server.
-type VersionedHTTPServer struct {
-	UnversionedHTTPServer
-	versionURI string
-}
-
-// NewUnversionedHTTPServer returns an instance of an unversioned mock http server.
-func NewUnversionedHTTPServer() UnversionedHTTPServer {
+// NewServerV3 returns an instance of a mock http server for v3 API.
+func NewServerV3() Server {
 	m := http.NewServeMux()
 	s := httptest.NewServer(m)
-	return UnversionedHTTPServer{
-		URL:    s.URL[7:],
-		server: s,
-		mux:    m,
+
+	return Server{
+		URL:     s.URL[7:],
+		server:  s,
+		mux:     m,
+		version: "v3",
 	}
 }
 
-// NewVersionedHTTPServer returns an instance of a versioned mock http server.
-func NewVersionedHTTPServer() VersionedHTTPServer {
-	s := NewUnversionedHTTPServer()
-	s.mux.HandleFunc(
-		"/version",
-		func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			fmt.Fprint(w, `{"version": "3.x.x", "api_version": "v3"}`) // nolint
-		})
+// NewTLSServerV3 returns an instance of a mock https server for v3 API.
+func NewTLSServerV3() Server {
+	m := http.NewServeMux()
+	s := httptest.NewTLSServer(m)
 
-	return VersionedHTTPServer{
-		UnversionedHTTPServer: s,
-		versionURI:            "/v3",
+	return Server{
+		URL:     s.URL[8:],
+		server:  s,
+		mux:     m,
+		version: "v3",
 	}
 }
 
-// Serve serves an unversioned endpoint.
-func (s UnversionedHTTPServer) Serve(t *testing.T, uri string, statusCode int, response interface{}) {
+// ServeUnversioned serves an unversioned endpoint.
+func (s Server) ServeUnversioned(t *testing.T, uri string, statusCode int, response interface{}) {
 	serve(s.mux, t, uri, statusCode, response)
 }
 
-// Serve serves a versioned endpoint.
-func (s VersionedHTTPServer) Serve(t *testing.T, uri string, statusCode int, response interface{}) {
-	serve(s.mux, t, fmt.Sprintf("%v%v", s.versionURI, uri), statusCode, response)
+// ServeVersioned serves a versioned endpoint.
+func (s Server) ServeVersioned(t *testing.T, uri string, statusCode int, response interface{}) {
+	serve(s.mux, t, fmt.Sprintf("/%v%v", s.version, uri), statusCode, response)
+}
+
+// SetTLS starts TLS using the configured options.
+func (s Server) SetTLS(cfg *tls.Config) {
+	s.tls = cfg
+}
+
+// GetCertificates returns the certificate used by the server.
+func (s Server) GetCertificates() *x509.Certificate {
+	return s.server.Certificate()
 }
 
 // Close closes the unversioned server connection.
-func (s UnversionedHTTPServer) Close() {
-	s.server.Close()
-}
-
-// Close closes the versioned server connection.
-func (s VersionedHTTPServer) Close() {
+func (s Server) Close() {
 	s.server.Close()
 }
 
