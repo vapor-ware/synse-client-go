@@ -52,6 +52,8 @@ func NewHTTPClientV3(options *Options) (Client, error) {
 		client.SetCertificates(cert)
 
 		// Set the security check.
+		// FIXME - if not disable linting here, it will yield: warning: TLS
+		// InsecureSkipVerify may be true.,HIGH,LOW (gosec)
 		client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: options.TLS.SkipVerify}) // nolint
 	}
 
