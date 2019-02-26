@@ -66,16 +66,16 @@ func NewHTTPClientV3(options *Options) (Client, error) {
 }
 
 // createHTTPClient setups the client with configured options.
-func createHTTPClient(opt *Options) (*resty.Client, error) {
-	if opt == nil {
+func createHTTPClient(opts *Options) (*resty.Client, error) {
+	if opts == nil {
 		return nil, errors.New("options can not be nil")
 	}
 
-	if opt.Address == "" {
+	if opts.Address == "" {
 		return nil, errors.New("no address is specified")
 	}
 
-	err := defaults.Set(opt)
+	err := defaults.Set(opts)
 	if err != nil {
 		return nil, errors.New("failed to set default configs")
 	}
@@ -83,10 +83,10 @@ func createHTTPClient(opt *Options) (*resty.Client, error) {
 	// Create a new resty client with configured options.
 	client := resty.New()
 	return client.
-		SetTimeout(opt.Timeout).
-		SetRetryCount(opt.Retry.Count).
-		SetRetryWaitTime(opt.Retry.WaitTime).
-		SetRetryMaxWaitTime(opt.Retry.MaxWaitTime), nil
+		SetTimeout(opts.Timeout).
+		SetRetryCount(opts.Retry.Count).
+		SetRetryWaitTime(opts.Retry.WaitTime).
+		SetRetryMaxWaitTime(opts.Retry.MaxWaitTime), nil
 }
 
 // Status returns the status info.
