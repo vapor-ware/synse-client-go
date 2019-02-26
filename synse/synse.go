@@ -68,4 +68,10 @@ type Client interface {
 
 	// GetOptions returns the current config options of the client.
 	GetOptions() *Options
+
+	// Close closes the connection between the client and Synse Server. This
+	// is only applicable for a WebSocket client in a sense that, one must
+	// close the connection after finish using it. Calling this method on a
+	// HTTP Client will have no effect.
+	Close()
 }

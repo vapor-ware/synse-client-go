@@ -277,6 +277,10 @@ func (c *httpClient) GetOptions() *Options {
 	return c.options
 }
 
+// Close closes the connection between the client and Synse Server. However,
+// this method is not applicable for a HTTP client. Hence, it will do nothing.
+func (c *httpClient) Close() {}
+
 // getVersionedQueryParams performs a GET request using query parameters
 // against the Synse Server versioned API.
 func (c *httpClient) getVersionedQueryParams(uri string, params interface{}, okScheme interface{}) error {
