@@ -25,6 +25,18 @@ func TestNewHTTPClientV3_NoAddress(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestNewHTTPClientV3_NoTLSCertificates(t *testing.T) {
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+		TLS: TLSOptions{
+			// Enable TLS but not provide the certificates.
+			Enabled: true,
+		},
+	})
+	assert.Nil(t, client)
+	assert.Error(t, err)
+}
+
 func TestNewHTTPClientV3_defaults(t *testing.T) {
 	client, err := NewHTTPClientV3(&Options{
 		Address: "localhost:5000",
