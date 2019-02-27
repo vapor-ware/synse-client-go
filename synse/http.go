@@ -267,8 +267,12 @@ func (c *httpClient) GetOptions() *Options {
 	return c.options
 }
 
-// Close closes the connection between the client and Synse Server. However,
-// this method is not applicable for a HTTP client. Hence, it will do nothing.
+// Open opens the websocket connection between the client and Synse Server.
+// However, this method is not applicable for a HTTP client. Hence, it will do nothing.
+func (c *httpClient) Open() {}
+
+// Close closes the websocket connection between the client and Synse Server.
+// However, this method is not applicable for a HTTP client. Hence, it will do nothing.
 func (c *httpClient) Close() {}
 
 // getVersionedQueryParams performs a GET request using query parameters
