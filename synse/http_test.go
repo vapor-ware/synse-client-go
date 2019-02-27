@@ -33,10 +33,10 @@ func TestNewHTTPClientV3_defaults(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, "localhost:5000", client.GetOptions().Address)
-	assert.Equal(t, 2*time.Second, client.GetOptions().Timeout)
-	assert.Equal(t, int(3), client.GetOptions().Retry.Count)
-	assert.Equal(t, 100*time.Millisecond, client.GetOptions().Retry.WaitTime)
-	assert.Equal(t, 2*time.Second, client.GetOptions().Retry.MaxWaitTime)
+	assert.Equal(t, 2*time.Second, client.GetOptions().HTTP.Timeout)
+	assert.Equal(t, int(3), client.GetOptions().HTTP.Retry.Count)
+	assert.Equal(t, 100*time.Millisecond, client.GetOptions().HTTP.Retry.WaitTime)
+	assert.Equal(t, 2*time.Second, client.GetOptions().HTTP.Retry.MaxWaitTime)
 	assert.Empty(t, client.GetOptions().TLS.CertFile)
 	assert.Empty(t, client.GetOptions().TLS.KeyFile)
 	assert.False(t, client.GetOptions().TLS.SkipVerify)
@@ -53,7 +53,9 @@ func TestNewHTTPClientV3_ValidAddress(t *testing.T) {
 func TestNewHTTPClientV3_ValidAddressAndTimeout(t *testing.T) {
 	client, err := NewHTTPClientV3(&Options{
 		Address: "localhost:5000",
-		Timeout: 3 * time.Second,
+		HTTP: HTTPOptions{
+			Timeout: 3 * time.Second,
+		},
 	})
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
@@ -62,10 +64,12 @@ func TestNewHTTPClientV3_ValidAddressAndTimeout(t *testing.T) {
 func TestNewHTTPClientV3_ValidRetry(t *testing.T) {
 	client, err := NewHTTPClientV3(&Options{
 		Address: "localhost:5000",
-		Retry: RetryOptions{
-			Count:       3,
-			WaitTime:    5 * time.Second,
-			MaxWaitTime: 20 * time.Second,
+		HTTP: HTTPOptions{
+			Retry: RetryOptions{
+				Count:       3,
+				WaitTime:    5 * time.Second,
+				MaxWaitTime: 20 * time.Second,
+			},
 		},
 	})
 	assert.NotNil(t, client)
@@ -1075,8 +1079,8 @@ func TestHTTPClientV3_TLS(t *testing.T) {
 	// Setup a client that also uses the certificates.
 	client, err := NewHTTPClientV3(&Options{
 		Address: server.URL,
-		Timeout: 3 * time.Second,
 		TLS: TLSOptions{
+			Enabled:    true,
 			CertFile:   certFile,
 			KeyFile:    keyFile,
 			SkipVerify: true, // skip CA known authority check
@@ -1161,8 +1165,8 @@ func TestHTTPClientV3_TLS_UnknownCA(t *testing.T) {
 	// don't skip the CA known security check.
 	client, err := NewHTTPClientV3(&Options{
 		Address: server.URL,
-		Timeout: 3 * time.Second,
 		TLS: TLSOptions{
+			Enabled:  true,
 			CertFile: certFile,
 			KeyFile:  keyFile,
 		},

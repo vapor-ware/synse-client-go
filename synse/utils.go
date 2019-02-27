@@ -3,11 +3,46 @@ package synse
 // utils.go provides function utilities for the client.
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net/url"
 	"reflect"
 	"strings"
+
+	"github.com/creasty/defaults"
+	"github.com/pkg/errors"
 )
+
+// setDefaults setups default options.
+func setDefaults(opts *Options) error {
+	if opts == nil {
+		return errors.New("options can not be nil")
+	}
+
+	if opts.Address == "" {
+		return errors.New("no address is specified")
+	}
+
+	if err := defaults.Set(opts); err != nil {
+		return errors.New("failed to set default configs")
+	}
+
+	return nil
+}
+
+// setTLS registers the certificates with configured optionss.
+func setTLS(opts *Options) (tls.Certificate, error) {
+	if opts.TLS.CertFile == "" && opts.TLS.KeyFile == "" {
+		return tls.Certificate{}, errors.New("no certificates are specified")
+	}
+
+	cert, err := tls.LoadX509KeyPair(opts.TLS.CertFile, opts.TLS.KeyFile)
+	if err != nil {
+		return tls.Certificate{}, errors.Wrap(err, "failed to set client certificates")
+	}
+
+	return cert, nil
+}
 
 // buildURL builds up a complete URL from given scheme, host and path.
 func buildURL(scheme string, host string, path ...string) string {

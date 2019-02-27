@@ -8,7 +8,6 @@ import (
 
 	"github.com/vapor-ware/synse-client-go/synse/scheme"
 
-	"github.com/creasty/defaults"
 	"github.com/pkg/errors"
 	"gopkg.in/resty.v1"
 )
@@ -31,62 +30,53 @@ type httpClient struct {
 }
 
 // NewHTTPClientV3 returns a new instance of a http client for v3 API.
-func NewHTTPClientV3(options *Options) (Client, error) {
-	scheme := "http"
-	client, err := createHTTPClient(options)
+func NewHTTPClientV3(opts *Options) (Client, error) {
+	c, err := createHTTPClient(opts)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create a http client")
 	}
 
-	// Check if TLS options are set.
-	if options.TLS.CertFile != "" && options.TLS.KeyFile != "" {
-		// Change the scheme to `https`
-		scheme = "https"
-
-		// Register the certificates.
-		cert, err := tls.LoadX509KeyPair(options.TLS.CertFile, options.TLS.KeyFile)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to set client certificates")
-		}
-
-		client.SetCertificates(cert)
-
-		// Set the security check.
-		// FIXME - if not disable linting here, it will yield: warning: TLS
-		// InsecureSkipVerify may be true.,HIGH,LOW (gosec)
-		client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: options.TLS.SkipVerify}) // nolint
+	s := "http"
+	if opts.TLS.Enabled == true {
+		s = "https"
 	}
 
 	return &httpClient{
-		options:    options,
-		client:     client,
+		options:    opts,
+		client:     c,
 		apiVersion: "v3",
-		scheme:     scheme,
+		scheme:     s,
 	}, nil
 }
 
-// createHTTPClient setups the client with configured options.
+// createHTTPClient setups a resty client with configured options.
 func createHTTPClient(opts *Options) (*resty.Client, error) {
-	if opts == nil {
-		return nil, errors.New("options can not be nil")
-	}
-
-	if opts.Address == "" {
-		return nil, errors.New("no address is specified")
-	}
-
-	err := defaults.Set(opts)
+	err := setDefaults(opts)
 	if err != nil {
-		return nil, errors.New("failed to set default configs")
+		return nil, err
 	}
 
-	// Create a new resty client with configured options.
+	// Create a resty client with configured options.
 	client := resty.New()
+	client = client.
+		SetTimeout(opts.HTTP.Timeout).
+		SetRetryCount(opts.HTTP.Retry.Count).
+		SetRetryWaitTime(opts.HTTP.Retry.WaitTime).
+		SetRetryMaxWaitTime(opts.HTTP.Retry.MaxWaitTime)
+
+	if opts.TLS.Enabled == false {
+		return client, nil
+	}
+
+	// Setup TLS if it's enable.
+	cert, err := setTLS(opts)
+	if err != nil {
+		return nil, err
+	}
+
 	return client.
-		SetTimeout(opts.Timeout).
-		SetRetryCount(opts.Retry.Count).
-		SetRetryWaitTime(opts.Retry.WaitTime).
-		SetRetryMaxWaitTime(opts.Retry.MaxWaitTime), nil
+		SetCertificates(cert).
+		SetTLSClientConfig(&tls.Config{InsecureSkipVerify: opts.TLS.SkipVerify}), nil
 }
 
 // Status returns the status info.
