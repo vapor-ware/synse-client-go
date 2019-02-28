@@ -1,6 +1,6 @@
 package synse
 
-// uri.go has the server routes.
+// uri.go stores uri endpoint supported by the Synse HTTP API.
 
 const (
 	// testURI is the URI for the `/test` route.

@@ -72,11 +72,11 @@ type Client interface {
 	// Open opens the websocket connection between the client and Synse Server.
 	// As the description suggested, it is only applicable for a WebSocket
 	// client. Calling this method on a HTTP Client will have no effect.
-	Open()
+	Open() error
 
 	// Close closes the websocket connection between the client and Synse Server.
 	// It is only applicable for a WebSocket client in a sense that, one must
 	// close the connection after finish using it. Calling this method on a
 	// HTTP Client will have no effect.
-	Close()
+	Close() error
 }
