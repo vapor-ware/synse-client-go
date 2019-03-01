@@ -4,11 +4,15 @@ package synse
 
 import (
 	"crypto/tls"
+	"sync/atomic"
 
 	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
 	"github.com/vapor-ware/synse-client-go/synse/scheme"
 )
+
+// counter counts the number of request sent.
+var counter uint64
 
 type websocketClient struct {
 	// options is the global config options of the client.
@@ -17,9 +21,18 @@ type websocketClient struct {
 	// client holds the websocket.Dialer.
 	client *websocket.Dialer
 
+	// connection holds the websocket connection.
+	connection *websocket.Conn
+
 	// apiVersion is the current api version of Synse Server that we are
 	// communicating with.
 	apiVersion string
+
+	// entryRoute is the entry route to start the websocket connection.
+	entryRoute string
+
+	// scheme could either be ws or wss depending on TLS configuration.
+	scheme string
 }
 
 // NewWebSocketClientV3 returns a new instance of a websocket client for v3.
@@ -29,10 +42,17 @@ func NewWebSocketClientV3(opts *Options) (Client, error) {
 		return nil, errors.Wrap(err, "failed to create a websocket client")
 	}
 
+	s := "ws"
+	if opts.TLS.Enabled == true {
+		s = "wss"
+	}
+
 	return &websocketClient{
 		options:    opts,
 		client:     c,
 		apiVersion: "v3",
+		entryRoute: "connect",
+		scheme:     s,
 	}, nil
 }
 
@@ -63,15 +83,57 @@ func createWebSocketClient(opts *Options) (*websocket.Dialer, error) {
 	}, nil
 }
 
+// Open opens the websocket connection between the client and Synse Server.
+func (c *websocketClient) Open() error {
+	conn, _, err := c.client.Dial(buildURL(c.scheme, c.options.Address, c.apiVersion, c.entryRoute), nil)
+	if err != nil {
+		return errors.Wrap(err, "failed to open the websocket connection")
+	}
+
+	c.connection = conn
+	return nil
+}
+
+// Close closes the websocket connection between the client and Synse Server.
+// It's up to the user to close the connection after finish using it.
+// TODO - look into how defer work with returned error?
+func (c *websocketClient) Close() error {
+	err := c.connection.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+	if err != nil {
+		return errors.Wrap(err, "failed to close the connection gracefully")
+	}
+
+	return nil
+}
+
 // Status returns the status info. This is used to check if the server
-// is responsive and reachable.
+// is responsive and reachable. However, it's not applicable for WebSocket
+// client.
 func (c *websocketClient) Status() (*scheme.Status, error) {
 	return nil, nil
 }
 
 // Version returns the version info.
 func (c *websocketClient) Version() (*scheme.Version, error) {
-	return nil, nil
+	req := scheme.RequestVersion{
+		EventMeta: scheme.EventMeta{
+			ID:    addCounter(),
+			Event: requestVersion,
+		},
+	}
+
+	err := c.connection.WriteJSON(req)
+	if err != nil {
+		return nil, err
+	}
+
+	out := new(scheme.ResponseVersion)
+	err = c.connection.ReadJSON(out)
+	if err != nil {
+		return nil, err
+	}
+
+	return &out.Data, nil
 }
 
 // Config returns the unified configuration info.
@@ -155,14 +217,15 @@ func (c *websocketClient) Transaction(id string) (*scheme.Transaction, error) {
 
 // GetOptions returns the current config options of the client.
 func (c *websocketClient) GetOptions() *Options {
-	return nil
+	return c.options
 }
 
-// Open opens the websocket connection between the client and Synse Server.
-func (c *websocketClient) Open() {
+// addCounter safely increases the counter by 1.
+func addCounter() uint64 {
+	return atomic.AddUint64(&counter, 1)
 }
 
-// Close closes the websocket connection between the client and Synse Server.
-// It's up to the user to close the connection after finish using it.
-func (c *websocketClient) Close() {
+// getCounter safely gets current value of counter.
+func getCounter() uint64 {
+	return atomic.LoadUint64(&counter)
 }
