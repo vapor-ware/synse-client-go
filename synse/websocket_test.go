@@ -2,12 +2,15 @@ package synse
 
 import (
 	// "crypto/tls"
+	// "net/http"
+	// "net/http/httptest"
 	"testing"
 	"time"
 
-	"github.com/vapor-ware/synse-client-go/internal/test"
-	"github.com/vapor-ware/synse-client-go/synse/scheme"
+	// "github.com/vapor-ware/synse-client-go/internal/test"
+	// "github.com/vapor-ware/synse-client-go/synse/scheme"
 
+	// "github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -70,51 +73,34 @@ func TestNewWebSocketClientV3_ValidAddressAndTimeout(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestWebSocketClientV3_200(t *testing.T) {
-	tests := []struct {
-		event    string
-		in       string
-		expected interface{}
-	}{
-		{
-			"request/version",
-			`
-	{
-	"version":"3.0.0",
-	"api_version":"v3"
-	}`,
-			&scheme.Version{
-				Version:    "3.0.0",
-				APIVersion: "v3",
-			},
-		},
-	}
+// func TestWebSocketClientV3_200(t *testing.T) {
+// 	// tests := []struct {
+// 	// 	event    string
+// 	// 	in       string
+// 	// 	expected interface{}
+// 	// }{
+// 	// 	{
+// 	// 		"request/version",
+// 	// 		`
+// 	// {
+// 	// "version":"3.0.0",
+// 	// "api_version":"v3"
+// 	// }`,
+// 	// 		&scheme.Version{
+// 	// 			Version:    "3.0.0",
+// 	// 			APIVersion: "v3",
+// 	// 		},
+// 	// 	},
+// 	// }
 
-	server := test.NewServerV3()
-	defer server.Close()
+// 	// var upgrader = websocket.Upgrader{}
 
-	client, err := NewWebSocketClientV3(&Options{
-		Address: server.URL,
-	})
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
+// 	client, err := NewWebSocketClientV3(&Options{
+// 		Address: "TODO",
+// 	})
+// 	assert.NotNil(t, client)
+// 	assert.NoError(t, err)
 
-	err = client.Open()
-	assert.NoError(t, err)
-
-	for _, tt := range tests {
-		server.ServeUnversioned(t, "/connect", 200, tt.in)
-
-		var (
-			resp interface{}
-			err  error
-		)
-		switch tt.event {
-		case "request/version":
-			resp, err = client.Version()
-		}
-		assert.NotNil(t, resp)
-		assert.NoError(t, err)
-		assert.Equal(t, tt.expected, resp)
-	}
-}
+// 	err = client.Open()
+// 	assert.NoError(t, err)
+// }
