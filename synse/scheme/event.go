@@ -113,3 +113,58 @@ type ResponseConfig struct {
 	EventMeta
 	Data Config
 }
+
+// ResponsePlugin describes a scheme for response/plugin event.
+type ResponsePlugin struct {
+	EventMeta
+	Data Plugin
+}
+
+// ResponsePluginHealth describes a scheme for response/plugin_health event.
+type ResponsePluginHealth struct {
+	EventMeta
+	Data PluginHealth
+}
+
+// ResponseTags describes a scheme for response/tags event.
+type ResponseTags struct {
+	EventMeta
+	Data RTagsData
+}
+
+// RTagsData describes the data for response/data event.
+// FIXME - need to name it RTagsData because it conflicts TagsData from
+// request/data event.
+type RTagsData struct {
+	Tags []string `json:"tags"`
+}
+
+// ResponseDevice describes a scheme for response/device event.
+type ResponseDevice struct {
+	EventMeta
+	Data Info
+}
+
+// ResponseDeviceSummary describes a scheme for response/device_summary event.
+type ResponseDeviceSummary struct {
+	EventMeta
+	Data Scan
+}
+
+// ResponseReading describes a scheme for response/reading event.
+type ResponseReading struct {
+	EventMeta
+	Data Read
+}
+
+// ResponseWriteState describes a scheme for response/write_state event.
+type ResponseWriteState struct {
+	EventMeta
+	Data Transaction
+}
+
+// ResponseError describes a scheme for response/error event.
+type ResponseError struct {
+	EventMeta
+	Data Error
+}
