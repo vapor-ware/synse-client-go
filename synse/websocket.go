@@ -124,16 +124,21 @@ func (c *websocketClient) Version() (*scheme.Version, error) {
 
 	err := c.connection.WriteJSON(req)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to write to connection")
 	}
 
-	out := new(scheme.ResponseVersion)
-	err = c.connection.ReadJSON(out)
+	resp := new(scheme.ResponseVersion)
+	err = c.connection.ReadJSON(resp)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to read from connection")
 	}
 
-	return &out.Data, nil
+	// Compare the id between request and response event.
+	if req.ID != resp.ID {
+		return nil, errors.Wrap(err, "request id doesn't match")
+	}
+
+	return &resp.Data, nil
 }
 
 // Config returns the unified configuration info.

@@ -2,15 +2,12 @@ package synse
 
 import (
 	// "crypto/tls"
-	"net/http"
-	"net/http/httptest"
 	"testing"
 	"time"
 
-	// "github.com/vapor-ware/synse-client-go/internal/test"
+	"github.com/vapor-ware/synse-client-go/internal/test"
 	"github.com/vapor-ware/synse-client-go/synse/scheme"
 
-	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -93,12 +90,18 @@ func TestWebSocketClientV3_200(t *testing.T) {
 	// 	},
 	// }
 
-	// Create test server with the echo handler.
-	s := httptest.NewServer(http.HandlerFunc(echo))
+	expected := &scheme.Version{
+		Version:    "3.0.0",
+		APIVersion: "v3",
+	}
+
+	s := test.NewWebSocketServerV3()
 	defer s.Close()
 
+	s.Serve("request/version", expected)
+
 	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL[7:],
+		Address: s.URL,
 	})
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
@@ -109,40 +112,5 @@ func TestWebSocketClientV3_200(t *testing.T) {
 	v, err := client.Version()
 	assert.NotNil(t, v)
 	assert.NoError(t, err)
-
-	t.Log(v)
-}
-
-var upgrader = websocket.Upgrader{}
-
-func echo(w http.ResponseWriter, r *http.Request) {
-	c, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		return
-	}
-	defer c.Close()
-
-	in := new(scheme.RequestVersion)
-	out := scheme.ResponseVersion{
-		EventMeta: scheme.EventMeta{
-			ID:    uint64(1),
-			Event: "response/version",
-		},
-		Data: scheme.Version{
-			Version:    "3.0.0",
-			APIVersion: "v3",
-		},
-	}
-
-	for {
-		err := c.ReadJSON(in)
-		if err != nil {
-			break
-		}
-
-		err = c.WriteJSON(out)
-		if err != nil {
-			break
-		}
-	}
+	assert.Equal(t, expected, v)
 }
