@@ -107,8 +107,8 @@ func (c *websocketClient) Close() error {
 }
 
 // Status returns the status info. This is used to check if the server
-// is responsive and reachable. However, it's not applicable for WebSocket
-// client.
+// is responsive and reachable.
+// Note: this method is not applicable for websocket client.
 func (c *websocketClient) Status() (*scheme.Status, error) {
 	return nil, nil
 }
@@ -148,6 +148,7 @@ func (c *websocketClient) Config() (*scheme.Config, error) {
 
 // Plugins returns the summary of all plugins currently registered with
 // Synse Server.
+// Note: this method is not applicable for websocket client.
 func (c *websocketClient) Plugins() (*[]scheme.PluginMeta, error) {
 	return nil, nil
 }

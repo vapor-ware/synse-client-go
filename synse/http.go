@@ -268,13 +268,13 @@ func (c *httpClient) GetOptions() *Options {
 }
 
 // Open opens the websocket connection between the client and Synse Server.
-// However, this method is not applicable for a HTTP client. Hence, it will do nothing.
+// Note: this method is not applicable for http client.
 func (c *httpClient) Open() error {
 	return nil
 }
 
 // Close closes the websocket connection between the client and Synse Server.
-// However, this method is not applicable for a HTTP client. Hence, it will do nothing.
+// Note: this method is not applicable for http client.
 func (c *httpClient) Close() error {
 	return nil
 }
