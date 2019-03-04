@@ -155,7 +155,34 @@ func (c *websocketClient) Plugins() (*[]scheme.PluginMeta, error) {
 
 // Plugin returns data from a specific plugin.
 func (c *websocketClient) Plugin(id string) (*scheme.Plugin, error) {
-	return nil, nil
+	req := scheme.RequestPlugin{
+		EventMeta: scheme.EventMeta{
+			ID:    addCounter(),
+			Event: requestVersion,
+		},
+		Data: scheme.PluginData{
+			Plugin: id,
+		},
+	}
+
+	err := c.connection.WriteJSON(req)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to write to connection")
+	}
+
+	resp := new(scheme.ResponsePlugin)
+	err = c.connection.ReadJSON(resp)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to read from connection")
+	}
+
+	// Compare the id between request and response event.
+	if req.ID != resp.ID {
+		return nil, errors.Wrap(err, "request id doesn't match")
+	}
+
+	return &resp.Data, nil
+
 }
 
 // PluginHealth returns the summary of the health of registered plugins.

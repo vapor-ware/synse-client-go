@@ -49,10 +49,7 @@ type request struct {
 	Data  map[string]interface{} `json:"data"`
 }
 
-type mock struct {
-}
-
-// NewServerV3 returns an instance of a mock http server for v3 API.
+// NewWebSocketServerV3 returns an instance of a mock http server for v3 API.
 func NewWebSocketServerV3() WebSocketServer {
 	m := http.NewServeMux()
 	s := httptest.NewServer(m)
@@ -66,7 +63,7 @@ func NewWebSocketServerV3() WebSocketServer {
 	}
 }
 
-func (s WebSocketServer) Serve(event string, resp interface{}) {
+func (s WebSocketServer) Serve(resp interface{}) {
 	s.mux.HandleFunc(
 		fmt.Sprintf("/%s/%s", s.version, s.entryRoute),
 		func(w http.ResponseWriter, r *http.Request) {
@@ -83,16 +80,11 @@ func (s WebSocketServer) Serve(event string, resp interface{}) {
 					return
 				}
 
-				out := map[string]interface{}{}
-				switch event {
-				case "request/version":
-					out = map[string]interface{}{
-						"id":    in.ID,
-						"event": in.Event,
-						"data":  resp,
-					}
+				out := map[string]interface{}{
+					"id":    in.ID,
+					"event": in.Event,
+					"data":  resp,
 				}
-
 				err = c.WriteJSON(out)
 				if err != nil {
 					return
