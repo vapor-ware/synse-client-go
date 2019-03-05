@@ -79,6 +79,18 @@ func createHTTPClient(opts *Options) (*resty.Client, error) {
 		SetTLSClientConfig(&tls.Config{InsecureSkipVerify: opts.TLS.SkipVerify}), nil
 }
 
+// Open opens the websocket connection between the client and Synse Server.
+// NOTE - this method is not applicable for http client.
+func (c *httpClient) Open() error {
+	return nil
+}
+
+// Close closes the websocket connection between the client and Synse Server.
+// NOTE - this method is not applicable for http client.
+func (c *httpClient) Close() error {
+	return nil
+}
+
 // Status returns the status info.
 func (c *httpClient) Status() (*scheme.Status, error) {
 	out := new(scheme.Status)
@@ -265,18 +277,6 @@ func (c *httpClient) Transaction(id string) (*scheme.Transaction, error) {
 // GetOptions returns the current config options of the client.
 func (c *httpClient) GetOptions() *Options {
 	return c.options
-}
-
-// Open opens the websocket connection between the client and Synse Server.
-// Note: this method is not applicable for http client.
-func (c *httpClient) Open() error {
-	return nil
-}
-
-// Close closes the websocket connection between the client and Synse Server.
-// Note: this method is not applicable for http client.
-func (c *httpClient) Close() error {
-	return nil
 }
 
 // getVersionedQueryParams performs a GET request using query parameters
