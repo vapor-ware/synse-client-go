@@ -35,14 +35,7 @@ type RequestPluginHealth struct {
 // RequestScan describes a scheme for request/scan event.
 type RequestScan struct {
 	EventMeta
-	Data ScanData `json:"data"`
-}
-
-// ScanData describes the data for request/scan event.
-type ScanData struct {
-	NS    string   `json:"ns"`
-	Tags  []string `json:"tags"`
-	Force bool     `json:"force"`
+	Data ScanOptions `json:"data"`
 }
 
 // RequestTags describes a scheme for request/tags event.
@@ -148,7 +141,7 @@ type ResponseDevice struct {
 // ResponseDeviceSummary describes a scheme for response/device_summary event.
 type ResponseDeviceSummary struct {
 	EventMeta
-	Data Scan
+	Data []Scan
 }
 
 // ResponseReading describes a scheme for response/reading event.
