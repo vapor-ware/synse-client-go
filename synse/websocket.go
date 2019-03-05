@@ -96,7 +96,7 @@ func (c *websocketClient) Open() error {
 
 // Close closes the websocket connection between the client and Synse Server.
 // It's up to the user to close the connection after finish using it.
-// TODO - look into how defer work with returned error?
+// FIXME - does defer work with Close?
 func (c *websocketClient) Close() error {
 	err := c.connection.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 	if err != nil {
@@ -108,7 +108,7 @@ func (c *websocketClient) Close() error {
 
 // Status returns the status info. This is used to check if the server
 // is responsive and reachable.
-// Note: this method is not applicable for websocket client.
+// NOTE - this method is not applicable for websocket client.
 func (c *websocketClient) Status() (*scheme.Status, error) {
 	return nil, nil
 }
@@ -122,20 +122,15 @@ func (c *websocketClient) Version() (*scheme.Version, error) {
 		},
 	}
 
-	err := c.connection.WriteJSON(req)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to write to connection")
-	}
-
 	resp := new(scheme.ResponseVersion)
-	err = c.connection.ReadJSON(resp)
+	err := c.makeRequest(req, resp)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to read from connection")
+		return nil, err
 	}
 
-	// Compare the id between request and response event.
-	if req.ID != resp.ID {
-		return nil, errors.Wrap(err, "request id doesn't match")
+	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
+	if err != nil {
+		return nil, err
 	}
 
 	return &resp.Data, nil
@@ -148,7 +143,7 @@ func (c *websocketClient) Config() (*scheme.Config, error) {
 
 // Plugins returns the summary of all plugins currently registered with
 // Synse Server.
-// Note: this method is not applicable for websocket client.
+// NOTE - this method is not applicable for websocket client.
 func (c *websocketClient) Plugins() (*[]scheme.PluginMeta, error) {
 	return nil, nil
 }
@@ -165,29 +160,41 @@ func (c *websocketClient) Plugin(id string) (*scheme.Plugin, error) {
 		},
 	}
 
-	err := c.connection.WriteJSON(req)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to write to connection")
-	}
-
 	resp := new(scheme.ResponsePlugin)
-	err = c.connection.ReadJSON(resp)
+	err := c.makeRequest(req, resp)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to read from connection")
+		return nil, err
 	}
 
-	// Compare the id between request and response event.
-	if req.ID != resp.ID {
-		return nil, errors.Wrap(err, "request id doesn't match")
+	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
+	if err != nil {
+		return nil, err
 	}
 
 	return &resp.Data, nil
-
 }
 
 // PluginHealth returns the summary of the health of registered plugins.
 func (c *websocketClient) PluginHealth() (*scheme.PluginHealth, error) {
-	return nil, nil
+	req := scheme.RequestPluginHealth{
+		EventMeta: scheme.EventMeta{
+			ID:    addCounter(),
+			Event: requestVersion,
+		},
+	}
+
+	resp := new(scheme.ResponsePluginHealth)
+	err := c.makeRequest(req, resp)
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp.Data, nil
 }
 
 // Scan returns the list of devices that Synse knows about and can read
@@ -195,7 +202,26 @@ func (c *websocketClient) PluginHealth() (*scheme.PluginHealth, error) {
 // It can be filtered to show only those devices which match a set
 // of provided tags by using ScanOptions.
 func (c *websocketClient) Scan(opts scheme.ScanOptions) (*[]scheme.Scan, error) {
-	return nil, nil
+	req := scheme.RequestScan{
+		EventMeta: scheme.EventMeta{
+			ID:    addCounter(),
+			Event: requestScan,
+		},
+		Data: opts,
+	}
+
+	resp := new(scheme.ResponseDeviceSummary)
+	err := c.makeRequest(req, resp)
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp.Data, nil
 }
 
 // Tags returns the list of all tags currently associated with devices.
@@ -261,4 +287,55 @@ func addCounter() uint64 {
 // getCounter safely gets current value of counter.
 func getCounter() uint64 {
 	return atomic.LoadUint64(&counter)
+}
+
+// makeRequest issues a request event, reads its response event and parse the
+// response back in JSON.
+// TODO - how async work in this case? is writeJSON and readJSON block or
+// should it? do i need to verify returned response? how do i do that?
+func (c *websocketClient) makeRequest(req, resp interface{}) error {
+	err := c.connection.WriteJSON(req)
+	if err != nil {
+		return errors.Wrap(err, "failed to write to connection")
+	}
+
+	err = c.connection.ReadJSON(resp)
+	if err != nil {
+		return errors.Wrap(err, "failed to read from connection")
+	}
+
+	return nil
+}
+
+// verityResponse checks if the request/reponse metadata are matched.
+func (c *websocketClient) verifyResponse(reqMeta, respMeta scheme.EventMeta) error {
+	if reqMeta.ID != respMeta.ID {
+		return errors.New("request/response id does not match")
+	}
+
+	if matchEvent(reqMeta.Event) != respMeta.Event {
+		return errors.New("request/response event does not match")
+	}
+
+	return nil
+}
+
+// matchEvent returns a corresponding response event for a given request event.
+func matchEvent(reqEvent string) string {
+	var respEvent string
+
+	switch reqEvent {
+	case requestVersion:
+		respEvent = responseVersion
+	case requestPlugin:
+		respEvent = responsePlugin
+	case requestPluginHealth:
+		respEvent = responsePluginHealth
+	case requestScan:
+		respEvent = responseDeviceSummary
+	default:
+		respEvent = ""
+	}
+
+	return respEvent
 }
