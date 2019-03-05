@@ -71,6 +71,16 @@ func TestNewWebSocketClientV3_ValidAddressAndTimeout(t *testing.T) {
 }
 
 func TestWebSocketClientV3_Version_200(t *testing.T) {
+	in := `
+{
+  "id":1,
+  "event":"response/version",
+  "data":{
+    "version":"3.0.0",
+	"api_version":"v3"
+  }
+}`
+
 	expected := &scheme.Version{
 		Version:    "3.0.0",
 		APIVersion: "v3",
@@ -79,7 +89,7 @@ func TestWebSocketClientV3_Version_200(t *testing.T) {
 	s := test.NewWebSocketServerV3()
 	defer s.Close()
 
-	s.Serve(expected)
+	s.Serve(in)
 
 	client, err := NewWebSocketClientV3(&Options{
 		Address: s.URL,
@@ -97,6 +107,55 @@ func TestWebSocketClientV3_Version_200(t *testing.T) {
 }
 
 func TestWebSocketClientV3_Plugin_200(t *testing.T) {
+	in := `
+{
+   "id":2,
+   "event":"response/plugin",
+   "data":{
+      "active":true,
+      "id":"12835beffd3e6c603aa4dd92127707b5",
+      "tag":"vaporio\/emulator-plugin",
+      "name":"emulator plugin",
+      "description":"A plugin with emulated devices and data",
+      "maintainer":"vaporio",
+      "vcs":"github.com\/vapor-ware\/synse-emulator-plugin",
+      "version":{
+         "plugin_version":"2.0.0",
+         "sdk_version":"1.0.0",
+         "build_date":"2018-06-14T16:24:09",
+         "git_commit":"13e6478",
+         "git_tag":"1.0.2-5-g13e6478",
+         "arch":"amd64",
+         "os":"linux"
+      },
+      "network":{
+         "protocol":"tcp",
+         "address":"emulator-plugin:5001"
+      },
+      "health":{
+         "timestamp":"2018-06-15T20:04:33Z",
+         "status":"ok",
+         "message":"",
+         "checks":[
+            {
+               "name":"read buffer health",
+               "status":"ok",
+               "message":"",
+               "timestamp":"2018-06-15T20:04:06Z",
+               "type":"periodic"
+            },
+            {
+               "name":"write buffer health",
+               "status":"ok",
+               "message":"",
+               "timestamp":"2018-06-15T20:04:06Z",
+               "type":"periodic"
+            }
+         ]
+      }
+   }
+}`
+
 	expected := &scheme.Plugin{
 		PluginMeta: scheme.PluginMeta{
 			Active:      true,
@@ -146,7 +205,7 @@ func TestWebSocketClientV3_Plugin_200(t *testing.T) {
 	s := test.NewWebSocketServerV3()
 	defer s.Close()
 
-	s.Serve(expected)
+	s.Serve(in)
 
 	client, err := NewWebSocketClientV3(&Options{
 		Address: s.URL,

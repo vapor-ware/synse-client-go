@@ -4,6 +4,7 @@ package synse
 
 import (
 	"crypto/tls"
+	"fmt"
 	"sync/atomic"
 
 	"github.com/gorilla/websocket"
@@ -153,7 +154,7 @@ func (c *websocketClient) Plugin(id string) (*scheme.Plugin, error) {
 	req := scheme.RequestPlugin{
 		EventMeta: scheme.EventMeta{
 			ID:    addCounter(),
-			Event: requestVersion,
+			Event: requestPlugin,
 		},
 		Data: scheme.PluginData{
 			Plugin: id,
@@ -310,11 +311,11 @@ func (c *websocketClient) makeRequest(req, resp interface{}) error {
 // verityResponse checks if the request/reponse metadata are matched.
 func (c *websocketClient) verifyResponse(reqMeta, respMeta scheme.EventMeta) error {
 	if reqMeta.ID != respMeta.ID {
-		return errors.New("request/response id does not match")
+		return errors.New(fmt.Sprintf("%v is not the same as %v", reqMeta.ID, respMeta.ID))
 	}
 
 	if matchEvent(reqMeta.Event) != respMeta.Event {
-		return errors.New("request/response event does not match")
+		return errors.New(fmt.Sprintf("%s is not the same as %s", reqMeta.Event, respMeta.Event))
 	}
 
 	return nil

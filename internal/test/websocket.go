@@ -42,13 +42,6 @@ type WebSocketServer struct {
 	entryRoute string
 }
 
-// request describes a request event scheme.
-type request struct {
-	ID    uint64                 `json:"id"`
-	Event string                 `json:"event"`
-	Data  map[string]interface{} `json:"data"`
-}
-
 // NewWebSocketServerV3 returns an instance of a mock http server for v3 API.
 func NewWebSocketServerV3() WebSocketServer {
 	m := http.NewServeMux()
@@ -63,7 +56,7 @@ func NewWebSocketServerV3() WebSocketServer {
 	}
 }
 
-func (s WebSocketServer) Serve(resp interface{}) {
+func (s WebSocketServer) Serve(resp string) {
 	s.mux.HandleFunc(
 		fmt.Sprintf("/%s/%s", s.version, s.entryRoute),
 		func(w http.ResponseWriter, r *http.Request) {
@@ -74,18 +67,12 @@ func (s WebSocketServer) Serve(resp interface{}) {
 			defer c.Close()
 
 			for {
-				in := new(request)
-				err := c.ReadJSON(in)
+				_, _, err := c.ReadMessage()
 				if err != nil {
 					return
 				}
 
-				out := map[string]interface{}{
-					"id":    in.ID,
-					"event": matchEvent(in.Event),
-					"data":  resp,
-				}
-				err = c.WriteJSON(out)
+				err = c.WriteMessage(websocket.TextMessage, []byte(resp))
 				if err != nil {
 					return
 				}
@@ -96,90 +83,4 @@ func (s WebSocketServer) Serve(resp interface{}) {
 
 func (s WebSocketServer) Close() {
 	s.server.Close()
-}
-
-// TODO - clean this up
-const (
-	// requestVersion describes the request/version event.
-	requestVersion = "request/version"
-
-	// requestConfig describes the request/config event.
-	requestConfig = "request/config"
-
-	// requestPlugin describes the request/plugin event.
-	requestPlugin = "request/plugin"
-
-	// requestPluginHealth describes the request/plugin_health event.
-	requestPluginHealth = "request/plugin_health"
-
-	// requestScan describes the request/scan event.
-	requestScan = "request/scan"
-
-	// requestTags describes the request/tags event.
-	requestTags = "request/tags"
-
-	// requestInfo describes the request/info event.
-	requestInfo = "request/info"
-
-	// requestRead describes the request/read event.
-	requestRead = "request/read"
-
-	// requestReadCache describes the request/read_cache event.
-	requestReadCache = "request/read_cache"
-
-	// requestWrite describes the request/write event.
-	requestWrite = "request/write"
-
-	// requestTransaction describes the request/transaction event.
-	requestTransaction = "request/transaction"
-
-	// responseVersion describes the response/version event.
-	responseVersion = "response/version"
-
-	// responseConfig describes the response/config event.
-	responseConfig = "response/config"
-
-	// responsePlugin describes the response/plugin event.
-	responsePlugin = "response/plugin"
-
-	// responsePluginHealth describes the response/plugin_health event.
-	responsePluginHealth = "response/plugin_health"
-
-	// responseTags describes the response/tags event.
-	responseTags = "response/tags"
-
-	// responseDevice describes the response/device event.
-	responseDevice = "response/device"
-
-	// responseDeviceSummary describes the response/device_summary event.
-	responseDeviceSummary = "response/device_summary"
-
-	// responseReading describes the response/reading event.
-	responseReading = "response/reading"
-
-	// responseWriteState describes the response/write_state event.
-	responseWriteState = "response/write_state"
-
-	// responseError describes the response/error event.
-	responseError = "response/error"
-)
-
-// matchEvent returns a corresponding response event for a given request event.
-func matchEvent(reqEvent string) string {
-	var respEvent string
-
-	switch reqEvent {
-	case requestVersion:
-		respEvent = responseVersion
-	case requestPlugin:
-		respEvent = responsePlugin
-	case requestPluginHealth:
-		respEvent = responsePluginHealth
-	case requestScan:
-		respEvent = responseDeviceSummary
-	default:
-		respEvent = ""
-	}
-
-	return respEvent
 }
