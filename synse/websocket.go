@@ -188,7 +188,7 @@ func (c *websocketClient) PluginHealth() (*scheme.PluginHealth, error) {
 	req := scheme.RequestPluginHealth{
 		EventMeta: scheme.EventMeta{
 			ID:    addCounter(),
-			Event: requestVersion,
+			Event: requestPluginHealth,
 		},
 	}
 
@@ -236,7 +236,26 @@ func (c *websocketClient) Scan(opts scheme.ScanOptions) (*[]scheme.Scan, error) 
 // Tags returns the list of all tags currently associated with devices.
 // If no TagsOptions is specified, the default tag namespace will be used.
 func (c *websocketClient) Tags(opts scheme.TagsOptions) (*[]string, error) {
-	return nil, nil
+	req := scheme.RequestTags{
+		EventMeta: scheme.EventMeta{
+			ID:    addCounter(),
+			Event: requestTags,
+		},
+		Data: opts,
+	}
+
+	resp := new(scheme.ResponseTags)
+	err := c.makeRequest(req, resp)
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp.Data.Tags, nil
 }
 
 // Info returns the full set of meta info and capabilities for a specific
@@ -342,6 +361,8 @@ func matchEvent(reqEvent string) string {
 		respEvent = responsePluginHealth
 	case requestScan:
 		respEvent = responseDeviceSummary
+	case requestTags:
+		respEvent = responseTags
 	default:
 		respEvent = ""
 	}

@@ -41,13 +41,7 @@ type RequestScan struct {
 // RequestTags describes a scheme for request/tags event.
 type RequestTags struct {
 	EventMeta
-	Data TagsData `json:"data"`
-}
-
-// TagsData describes the data for request/tags event.
-type TagsData struct {
-	NS  []string `json:"ns"`
-	IDs bool     `json:"ids"`
+	Data TagsOptions `json:"data"`
 }
 
 // RequestInfo describes a scheme for request/info event.
@@ -122,13 +116,11 @@ type ResponsePluginHealth struct {
 // ResponseTags describes a scheme for response/tags event.
 type ResponseTags struct {
 	EventMeta
-	Data RTagsData
+	Data TagsData
 }
 
-// RTagsData describes the data for response/data event.
-// FIXME - need to name it RTagsData because it conflicts TagsData from
-// request/data event.
-type RTagsData struct {
+// TagsData describes the data for response/data event.
+type TagsData struct {
 	Tags []string `json:"tags"`
 }
 

@@ -221,3 +221,42 @@ func TestWebSocketClientV3_Plugin_200(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, expected, v)
 }
+
+func TestWebSocketClientV3_Tags_200(t *testing.T) {
+	in := `
+{
+   "id":3,
+   "event":"response/tags",
+   "data":{
+      "tags":[
+         "default/tag1",
+         "default/type:temperature"
+      ]
+   }
+}`
+
+	expected := &[]string{
+		"default/tag1",
+		"default/type:temperature",
+	}
+
+	s := test.NewWebSocketServerV3()
+	defer s.Close()
+
+	s.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: s.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	opts := scheme.TagsOptions{}
+	v, err := client.Tags(opts)
+	assert.NotNil(t, v)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, v)
+}
