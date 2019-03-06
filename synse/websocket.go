@@ -12,7 +12,9 @@ import (
 	"github.com/vapor-ware/synse-client-go/synse/scheme"
 )
 
-// counter counts the number of request sent.
+// counter counts the number of request sent. It has the type uint64 which can
+// later be used by an atomic function, which makes it more concurrency-safe.
+// FIXME - is it necessary though?
 var counter uint64
 
 type websocketClient struct {
@@ -97,7 +99,8 @@ func (c *websocketClient) Open() error {
 
 // Close closes the websocket connection between the client and Synse Server.
 // It's up to the user to close the connection after finish using it.
-// FIXME - does defer work with Close?
+// FIXME - it makes sense to use defer function with Close. However, since
+// Close returns an error, do user need to check it manually? If yes, how?
 func (c *websocketClient) Close() error {
 	err := c.connection.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 	if err != nil {
@@ -134,6 +137,11 @@ func (c *websocketClient) Version() (*scheme.Version, error) {
 		return nil, err
 	}
 
+	// FIXME - should we return the everything from ResponseVersion
+	// or it is fine to return the Data value only since these metadata
+	// such as request id and request won't be much helpful for consumer
+	// anyway? Should the response from websocket client be similar to http
+	// client?
 	return &resp.Data, nil
 }
 

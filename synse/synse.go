@@ -6,7 +6,11 @@ import (
 	"github.com/vapor-ware/synse-client-go/synse/scheme"
 )
 
-// Client API for Synse Server.
+// Client API for Synse Server, for both Websocket and HTTP client.
+// FIXME - for the most part, Websocket and HTTP client expose similiar api
+// methods. However, since they are different in their usage and semantics,
+// there are some methods that are only applicable for one and not the other.
+// In this case, these methods will do nothing. Does this make sense?
 type Client interface {
 	// Status returns the status info. This is used to check if the server
 	// is responsive and reachable.
