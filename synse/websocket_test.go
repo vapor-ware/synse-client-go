@@ -106,10 +106,124 @@ func TestWebSocketClientV3_Version_200(t *testing.T) {
 	assert.Equal(t, expected, v)
 }
 
-func TestWebSocketClientV3_Plugin_200(t *testing.T) {
+func TestWebSocketClientV3_Config_200(t *testing.T) {
 	in := `
 {
    "id":2,
+   "event":"response/config",
+   "data":{
+      "logging":"info",
+      "pretty_json":true,
+      "locale":"en_US",
+      "cache":{
+         "device":{
+            "ttl":20
+         },
+         "transaction":{
+            "ttl":300
+         }
+      },
+      "grpc":{
+         "timeout":3,
+         "tls":{
+            "cert":"/tmp/ssl/synse.crt"
+         }
+      },
+      "metrics":{
+         "enabled":false
+      },
+      "transport":{
+         "http":true,
+         "websocket":true
+      },
+      "plugin":{
+         "tcp":[
+            "emulator-plugin:5001"
+         ],
+         "unix":[
+            "/tmp/synse/plugin/foo.sock"
+         ],
+         "discover":{
+            "kubernetes":{
+               "namespace":"vapor",
+               "endpoints":{
+                  "labels":{
+                     "app":"synse",
+                     "component":"server"
+                  }
+               }
+            }
+         }
+      }
+   }
+}`
+
+	expected := &scheme.Config{
+		Logging:    "info",
+		PrettyJSON: true,
+		Locale:     "en_US",
+		Cache: scheme.CacheOptions{
+			Device: scheme.DeviceOptions{
+				TTL: int(20),
+			},
+			Transaction: scheme.TransactionOptions{
+				TTL: int(300),
+			},
+		},
+		GRPC: scheme.GRPCOptions{
+			Timeout: int(3),
+			TLS: scheme.TLSOptions{
+				Cert: "/tmp/ssl/synse.crt",
+			},
+		},
+		Metrics: scheme.MetricsOptions{
+			Enabled: false,
+		},
+		Transport: scheme.TransportOptions{
+			HTTP:      true,
+			WebSocket: true,
+		},
+		Plugin: scheme.PluginOptions{
+			TCP:  []string{"emulator-plugin:5001"},
+			Unix: []string{"/tmp/synse/plugin/foo.sock"},
+			Discover: scheme.DiscoveryOptions{
+				Kubernetes: scheme.KubernetesOptions{
+					Namespace: "vapor",
+					Endpoints: scheme.EndpointsOptions{
+						Labels: map[string]string{
+							"app":       "synse",
+							"component": "server",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	s := test.NewWebSocketServerV3()
+	defer s.Close()
+
+	s.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: s.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	v, err := client.Config()
+	assert.NotNil(t, v)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, v)
+}
+
+func TestWebSocketClientV3_Plugin_200(t *testing.T) {
+	in := `
+{
+   "id":3,
    "event":"response/plugin",
    "data":{
       "active":true,
@@ -225,7 +339,7 @@ func TestWebSocketClientV3_Plugin_200(t *testing.T) {
 func TestWebSocketClientV3_Tags_200(t *testing.T) {
 	in := `
 {
-   "id":3,
+   "id":4,
    "event":"response/tags",
    "data":{
       "tags":[

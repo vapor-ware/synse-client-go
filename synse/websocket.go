@@ -147,7 +147,25 @@ func (c *websocketClient) Version() (*scheme.Version, error) {
 
 // Config returns the unified configuration info.
 func (c *websocketClient) Config() (*scheme.Config, error) {
-	return nil, nil
+	req := scheme.RequestConfig{
+		EventMeta: scheme.EventMeta{
+			ID:    addCounter(),
+			Event: requestConfig,
+		},
+	}
+
+	resp := new(scheme.ResponseConfig)
+	err := c.makeRequest(req, resp)
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp.Data, nil
 }
 
 // Plugins returns the summary of all plugins currently registered with
