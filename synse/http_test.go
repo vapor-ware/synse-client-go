@@ -120,7 +120,7 @@ func TestHTTPClientV3_Unversioned_200(t *testing.T) {
 		},
 	}
 
-	server := test.NewServerV3()
+	server := test.NewHTTPServerV3()
 	defer server.Close()
 
 	client, err := NewHTTPClientV3(&Options{
@@ -156,7 +156,7 @@ func TestHTTPClientV3_Unversioned_500(t *testing.T) {
 		{"/version"},
 	}
 
-	server := test.NewServerV3()
+	server := test.NewHTTPServerV3()
 	defer server.Close()
 
 	client, err := NewHTTPClientV3(&Options{
@@ -925,7 +925,7 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
 		},
 	}
 
-	server := test.NewServerV3()
+	server := test.NewHTTPServerV3()
 	defer server.Close()
 
 	client, err := NewHTTPClientV3(&Options{
@@ -1004,7 +1004,7 @@ func TestHTTPClientV3_Versioned_500(t *testing.T) { // nolint
 		{"/transaction/56a32eba-1aa6-4868-84ee-fe01af8b2e6b"},
 	}
 
-	server := test.NewServerV3()
+	server := test.NewHTTPServerV3()
 	defer server.Close()
 
 	client, err := NewHTTPClientV3(&Options{
@@ -1081,7 +1081,7 @@ func TestHTTPClientV3_TLS(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Create a mock https server and let it use the certificates.
-	server := test.NewTLSServerV3()
+	server := test.NewHTTPSServerV3()
 	defer server.Close()
 
 	cfg := &tls.Config{Certificates: []tls.Certificate{cert}}
@@ -1166,7 +1166,7 @@ func TestHTTPClientV3_TLS_UnknownCA(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Create a mock https server and let it use the certificates.
-	server := test.NewTLSServerV3()
+	server := test.NewHTTPSServerV3()
 	defer server.Close()
 
 	cfg := &tls.Config{Certificates: []tls.Certificate{cert}}
