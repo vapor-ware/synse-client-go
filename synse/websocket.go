@@ -355,6 +355,8 @@ func matchEvent(reqEvent string) string {
 	switch reqEvent {
 	case requestVersion:
 		respEvent = responseVersion
+	case requestConfig:
+		respEvent = responseConfig
 	case requestPlugin:
 		respEvent = responsePlugin
 	case requestPluginHealth:
@@ -363,6 +365,16 @@ func matchEvent(reqEvent string) string {
 		respEvent = responseDeviceSummary
 	case requestTags:
 		respEvent = responseTags
+	case requestInfo:
+		respEvent = responseDevice
+	case requestRead:
+		respEvent = responseReading
+	case requestReadCache:
+		respEvent = responseReading
+	case requestWrite:
+		respEvent = responseWriteState
+	case requestTransaction:
+		respEvent = responseWriteState
 	default:
 		respEvent = ""
 	}
