@@ -390,10 +390,85 @@ func TestWebSocketClientV3_PluginHealth_200(t *testing.T) {
 	assert.Equal(t, expected, v)
 }
 
-func TestWebSocketClientV3_Tags_200(t *testing.T) {
+func TestWebSocketClientV3_Scan_200(t *testing.T) {
 	in := `
 {
    "id":5,
+   "event":"response/device_summary",
+   "data":[
+      {
+         "id":"0fe8f06229aa9a01ef6032d1ddaf18a5",
+         "info":"Synse Temperature Sensor",
+         "type":"temperature",
+         "plugin":"12835beffd3e6c603aa4dd92127707b5",
+         "tags":[
+            "type:temperature",
+            "temperature",
+            "vio/fan-sensor"
+         ]
+      },
+      {
+         "id":"12ea5644d052c6bf1bca3c9864fd8a44",
+         "info":"Synse LED",
+         "type":"led",
+         "plugin":"12835beffd3e6c603aa4dd92127707b5",
+         "tags":[
+            "type:led",
+            "led"
+         ]
+      }
+   ]
+}`
+
+	expected := &[]scheme.Scan{
+		scheme.Scan{
+			ID:     "0fe8f06229aa9a01ef6032d1ddaf18a5",
+			Info:   "Synse Temperature Sensor",
+			Type:   "temperature",
+			Plugin: "12835beffd3e6c603aa4dd92127707b5",
+			Tags: []string{
+				"type:temperature",
+				"temperature",
+				"vio/fan-sensor",
+			},
+		},
+		scheme.Scan{
+			ID:     "12ea5644d052c6bf1bca3c9864fd8a44",
+			Info:   "Synse LED",
+			Type:   "led",
+			Plugin: "12835beffd3e6c603aa4dd92127707b5",
+			Tags: []string{
+				"type:led",
+				"led",
+			},
+		},
+	}
+
+	s := test.NewWebSocketServerV3()
+	defer s.Close()
+
+	s.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: s.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	opts := scheme.ScanOptions{}
+	v, err := client.Scan(opts)
+	assert.NotNil(t, v)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, v)
+}
+
+func TestWebSocketClientV3_Tags_200(t *testing.T) {
+	in := `
+{
+   "id":6,
    "event":"response/tags",
    "data":{
       "tags":[
