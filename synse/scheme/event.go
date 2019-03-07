@@ -58,18 +58,13 @@ type InfoData struct {
 // RequestRead describes a scheme for request/read event.
 type RequestRead struct {
 	EventMeta
-	Data ReadData `json:"data"`
-}
-
-// ReadData describes the data for request/read event.
-type ReadData struct {
-	NS   string   `json:"ns"`
-	Tags []string `json:"tags"`
+	Data ReadOptions `json:"data"`
 }
 
 // RequestReadCache describes a scheme for request/read_cache event.
 type RequestReadCache struct {
 	EventMeta
+	Data ReadCacheOptions `json:"data"`
 }
 
 // RequestWrite describes a scheme for request/write event.
@@ -81,7 +76,7 @@ type RequestWrite struct {
 // RequestTransaction describes a scheme for request/transaction event.
 type RequestTransaction struct {
 	EventMeta
-	Data ReadData `json:"data"`
+	Data ReadOptions `json:"data"`
 }
 
 // TransactionData describes the data for request/transaction event.
@@ -139,7 +134,7 @@ type ResponseDeviceSummary struct {
 // ResponseReading describes a scheme for response/reading event.
 type ResponseReading struct {
 	EventMeta
-	Data Read
+	Data []Read
 }
 
 // ResponseWriteState describes a scheme for response/write_state event.

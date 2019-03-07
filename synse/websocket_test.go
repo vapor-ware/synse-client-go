@@ -649,3 +649,124 @@ func TestWebSocketClientV3_Info_200(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, expected, v)
 }
+
+func TestWebSocketClientV3_Read_200(t *testing.T) {
+	in := `
+{
+   "id":8,
+   "event":"response/reading",
+   "data":[
+      {
+         "device":"a72cs6519ee675b",
+         "device_type":"temperature",
+         "type":"temperature",
+         "value":20.3,
+         "timestamp":"2018-02-01T13:47:40Z",
+         "unit":{
+            "system":"metric",
+            "symbol":"C",
+            "name":"degrees celsius"
+         },
+         "context":{
+            "host":"127.0.0.1",
+            "sample_rate":8
+         }
+      },
+      {
+         "device":"929b923de65a811",
+         "device_type":"led",
+         "type":"state",
+         "value":"off",
+         "timestamp":"2018-02-01T13:47:40Z",
+         "unit":null
+      },
+      {
+         "device":"929b923de65a811",
+         "device_type":"led",
+         "type":"color",
+         "value":"000000",
+         "timestamp":"2018-02-01T13:47:40Z",
+         "unit":null
+      },
+      {
+         "device":"12bb12c1f86a86e",
+         "device_type":"door_lock",
+         "type":"status",
+         "value":"locked",
+         "timestamp":"2018-02-01T13:47:40Z",
+         "unit":null,
+         "context":{
+            "wedge":1,
+            "zone":"6B"
+         }
+      }
+   ]
+}`
+
+	expected := &[]scheme.Read{
+		scheme.Read{
+			Device:     "a72cs6519ee675b",
+			DeviceType: "temperature",
+			Type:       "temperature",
+			Value:      float64(20.3),
+			Timestamp:  "2018-02-01T13:47:40Z",
+			Unit: scheme.UnitOptions{
+				System: "metric",
+				Symbol: "C",
+				Name:   "degrees celsius",
+			},
+			Context: map[string]interface{}{
+				"host":        "127.0.0.1",
+				"sample_rate": float64(8),
+			},
+		},
+		scheme.Read{
+			Device:     "929b923de65a811",
+			DeviceType: "led",
+			Type:       "state",
+			Value:      "off",
+			Timestamp:  "2018-02-01T13:47:40Z",
+			Unit:       scheme.UnitOptions{},
+		},
+		scheme.Read{
+			Device:     "929b923de65a811",
+			DeviceType: "led",
+			Type:       "color",
+			Value:      "000000",
+			Timestamp:  "2018-02-01T13:47:40Z",
+			Unit:       scheme.UnitOptions{},
+		},
+		scheme.Read{
+			Device:     "12bb12c1f86a86e",
+			DeviceType: "door_lock",
+			Type:       "status",
+			Value:      "locked",
+			Timestamp:  "2018-02-01T13:47:40Z",
+			Unit:       scheme.UnitOptions{},
+			Context: map[string]interface{}{
+				"wedge": float64(1),
+				"zone":  "6B",
+			},
+		},
+	}
+
+	s := test.NewWebSocketServerV3()
+	defer s.Close()
+
+	s.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: s.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	opts := scheme.ReadOptions{}
+	v, err := client.Read(opts)
+	assert.NotNil(t, v)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, v)
+}

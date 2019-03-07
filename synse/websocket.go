@@ -306,19 +306,58 @@ func (c *websocketClient) Info(id string) (*scheme.Info, error) {
 // Read returns data from devices which match the set of provided tags
 // using ReadOptions.
 func (c *websocketClient) Read(opts scheme.ReadOptions) (*[]scheme.Read, error) {
-	return nil, nil
+	req := scheme.RequestRead{
+		EventMeta: scheme.EventMeta{
+			ID:    addCounter(),
+			Event: requestRead,
+		},
+		Data: opts,
+	}
+
+	resp := new(scheme.ResponseReading)
+	err := c.makeRequest(req, resp)
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp.Data, nil
 }
 
 // ReadDevice returns data from a specific device.
 // It is the same as Read() where the label matches the device id tag
 // specified in ReadOptions.
+// NOTE - this method is not applicable for websocket client.
 func (c *websocketClient) ReadDevice(id string, opts scheme.ReadOptions) (*[]scheme.Read, error) {
 	return nil, nil
 }
 
 // ReadCache returns stream reading data from the registered plugins.
 func (c *websocketClient) ReadCache(opts scheme.ReadCacheOptions) (*[]scheme.Read, error) {
-	return nil, nil
+	req := scheme.RequestReadCache{
+		EventMeta: scheme.EventMeta{
+			ID:    addCounter(),
+			Event: requestInfo,
+		},
+		Data: opts,
+	}
+
+	resp := new(scheme.ResponseReading)
+	err := c.makeRequest(req, resp)
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp.Data, nil
 }
 
 // WriteAsync writes data to a device, in an asynchronous manner.
@@ -377,11 +416,11 @@ func (c *websocketClient) makeRequest(req, resp interface{}) error {
 // verityResponse checks if the request/reponse metadata are matched.
 func (c *websocketClient) verifyResponse(reqMeta, respMeta scheme.EventMeta) error {
 	if reqMeta.ID != respMeta.ID {
-		return errors.New(fmt.Sprintf("%v is not the same as %v", reqMeta.ID, respMeta.ID))
+		return errors.New(fmt.Sprintf("%v did not match %v", reqMeta.ID, respMeta.ID))
 	}
 
 	if matchEvent(reqMeta.Event) != respMeta.Event {
-		return errors.New(fmt.Sprintf("%s is not the same as %s", reqMeta.Event, respMeta.Event))
+		return errors.New(fmt.Sprintf("%s did not match %s", reqMeta.Event, respMeta.Event))
 	}
 
 	return nil
