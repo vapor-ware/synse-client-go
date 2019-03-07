@@ -76,12 +76,7 @@ type RequestWrite struct {
 // RequestTransaction describes a scheme for request/transaction event.
 type RequestTransaction struct {
 	EventMeta
-	Data ReadOptions `json:"data"`
-}
-
-// TransactionData describes the data for request/transaction event.
-type TransactionData struct {
-	Transaction string `json:"transaction"`
+	Data WriteData `json:"data"`
 }
 
 // ResponseVersion describes a scheme for response/version event.
