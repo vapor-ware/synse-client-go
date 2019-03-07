@@ -3,15 +3,10 @@ package test
 // websocket.go provides testing functionalities against a mock websocket server.
 
 import (
-	"crypto/tls"
-	// "crypto/x509"
+	// "crypto/tls"
 	"fmt"
-	// "io"
 	"net/http"
 	"net/http/httptest"
-	// "testing"
-
-	// "github.com/vapor-ware/synse-client-go/synse/scheme"
 
 	"github.com/gorilla/websocket"
 )
@@ -26,7 +21,7 @@ type WebSocketServer struct {
 	URL string
 
 	// tls holds the TLS configuration.
-	tls *tls.Config
+	// tls *tls.Config
 
 	// server is the mock websocket server.
 	server *httptest.Server
@@ -56,6 +51,7 @@ func NewWebSocketServerV3() WebSocketServer {
 	}
 }
 
+// Serve reads a request event and writes back a given response.
 func (s WebSocketServer) Serve(resp string) {
 	s.mux.HandleFunc(
 		fmt.Sprintf("/%s/%s", s.version, s.entryRoute),
@@ -64,7 +60,13 @@ func (s WebSocketServer) Serve(resp string) {
 			if err != nil {
 				return
 			}
-			defer c.Close()
+
+			defer func() {
+				err := c.Close()
+				if err != nil {
+					return
+				}
+			}()
 
 			for {
 				_, _, err := c.ReadMessage()
@@ -81,6 +83,7 @@ func (s WebSocketServer) Serve(resp string) {
 	)
 }
 
+// Close closes the connection.
 func (s WebSocketServer) Close() {
 	s.server.Close()
 }

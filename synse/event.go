@@ -64,5 +64,5 @@ const (
 	responseWriteState = "response/write_state"
 
 	// responseError describes the response/error event.
-	responseError = "response/error"
+	// responseError = "response/error"
 )

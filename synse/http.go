@@ -37,7 +37,7 @@ func NewHTTPClientV3(opts *Options) (Client, error) {
 	}
 
 	s := "http"
-	if opts.TLS.Enabled == true {
+	if opts.TLS.Enabled {
 		s = "https"
 	}
 
@@ -64,7 +64,7 @@ func createHTTPClient(opts *Options) (*resty.Client, error) {
 		SetRetryWaitTime(opts.HTTP.Retry.WaitTime).
 		SetRetryMaxWaitTime(opts.HTTP.Retry.MaxWaitTime)
 
-	if opts.TLS.Enabled == false {
+	if !opts.TLS.Enabled {
 		return client, nil
 	}
 
@@ -74,9 +74,10 @@ func createHTTPClient(opts *Options) (*resty.Client, error) {
 		return nil, err
 	}
 
+	// FIXME - for some reasons linting doesn't like how we skip tls checking here.
 	return client.
 		SetCertificates(cert).
-		SetTLSClientConfig(&tls.Config{InsecureSkipVerify: opts.TLS.SkipVerify}), nil
+		SetTLSClientConfig(&tls.Config{InsecureSkipVerify: opts.TLS.SkipVerify}), nil // nolint
 }
 
 // Open opens the websocket connection between the client and Synse Server.

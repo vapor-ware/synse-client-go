@@ -19,12 +19,7 @@ type RequestConfig struct {
 // RequestPlugin describes a scheme for request/plugin event.
 type RequestPlugin struct {
 	EventMeta
-	Data PluginData `json:"data"`
-}
-
-// PluginData describes the data for request/plugin event.
-type PluginData struct {
-	Plugin string `json:"plugin"`
+	Data WriteData `json:"data"`
 }
 
 // RequestPluginHealth describes a scheme for request/plugin_health event.
@@ -47,12 +42,7 @@ type RequestTags struct {
 // RequestInfo describes a scheme for request/info event.
 type RequestInfo struct {
 	EventMeta
-	Data InfoData `json:"data"`
-}
-
-// InfoData describes the data for request/info event.
-type InfoData struct {
-	Device string `json:"device"`
+	Data WriteData `json:"data"`
 }
 
 // RequestRead describes a scheme for request/read event.

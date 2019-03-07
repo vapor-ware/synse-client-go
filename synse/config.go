@@ -55,13 +55,13 @@ type RetryOptions struct {
 
 // TLSOptions is the config options for TLS/SSL communication.
 type TLSOptions struct {
-	// Enabled specifies whethere tls is enabled.
-	Enabled bool `default:"false"`
-
 	// CertFile and KeyFile are public/private key pair from a pair of files to
 	// use when communicating with Synse Server.
 	CertFile string `default:"-"`
 	KeyFile  string `default:"-"`
+
+	// Enabled specifies whethere tls is enabled.
+	Enabled bool `default:"false"`
 
 	// SkipVerify specifies whether the client can skip certificate checks.
 	SkipVerify bool `default:"false"`

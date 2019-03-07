@@ -46,7 +46,7 @@ func NewWebSocketClientV3(opts *Options) (Client, error) {
 	}
 
 	s := "ws"
-	if opts.TLS.Enabled == true {
+	if opts.TLS.Enabled {
 		s = "wss"
 	}
 
@@ -66,7 +66,7 @@ func createWebSocketClient(opts *Options) (*websocket.Dialer, error) {
 		return nil, err
 	}
 
-	if opts.TLS.Enabled == false {
+	if !opts.TLS.Enabled {
 		return &websocket.Dialer{
 			HandshakeTimeout: opts.WebSocket.HandshakeTimeout,
 		}, nil
@@ -182,7 +182,7 @@ func (c *websocketClient) Plugin(id string) (*scheme.Plugin, error) {
 			ID:    addCounter(),
 			Event: requestPlugin,
 		},
-		Data: scheme.PluginData{
+		Data: scheme.WriteData{
 			Plugin: id,
 		},
 	}
@@ -284,7 +284,7 @@ func (c *websocketClient) Info(id string) (*scheme.Info, error) {
 			ID:    addCounter(),
 			Event: requestInfo,
 		},
-		Data: scheme.InfoData{
+		Data: scheme.WriteData{
 			Device: id,
 		},
 	}
@@ -393,6 +393,7 @@ func (c *websocketClient) WriteSync(id string, opts []scheme.WriteData) (*[]sche
 		return nil, err
 	}
 
+	// Quick fix for the issue mentioned above: return a slice with a single value.
 	out := []scheme.Transaction{}
 	out = append(out, resp.Data)
 	return &out, nil
@@ -441,9 +442,9 @@ func addCounter() uint64 {
 }
 
 // getCounter safely gets current value of counter.
-func getCounter() uint64 {
-	return atomic.LoadUint64(&counter)
-}
+// func getCounter() uint64 {
+// 	return atomic.LoadUint64(&counter)
+// }
 
 // makeRequest issues a request event, reads its response event and parse the
 // response back in JSON.
@@ -465,19 +466,22 @@ func (c *websocketClient) makeRequest(req, resp interface{}) error {
 
 // verityResponse checks if the request/reponse metadata are matched.
 func (c *websocketClient) verifyResponse(reqMeta, respMeta scheme.EventMeta) error {
+	// FIXME - diable linting here since we want to use the pkg/errors instead
+	// of fmt.Errorf.
 	if reqMeta.ID != respMeta.ID {
-		return errors.New(fmt.Sprintf("%v did not match %v", reqMeta.ID, respMeta.ID))
+		return errors.New(fmt.Sprintf("%v did not match %v", reqMeta.ID, respMeta.ID)) // nolint
 	}
 
 	if matchEvent(reqMeta.Event) != respMeta.Event {
-		return errors.New(fmt.Sprintf("%s did not match %s", reqMeta.Event, respMeta.Event))
+		return errors.New(fmt.Sprintf("%s did not match %s", reqMeta.Event, respMeta.Event)) //nolint
 	}
 
 	return nil
 }
 
 // matchEvent returns a corresponding response event for a given request event.
-func matchEvent(reqEvent string) string {
+// FIXME - disable linting because of cyclomatic complexity due to gocyclo.
+func matchEvent(reqEvent string) string { // nolint
 	var respEvent string
 
 	switch reqEvent {
