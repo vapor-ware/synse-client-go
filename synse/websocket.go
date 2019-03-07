@@ -279,7 +279,28 @@ func (c *websocketClient) Tags(opts scheme.TagsOptions) (*[]string, error) {
 // Info returns the full set of meta info and capabilities for a specific
 // device.
 func (c *websocketClient) Info(id string) (*scheme.Info, error) {
-	return nil, nil
+	req := scheme.RequestInfo{
+		EventMeta: scheme.EventMeta{
+			ID:    addCounter(),
+			Event: requestInfo,
+		},
+		Data: scheme.InfoData{
+			Device: id,
+		},
+	}
+
+	resp := new(scheme.ResponseDevice)
+	err := c.makeRequest(req, resp)
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp.Data, nil
 }
 
 // Read returns data from devices which match the set of provided tags

@@ -503,3 +503,149 @@ func TestWebSocketClientV3_Tags_200(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, expected, v)
 }
+
+func TestWebSocketClientV3_Info_200(t *testing.T) {
+	in := `
+{
+   "id":7,
+   "event":"response/device",
+   "data":{
+      "timestamp":"2018-06-18T13:30:15Z",
+      "id":"34c226b1afadaae5f172a4e1763fd1a6",
+      "type":"humidity",
+      "metadata":{
+         "model":"emul8-humidity"
+      },
+      "plugin":"12835beffd3e6c603aa4dd92127707b5",
+      "info":"Synse Humidity Sensor",
+      "tags":[
+         "type:humidity",
+         "humidity",
+         "vio/fan-sensor"
+      ],
+      "capabilities":{
+         "mode":"rw",
+         "read":{
+
+         },
+         "write":{
+            "actions":[
+               "color",
+               "state"
+            ]
+         }
+      },
+      "output":[
+         {
+            "name":"humidity",
+            "type":"humidity",
+            "precision":3,
+            "scaling_factor":1.0,
+            "units":[
+               {
+                  "system":null,
+                  "name":"percent humidity",
+                  "symbol":"%"
+               }
+            ]
+         },
+         {
+            "name":"temperature",
+            "type":"temperature",
+            "precision":3,
+            "scaling_factor":1.0,
+            "units":[
+               {
+                  "system":"metric",
+                  "name":"celsius",
+                  "symbol":"C"
+               },
+               {
+                  "system":"imperial",
+                  "name":"fahrenheit",
+                  "symbol":"F"
+               }
+            ]
+         }
+      ]
+   }
+}`
+
+	expected := &scheme.Info{
+		Timestamp: "2018-06-18T13:30:15Z",
+		ID:        "34c226b1afadaae5f172a4e1763fd1a6",
+		Type:      "humidity",
+		Metadata: scheme.MetadataOptions{
+			Model: "emul8-humidity",
+		},
+		Plugin: "12835beffd3e6c603aa4dd92127707b5",
+		Info:   "Synse Humidity Sensor",
+		Tags: []string{
+			"type:humidity",
+			"humidity",
+			"vio/fan-sensor",
+		},
+		Capabilities: scheme.CapabilitiesOptions{
+			Mode: "rw",
+			Read: map[string]string{},
+			Write: scheme.WriteOptions{
+				Actions: []string{
+					"color",
+					"state",
+				},
+			},
+		},
+		Output: []scheme.OutputOptions{
+			scheme.OutputOptions{
+				Name:          "humidity",
+				Type:          "humidity",
+				Precision:     int(3),
+				ScalingFactor: float64(1.0),
+				Units: []scheme.UnitOptions{
+					scheme.UnitOptions{
+						System: "",
+						Name:   "percent humidity",
+						Symbol: "%",
+					},
+				},
+			},
+			scheme.OutputOptions{
+				Name:          "temperature",
+				Type:          "temperature",
+				Precision:     int(3),
+				ScalingFactor: float64(1.0),
+				Units: []scheme.UnitOptions{
+					scheme.UnitOptions{
+						System: "metric",
+						Name:   "celsius",
+						Symbol: "C",
+					},
+					scheme.UnitOptions{
+						System: "imperial",
+						Name:   "fahrenheit",
+						Symbol: "F",
+					},
+				},
+			},
+		},
+	}
+
+	s := test.NewWebSocketServerV3()
+	defer s.Close()
+
+	s.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: s.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	v, err := client.Info("34c226b1afadaae5f172a4e1763fd1a6")
+	assert.NotNil(t, v)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, v)
+}
