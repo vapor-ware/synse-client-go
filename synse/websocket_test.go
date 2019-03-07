@@ -770,3 +770,68 @@ func TestWebSocketClientV3_Read_200(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, expected, v)
 }
+
+func TestWebSocketClientV3_ReadCache_200(t *testing.T) {
+	in := `
+{
+   "id":9,
+   "event":"response/reading",
+   "data":[
+      {
+         "device":"929b923de65a811",
+         "device_type":"led",
+         "type":"state",
+         "value":"off",
+         "timestamp":"2018-02-01T13:47:40Z",
+         "unit":null
+      },
+      {
+         "device":"929b923de65a811",
+         "device_type":"led",
+         "type":"color",
+         "value":"000000",
+         "timestamp":"2018-02-01T13:47:40Z",
+         "unit":null
+      }
+   ]
+}`
+
+	expected := &[]scheme.Read{
+		scheme.Read{
+			Device:     "929b923de65a811",
+			DeviceType: "led",
+			Type:       "state",
+			Value:      "off",
+			Timestamp:  "2018-02-01T13:47:40Z",
+			Unit:       scheme.UnitOptions{},
+		},
+		scheme.Read{
+			Device:     "929b923de65a811",
+			DeviceType: "led",
+			Type:       "color",
+			Value:      "000000",
+			Timestamp:  "2018-02-01T13:47:40Z",
+			Unit:       scheme.UnitOptions{},
+		},
+	}
+
+	s := test.NewWebSocketServerV3()
+	defer s.Close()
+
+	s.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: s.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	opts := scheme.ReadCacheOptions{}
+	v, err := client.ReadCache(opts)
+	assert.NotNil(t, v)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, v)
+}

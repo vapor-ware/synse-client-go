@@ -341,7 +341,7 @@ func (c *websocketClient) ReadCache(opts scheme.ReadCacheOptions) (*[]scheme.Rea
 	req := scheme.RequestReadCache{
 		EventMeta: scheme.EventMeta{
 			ID:    addCounter(),
-			Event: requestInfo,
+			Event: requestReadCache,
 		},
 		Data: opts,
 	}
