@@ -430,8 +430,7 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
   "unhealthy": [],
   "active": 3,
   "inactive": 0
-}
-			`,
+}`,
 			&scheme.PluginHealth{
 				Status:  "healthy",
 				Updated: "2018-06-15T20:04:33Z",

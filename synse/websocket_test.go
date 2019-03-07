@@ -336,10 +336,64 @@ func TestWebSocketClientV3_Plugin_200(t *testing.T) {
 	assert.Equal(t, expected, v)
 }
 
-func TestWebSocketClientV3_Tags_200(t *testing.T) {
+func TestWebSocketClientV3_PluginHealth_200(t *testing.T) {
 	in := `
 {
    "id":4,
+   "event":"response/plugin_health",
+   "data":{
+      "status":"healthy",
+      "updated":"2018-06-15T20:04:33Z",
+      "healthy":[
+         "12835beffd3e6c603aa4dd92127707b5",
+         "12835beffd3e6c603aa4dd92127707b6",
+         "12835beffd3e6c603aa4dd92127707b7"
+      ],
+      "unhealthy":[
+
+      ],
+      "active":3,
+      "inactive":0
+   }
+}`
+
+	expected := &scheme.PluginHealth{
+		Status:  "healthy",
+		Updated: "2018-06-15T20:04:33Z",
+		Healthy: []string{
+			"12835beffd3e6c603aa4dd92127707b5",
+			"12835beffd3e6c603aa4dd92127707b6",
+			"12835beffd3e6c603aa4dd92127707b7",
+		},
+		Unhealthy: []string{},
+		Active:    int(3),
+		Inactive:  int(0),
+	}
+
+	s := test.NewWebSocketServerV3()
+	defer s.Close()
+
+	s.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: s.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	v, err := client.PluginHealth()
+	assert.NotNil(t, v)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, v)
+}
+
+func TestWebSocketClientV3_Tags_200(t *testing.T) {
+	in := `
+{
+   "id":5,
    "event":"response/tags",
    "data":{
       "tags":[
