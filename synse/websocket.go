@@ -361,13 +361,41 @@ func (c *websocketClient) ReadCache(opts scheme.ReadCacheOptions) (*[]scheme.Rea
 }
 
 // WriteAsync writes data to a device, in an asynchronous manner.
+// NOTE - this method is not applicable for websocket client.
 func (c *websocketClient) WriteAsync(id string, opts []scheme.WriteData) (*[]scheme.Write, error) {
 	return nil, nil
 }
 
 // WriteSync writes data to a device, waiting for the write to complete.
+// Unlike http client's one, this does not support bulk write. Hence, there
+// should only be one WriteData value in the request opts. If multiple values are
+// specified, the first one would be picked. Same for the returned Transaction,
+// there should be only one value.
+// FIXME - this is related to compatibility issue mentioned in synse.go about the
+// need of uniforming client api.
 func (c *websocketClient) WriteSync(id string, opts []scheme.WriteData) (*[]scheme.Transaction, error) {
-	return nil, nil
+	req := scheme.RequestWrite{
+		EventMeta: scheme.EventMeta{
+			ID:    addCounter(),
+			Event: requestWrite,
+		},
+		Data: opts[0], // use the first one in the slice.
+	}
+
+	resp := new(scheme.ResponseWriteState)
+	err := c.makeRequest(req, resp)
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
+	if err != nil {
+		return nil, err
+	}
+
+	out := []scheme.Transaction{}
+	out = append(out, resp.Data)
+	return &out, nil
 }
 
 // Transactions returns the sorted list of all cached transaction IDs.

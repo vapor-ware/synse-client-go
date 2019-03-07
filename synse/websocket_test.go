@@ -835,3 +835,60 @@ func TestWebSocketClientV3_ReadCache_200(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, expected, v)
 }
+
+func TestWebSocketClientV3_WriteSync_200(t *testing.T) {
+	in := `
+{
+   "id":10,
+   "event":"response/write_state",
+   "data":{
+      "id":"56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
+      "timeout":"10s",
+      "device":"0fe8f06229aa9a01ef6032d1ddaf18a5",
+      "context":{
+         "action":"color",
+         "data":"f38ac2"
+      },
+      "status":"done",
+      "created":"2018-02-01T15:00:51Z",
+      "updated":"2018-02-01T15:00:51Z",
+      "message":""
+   }
+}`
+
+	expected := &[]scheme.Transaction{
+		scheme.Transaction{
+			ID:      "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
+			Timeout: "10s",
+			Device:  "0fe8f06229aa9a01ef6032d1ddaf18a5",
+			Context: scheme.WriteData{
+				Action: "color",
+				Data:   "f38ac2",
+			},
+			Status:  "done",
+			Created: "2018-02-01T15:00:51Z",
+			Updated: "2018-02-01T15:00:51Z",
+			Message: "",
+		},
+	}
+
+	s := test.NewWebSocketServerV3()
+	defer s.Close()
+
+	s.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: s.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	opts := []scheme.WriteData{scheme.WriteData{}}
+	v, err := client.WriteSync("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
+	assert.NotNil(t, v)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, v)
+}

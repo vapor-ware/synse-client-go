@@ -10,7 +10,8 @@ import (
 // FIXME - for the most part, Websocket and HTTP client expose similiar api
 // methods. However, since they are different in their usage and semantics,
 // there are some methods that are only applicable for one and not the other.
-// In this case, these methods will do nothing. Does this make sense?
+// In this case, these methods will do nothing. Does this make sense anymore to
+// keep a Client interface that both should follow?
 type Client interface {
 	// Status returns the status info. This is used to check if the server
 	// is responsive and reachable.
