@@ -30,6 +30,9 @@ const (
 	// requestRead describes the request/read event.
 	requestRead = "request/read"
 
+	// requestReadDevice describes the request/read_device event.
+	requestReadDevice = "request/read_device"
+
 	// requestReadCache describes the request/read_cache event.
 	requestReadCache = "request/read_cache"
 

@@ -867,6 +867,71 @@ func TestWebSocketClientV3_Read_200(t *testing.T) {
 	assert.Equal(t, expected, v)
 }
 
+func TestWebSocketClientV3_ReadDevice_200(t *testing.T) {
+	in := `
+{
+   "id":1,
+   "event":"response/reading",
+   "data":[
+      {
+         "device":"12bb12c1f86a86e",
+         "device_type":"temperature",
+         "type":"temperature",
+         "value":20.3,
+         "timestamp":"2018-02-01T13:47:40Z",
+         "unit":{
+            "system":"metric",
+            "symbol":"C",
+            "name":"degrees celsius"
+         },
+         "context":{
+            "host":"127.0.0.1",
+            "sample_rate":8
+         }
+      }
+   ]
+}`
+
+	expected := &[]scheme.Read{
+		scheme.Read{
+			Device:     "12bb12c1f86a86e",
+			DeviceType: "temperature",
+			Type:       "temperature",
+			Value:      float64(20.3),
+			Timestamp:  "2018-02-01T13:47:40Z",
+			Unit: scheme.UnitOptions{
+				System: "metric",
+				Symbol: "C",
+				Name:   "degrees celsius",
+			},
+			Context: map[string]interface{}{
+				"host":        "127.0.0.1",
+				"sample_rate": float64(8),
+			},
+		},
+	}
+
+	s := test.NewWebSocketServerV3()
+	defer s.Close()
+
+	s.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: s.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	opts := scheme.ReadOptions{}
+	v, err := client.ReadDevice("12bb12c1f86a86e", opts)
+	assert.NotNil(t, v)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, v)
+}
+
 func TestWebSocketClientV3_ReadCache_200(t *testing.T) {
 	in := `
 {

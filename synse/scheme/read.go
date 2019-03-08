@@ -15,5 +15,5 @@ type Read struct {
 type ReadOptions struct {
 	NS   string   `json:"ns"`
 	Tags []string `json:"tags"`
-	SOM  string
+	SOM  string   `json:"som"`
 }

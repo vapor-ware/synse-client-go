@@ -62,6 +62,18 @@ type RequestRead struct {
 	Data ReadOptions `json:"data"`
 }
 
+// RequestReadDevice describes a scheme for request/read_device event.
+type RequestReadDevice struct {
+	EventMeta
+	Data ReadDeviceOptions `json:"data"`
+}
+
+// ReadDeviceOptions describes the data for response/read_device event.
+type ReadDeviceOptions struct {
+	ID string `json:"id"`
+	ReadOptions
+}
+
 // RequestReadCache describes a scheme for request/read_cache event.
 type RequestReadCache struct {
 	EventMeta
@@ -123,7 +135,7 @@ type ResponseTags struct {
 	Data TagsData
 }
 
-// TagsData describes the data for response/data event.
+// TagsData describes the data for response/tags event.
 type TagsData struct {
 	Tags []string `json:"tags"`
 }

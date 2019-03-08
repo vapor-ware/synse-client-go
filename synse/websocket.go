@@ -358,9 +358,30 @@ func (c *websocketClient) Read(opts scheme.ReadOptions) (*[]scheme.Read, error) 
 // ReadDevice returns data from a specific device.
 // It is the same as Read() where the label matches the device id tag
 // specified in ReadOptions.
-// TODO
 func (c *websocketClient) ReadDevice(id string, opts scheme.ReadOptions) (*[]scheme.Read, error) {
-	return nil, nil
+	req := scheme.RequestReadDevice{
+		EventMeta: scheme.EventMeta{
+			ID:    c.addCounter(),
+			Event: requestReadDevice,
+		},
+		Data: scheme.ReadDeviceOptions{
+			ID:          id,
+			ReadOptions: opts,
+		},
+	}
+
+	resp := new(scheme.ResponseReading)
+	err := c.makeRequest(req, resp)
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp.Data, nil
 }
 
 // ReadCache returns stream reading data from the registered plugins.
@@ -523,6 +544,8 @@ func matchEvent(reqEvent string) string { // nolint
 	case requestInfo:
 		respEvent = responseDevice
 	case requestRead:
+		respEvent = responseReading
+	case requestReadDevice:
 		respEvent = responseReading
 	case requestReadCache:
 		respEvent = responseReading
