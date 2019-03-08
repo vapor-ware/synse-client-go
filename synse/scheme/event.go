@@ -21,6 +21,12 @@ type RequestConfig struct {
 	EventMeta
 }
 
+// RequestPlugins describes a scheme for request/plugin event, without no
+// plugin ID being provided.
+type RequestPlugins struct {
+	EventMeta
+}
+
 // RequestPlugin describes a scheme for request/plugin event.
 type RequestPlugin struct {
 	EventMeta
@@ -90,6 +96,13 @@ type ResponseVersion struct {
 type ResponseConfig struct {
 	EventMeta
 	Data Config
+}
+
+// ResponsePlugins describes a scheme for response/plugin event, without
+// plugin ID being provided.
+type ResponsePlugins struct {
+	EventMeta
+	Data []PluginMeta
 }
 
 // ResponsePlugin describes a scheme for response/plugin event.

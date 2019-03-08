@@ -110,7 +110,6 @@ func (c *websocketClient) Close() error {
 
 // Status returns the status info. This is used to check if the server
 // is responsive and reachable.
-// TODO
 func (c *websocketClient) Status() (*scheme.Status, error) {
 	req := scheme.RequestStatus{
 		EventMeta: scheme.EventMeta{
@@ -181,9 +180,26 @@ func (c *websocketClient) Config() (*scheme.Config, error) {
 
 // Plugins returns the summary of all plugins currently registered with
 // Synse Server.
-// TODO
 func (c *websocketClient) Plugins() (*[]scheme.PluginMeta, error) {
-	return nil, nil
+	req := scheme.RequestPlugins{
+		EventMeta: scheme.EventMeta{
+			ID:    c.addCounter(),
+			Event: requestPlugin,
+		},
+	}
+
+	resp := new(scheme.ResponsePlugins)
+	err := c.makeRequest(req, resp)
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp.Data, nil
 }
 
 // Plugin returns data from a specific plugin.

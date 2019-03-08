@@ -256,6 +256,66 @@ func TestWebSocketClientV3_Config_200(t *testing.T) {
 	assert.Equal(t, expected, v)
 }
 
+func TestWebSocketClientV3_Plugins_200(t *testing.T) {
+	in := `
+{
+   "id":1,
+   "event":"response/plugin",
+   "data":[
+      {
+         "description":"a plugin with emulated devices and data",
+         "id":"12835beffd3e6c603aa4dd92127707b5",
+         "name":"emulator plugin",
+         "maintainer":"vapor io",
+         "active":true
+      },
+      {
+         "description":"a custom third party plugin",
+         "id":"12835beffd3e6c603aa4dd92127707b6",
+         "name":"custom-plugin",
+         "maintainer":"third-party",
+         "active":true
+      }
+   ]
+}`
+
+	expected := &[]scheme.PluginMeta{
+		scheme.PluginMeta{
+			Description: "a plugin with emulated devices and data",
+			ID:          "12835beffd3e6c603aa4dd92127707b5",
+			Name:        "emulator plugin",
+			Maintainer:  "vapor io",
+			Active:      true,
+		},
+		scheme.PluginMeta{
+			Description: "a custom third party plugin",
+			ID:          "12835beffd3e6c603aa4dd92127707b6",
+			Name:        "custom-plugin",
+			Maintainer:  "third-party",
+			Active:      true,
+		},
+	}
+
+	s := test.NewWebSocketServerV3()
+	defer s.Close()
+
+	s.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: s.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	v, err := client.Plugins()
+	assert.NotNil(t, v)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, v)
+}
+
 func TestWebSocketClientV3_Plugin_200(t *testing.T) {
 	in := `
 {
