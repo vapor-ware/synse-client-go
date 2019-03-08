@@ -414,22 +414,19 @@ func (c *websocketClient) WriteAsync(id string, opts []scheme.WriteData) (*[]sch
 }
 
 // WriteSync writes data to a device, waiting for the write to complete.
-// FIXME - unlike http client's one, this does not support bulk write. Hence, there
-// should only be one WriteData value in the request opts. If multiple values are
-// specified, the first one would be picked. Same for the returned Transaction,
-// there should be only one value.
-// NOTE - this is related to compatibility issue mentioned in synse.go about the
-// need of uniforming client api.
 func (c *websocketClient) WriteSync(id string, opts []scheme.WriteData) (*[]scheme.Transaction, error) {
 	req := scheme.RequestWrite{
 		EventMeta: scheme.EventMeta{
 			ID:    c.addCounter(),
-			Event: requestWrite,
+			Event: requestWriteSync,
 		},
-		Data: opts[0], // use the first one in the slice.
+		Data: scheme.RequestWriteData{
+			ID:   id,
+			Data: opts,
+		},
 	}
 
-	resp := new(scheme.ResponseWriteState)
+	resp := new(scheme.ResponseWriteSync)
 	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
@@ -440,10 +437,7 @@ func (c *websocketClient) WriteSync(id string, opts []scheme.WriteData) (*[]sche
 		return nil, err
 	}
 
-	// Quick fix for the issue mentioned above: return a slice with a single value.
-	out := []scheme.Transaction{}
-	out = append(out, resp.Data)
-	return &out, nil
+	return &resp.Data, nil
 }
 
 // Transactions returns the sorted list of all cached transaction IDs.
@@ -548,8 +542,8 @@ func matchEvent(reqEvent string) string { // nolint
 		respEvent = responseReading
 	case requestReadCache:
 		respEvent = responseReading
-	case requestWrite:
-		respEvent = responseWriteState
+	case requestWriteSync:
+		respEvent = responseWriteSync
 	case requestTransaction:
 		respEvent = responseWriteState
 	default:

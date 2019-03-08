@@ -33,7 +33,7 @@ type RequestPlugin struct {
 	Data PluginData `json:"data"`
 }
 
-// PluginData describes the data for response/plugin event.
+// PluginData describes the data for request/plugin event.
 type PluginData struct {
 	Plugin string `json:"plugin"`
 }
@@ -78,7 +78,7 @@ type RequestReadDevice struct {
 	Data ReadDeviceData `json:"data"`
 }
 
-// ReadDeviceData describes the data for response/read_device event.
+// ReadDeviceData describes the data for request/read_device event.
 type ReadDeviceData struct {
 	ID string `json:"id"`
 	ReadOptions
@@ -90,10 +90,18 @@ type RequestReadCache struct {
 	Data ReadCacheOptions `json:"data"`
 }
 
-// RequestWrite describes a scheme for request/write event.
+// RequestWrite describes a scheme for request/write_async and
+// request/write_sync event.
 type RequestWrite struct {
 	EventMeta
-	Data WriteData `json:"data"`
+	Data RequestWriteData `json:"data"`
+}
+
+// RequestWriteData describes the data for request/write_async and
+// request/write_sync event.
+type RequestWriteData struct {
+	ID   string      `json:"id"`
+	Data []WriteData `json:"data"`
 }
 
 // RequestTransaction describes a scheme for request/transaction event.
@@ -166,6 +174,12 @@ type ResponseDeviceSummary struct {
 type ResponseReading struct {
 	EventMeta
 	Data []Read
+}
+
+// ResponseWriteSync describes a scheme for response/write_sync event.
+type ResponseWriteSync struct {
+	EventMeta
+	Data []Transaction
 }
 
 // ResponseWriteState describes a scheme for response/write_state event.

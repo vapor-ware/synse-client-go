@@ -36,8 +36,8 @@ const (
 	// requestReadCache describes the request/read_cache event.
 	requestReadCache = "request/read_cache"
 
-	// requestWrite describes the request/write event.
-	requestWrite = "request/write"
+	// requestWriteSync describes the request/write_sync event.
+	requestWriteSync = "request/write_sync"
 
 	// requestTransaction describes the request/transaction event.
 	requestTransaction = "request/transaction"
@@ -68,6 +68,9 @@ const (
 
 	// responseReading describes the response/reading event.
 	responseReading = "response/reading"
+
+	// responseWriteSync describes the response/write_sync event.
+	responseWriteSync = "response/write_sync"
 
 	// responseWriteState describes the response/write_state event.
 	responseWriteState = "response/write_state"
