@@ -80,14 +80,14 @@ func createHTTPClient(opts *Options) (*resty.Client, error) {
 		SetTLSClientConfig(&tls.Config{InsecureSkipVerify: opts.TLS.SkipVerify}), nil // nolint
 }
 
-// Open opens the websocket connection between the client and Synse Server.
-// NOTE - this method is not applicable for http client.
+// Open opens the connection between the client and Synse Server. This fulfils
+// the Client interface, but has no effect for the httpClient.
 func (c *httpClient) Open() error {
 	return nil
 }
 
-// Close closes the websocket connection between the client and Synse Server.
-// NOTE - this method is not applicable for http client.
+// Close closes the connection between the client and Synse Server. This fulfils
+// the Client interface, but has no effect for the httpClient.
 func (c *httpClient) Close() error {
 	return nil
 }

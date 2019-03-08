@@ -6,6 +6,11 @@ type EventMeta struct {
 	Event string `json:"event"`
 }
 
+// RequestStatus describes a scheme for request/status event.
+type RequestStatus struct {
+	EventMeta
+}
+
 // RequestVersion describes a scheme for request/version event.
 type RequestVersion struct {
 	EventMeta
@@ -67,6 +72,12 @@ type RequestWrite struct {
 type RequestTransaction struct {
 	EventMeta
 	Data WriteData `json:"data"`
+}
+
+// ResponseStatus describes a scheme for response/status event.
+type ResponseStatus struct {
+	EventMeta
+	Data Status
 }
 
 // ResponseVersion describes a scheme for response/version event.

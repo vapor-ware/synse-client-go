@@ -6,12 +6,10 @@ import (
 	"github.com/vapor-ware/synse-client-go/synse/scheme"
 )
 
-// Client API for Synse Server, for both Websocket and HTTP client.
-// FIXME - for the most part, Websocket and HTTP client expose similiar api
-// methods. However, since they are different in their usage and semantics,
-// there are some methods that are only applicable for one and not the other.
-// In this case, these methods will do nothing. Does this make sense anymore to
-// keep a Client interface that both should follow?
+// Client API for Synse Server, for both WebSocket and HTTP client.
+// FIXME - refer to #21. Even though the Websocket and HTTP client share
+// a similar sets of API methods, they are largely different in their usage and
+// semantics, should we keep a Client interface that both should follow anymore?
 type Client interface {
 	// Status returns the status info. This is used to check if the server
 	// is responsive and reachable.

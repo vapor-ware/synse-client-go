@@ -70,6 +70,42 @@ func TestNewWebSocketClientV3_ValidAddressAndTimeout(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestWebSocketClientV3_Status_200(t *testing.T) {
+	in := `
+{
+  "id":1,
+  "event":"response/status",
+  "data":{
+    "status":"ok",
+	"timestamp":"2019-01-24T14:34:24.926108Z"
+  }
+}`
+
+	expected := &scheme.Status{
+		Status:    "ok",
+		Timestamp: "2019-01-24T14:34:24.926108Z",
+	}
+
+	s := test.NewWebSocketServerV3()
+	defer s.Close()
+
+	s.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: s.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	v, err := client.Status()
+	assert.NotNil(t, v)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, v)
+}
+
 func TestWebSocketClientV3_Version_200(t *testing.T) {
 	in := `
 {
@@ -109,7 +145,7 @@ func TestWebSocketClientV3_Version_200(t *testing.T) {
 func TestWebSocketClientV3_Config_200(t *testing.T) {
 	in := `
 {
-   "id":2,
+  "id":1,
    "event":"response/config",
    "data":{
       "logging":"info",
@@ -223,7 +259,7 @@ func TestWebSocketClientV3_Config_200(t *testing.T) {
 func TestWebSocketClientV3_Plugin_200(t *testing.T) {
 	in := `
 {
-   "id":3,
+   "id":1,
    "event":"response/plugin",
    "data":{
       "active":true,
@@ -339,7 +375,7 @@ func TestWebSocketClientV3_Plugin_200(t *testing.T) {
 func TestWebSocketClientV3_PluginHealth_200(t *testing.T) {
 	in := `
 {
-   "id":4,
+   "id":1,
    "event":"response/plugin_health",
    "data":{
       "status":"healthy",
@@ -393,7 +429,7 @@ func TestWebSocketClientV3_PluginHealth_200(t *testing.T) {
 func TestWebSocketClientV3_Scan_200(t *testing.T) {
 	in := `
 {
-   "id":5,
+   "id":1,
    "event":"response/device_summary",
    "data":[
       {
@@ -468,7 +504,7 @@ func TestWebSocketClientV3_Scan_200(t *testing.T) {
 func TestWebSocketClientV3_Tags_200(t *testing.T) {
 	in := `
 {
-   "id":6,
+   "id":1,
    "event":"response/tags",
    "data":{
       "tags":[
@@ -507,7 +543,7 @@ func TestWebSocketClientV3_Tags_200(t *testing.T) {
 func TestWebSocketClientV3_Info_200(t *testing.T) {
 	in := `
 {
-   "id":7,
+   "id":1,
    "event":"response/device",
    "data":{
       "timestamp":"2018-06-18T13:30:15Z",
@@ -653,7 +689,7 @@ func TestWebSocketClientV3_Info_200(t *testing.T) {
 func TestWebSocketClientV3_Read_200(t *testing.T) {
 	in := `
 {
-   "id":8,
+   "id":1,
    "event":"response/reading",
    "data":[
       {
@@ -774,7 +810,7 @@ func TestWebSocketClientV3_Read_200(t *testing.T) {
 func TestWebSocketClientV3_ReadCache_200(t *testing.T) {
 	in := `
 {
-   "id":9,
+   "id":1,
    "event":"response/reading",
    "data":[
       {
@@ -839,7 +875,7 @@ func TestWebSocketClientV3_ReadCache_200(t *testing.T) {
 func TestWebSocketClientV3_WriteSync_200(t *testing.T) {
 	in := `
 {
-   "id":10,
+   "id":1,
    "event":"response/write_state",
    "data":{
       "id":"56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
@@ -896,7 +932,7 @@ func TestWebSocketClientV3_WriteSync_200(t *testing.T) {
 func TestWebSocketClientV3_Transaction_200(t *testing.T) {
 	in := `
 {
-   "id":11,
+   "id":1,
    "event":"response/write_state",
    "data":{
       "id":"56a32eba-1aa6-4868-84ee-fe01af8b2e6b",

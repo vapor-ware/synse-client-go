@@ -3,6 +3,9 @@ package synse
 // event.go stores request/response events supported by the Synse WebSocket API.
 
 const (
+	// requestStatus describes the request/status event.
+	requestStatus = "request/status"
+
 	// requestVersion describes the request/version event.
 	requestVersion = "request/version"
 
@@ -35,6 +38,9 @@ const (
 
 	// requestTransaction describes the request/transaction event.
 	requestTransaction = "request/transaction"
+
+	// responseStatus describes the response/status event.
+	responseStatus = "response/status"
 
 	// responseVersion describes the response/version event.
 	responseVersion = "response/version"

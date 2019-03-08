@@ -12,11 +12,6 @@ import (
 	"github.com/vapor-ware/synse-client-go/synse/scheme"
 )
 
-// counter counts the number of request sent. It has the type uint64 which can
-// later be used by an atomic function, which makes it more concurrency-safe.
-// FIXME - is it necessary though?
-var counter uint64
-
 type websocketClient struct {
 	// options is the global config options of the client.
 	options *Options
@@ -26,6 +21,11 @@ type websocketClient struct {
 
 	// connection holds the websocket connection.
 	connection *websocket.Conn
+
+	// counter counts the number of request sent. It has the type uint64
+	// that later be used by an atomic function, which makes it more
+	// concurrency-safe.
+	counter uint64
 
 	// apiVersion is the current api version of Synse Server that we are
 	// communicating with.
@@ -99,8 +99,6 @@ func (c *websocketClient) Open() error {
 
 // Close closes the websocket connection between the client and Synse Server.
 // It's up to the user to close the connection after finish using it.
-// FIXME - it makes sense to use defer function with Close. However, since
-// Close returns an error, do user need to check it manually? If yes, how?
 func (c *websocketClient) Close() error {
 	err := c.connection.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 	if err != nil {
@@ -112,16 +110,34 @@ func (c *websocketClient) Close() error {
 
 // Status returns the status info. This is used to check if the server
 // is responsive and reachable.
-// NOTE - this method is not applicable for websocket client.
+// TODO
 func (c *websocketClient) Status() (*scheme.Status, error) {
-	return nil, nil
+	req := scheme.RequestStatus{
+		EventMeta: scheme.EventMeta{
+			ID:    c.addCounter(),
+			Event: requestStatus,
+		},
+	}
+
+	resp := new(scheme.ResponseStatus)
+	err := c.makeRequest(req, resp)
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp.Data, nil
 }
 
 // Version returns the version info.
 func (c *websocketClient) Version() (*scheme.Version, error) {
 	req := scheme.RequestVersion{
 		EventMeta: scheme.EventMeta{
-			ID:    addCounter(),
+			ID:    c.addCounter(),
 			Event: requestVersion,
 		},
 	}
@@ -137,11 +153,6 @@ func (c *websocketClient) Version() (*scheme.Version, error) {
 		return nil, err
 	}
 
-	// FIXME - should we return the everything from ResponseVersion
-	// or it is fine to return the Data value only since these metadata
-	// such as request id and request won't be much helpful for consumer
-	// anyway? Should the response from websocket client be similar to http
-	// client?
 	return &resp.Data, nil
 }
 
@@ -149,7 +160,7 @@ func (c *websocketClient) Version() (*scheme.Version, error) {
 func (c *websocketClient) Config() (*scheme.Config, error) {
 	req := scheme.RequestConfig{
 		EventMeta: scheme.EventMeta{
-			ID:    addCounter(),
+			ID:    c.addCounter(),
 			Event: requestConfig,
 		},
 	}
@@ -170,7 +181,7 @@ func (c *websocketClient) Config() (*scheme.Config, error) {
 
 // Plugins returns the summary of all plugins currently registered with
 // Synse Server.
-// NOTE - this method is not applicable for websocket client.
+// TODO
 func (c *websocketClient) Plugins() (*[]scheme.PluginMeta, error) {
 	return nil, nil
 }
@@ -179,7 +190,7 @@ func (c *websocketClient) Plugins() (*[]scheme.PluginMeta, error) {
 func (c *websocketClient) Plugin(id string) (*scheme.Plugin, error) {
 	req := scheme.RequestPlugin{
 		EventMeta: scheme.EventMeta{
-			ID:    addCounter(),
+			ID:    c.addCounter(),
 			Event: requestPlugin,
 		},
 		Data: scheme.WriteData{
@@ -205,7 +216,7 @@ func (c *websocketClient) Plugin(id string) (*scheme.Plugin, error) {
 func (c *websocketClient) PluginHealth() (*scheme.PluginHealth, error) {
 	req := scheme.RequestPluginHealth{
 		EventMeta: scheme.EventMeta{
-			ID:    addCounter(),
+			ID:    c.addCounter(),
 			Event: requestPluginHealth,
 		},
 	}
@@ -231,7 +242,7 @@ func (c *websocketClient) PluginHealth() (*scheme.PluginHealth, error) {
 func (c *websocketClient) Scan(opts scheme.ScanOptions) (*[]scheme.Scan, error) {
 	req := scheme.RequestScan{
 		EventMeta: scheme.EventMeta{
-			ID:    addCounter(),
+			ID:    c.addCounter(),
 			Event: requestScan,
 		},
 		Data: opts,
@@ -256,7 +267,7 @@ func (c *websocketClient) Scan(opts scheme.ScanOptions) (*[]scheme.Scan, error) 
 func (c *websocketClient) Tags(opts scheme.TagsOptions) (*[]string, error) {
 	req := scheme.RequestTags{
 		EventMeta: scheme.EventMeta{
-			ID:    addCounter(),
+			ID:    c.addCounter(),
 			Event: requestTags,
 		},
 		Data: opts,
@@ -281,7 +292,7 @@ func (c *websocketClient) Tags(opts scheme.TagsOptions) (*[]string, error) {
 func (c *websocketClient) Info(id string) (*scheme.Info, error) {
 	req := scheme.RequestInfo{
 		EventMeta: scheme.EventMeta{
-			ID:    addCounter(),
+			ID:    c.addCounter(),
 			Event: requestInfo,
 		},
 		Data: scheme.WriteData{
@@ -308,7 +319,7 @@ func (c *websocketClient) Info(id string) (*scheme.Info, error) {
 func (c *websocketClient) Read(opts scheme.ReadOptions) (*[]scheme.Read, error) {
 	req := scheme.RequestRead{
 		EventMeta: scheme.EventMeta{
-			ID:    addCounter(),
+			ID:    c.addCounter(),
 			Event: requestRead,
 		},
 		Data: opts,
@@ -331,7 +342,7 @@ func (c *websocketClient) Read(opts scheme.ReadOptions) (*[]scheme.Read, error) 
 // ReadDevice returns data from a specific device.
 // It is the same as Read() where the label matches the device id tag
 // specified in ReadOptions.
-// NOTE - this method is not applicable for websocket client.
+// TODO
 func (c *websocketClient) ReadDevice(id string, opts scheme.ReadOptions) (*[]scheme.Read, error) {
 	return nil, nil
 }
@@ -340,7 +351,7 @@ func (c *websocketClient) ReadDevice(id string, opts scheme.ReadOptions) (*[]sch
 func (c *websocketClient) ReadCache(opts scheme.ReadCacheOptions) (*[]scheme.Read, error) {
 	req := scheme.RequestReadCache{
 		EventMeta: scheme.EventMeta{
-			ID:    addCounter(),
+			ID:    c.addCounter(),
 			Event: requestReadCache,
 		},
 		Data: opts,
@@ -361,7 +372,7 @@ func (c *websocketClient) ReadCache(opts scheme.ReadCacheOptions) (*[]scheme.Rea
 }
 
 // WriteAsync writes data to a device, in an asynchronous manner.
-// NOTE - this method is not applicable for websocket client.
+// TODO
 func (c *websocketClient) WriteAsync(id string, opts []scheme.WriteData) (*[]scheme.Write, error) {
 	return nil, nil
 }
@@ -376,7 +387,7 @@ func (c *websocketClient) WriteAsync(id string, opts []scheme.WriteData) (*[]sch
 func (c *websocketClient) WriteSync(id string, opts []scheme.WriteData) (*[]scheme.Transaction, error) {
 	req := scheme.RequestWrite{
 		EventMeta: scheme.EventMeta{
-			ID:    addCounter(),
+			ID:    c.addCounter(),
 			Event: requestWrite,
 		},
 		Data: opts[0], // use the first one in the slice.
@@ -400,7 +411,7 @@ func (c *websocketClient) WriteSync(id string, opts []scheme.WriteData) (*[]sche
 }
 
 // Transactions returns the sorted list of all cached transaction IDs.
-// NOTE - this method is not applicable for websocket client.
+// TODO
 func (c *websocketClient) Transactions() (*[]string, error) {
 	return nil, nil
 }
@@ -409,7 +420,7 @@ func (c *websocketClient) Transactions() (*[]string, error) {
 func (c *websocketClient) Transaction(id string) (*scheme.Transaction, error) {
 	req := scheme.RequestTransaction{
 		EventMeta: scheme.EventMeta{
-			ID:    addCounter(),
+			ID:    c.addCounter(),
 			Event: requestTransaction,
 		},
 		Data: scheme.WriteData{
@@ -437,19 +448,13 @@ func (c *websocketClient) GetOptions() *Options {
 }
 
 // addCounter safely increases the counter by 1.
-func addCounter() uint64 {
-	return atomic.AddUint64(&counter, 1)
+func (c *websocketClient) addCounter() uint64 {
+	return atomic.AddUint64(&c.counter, 1)
 }
 
-// getCounter safely gets current value of counter.
-// func getCounter() uint64 {
-// 	return atomic.LoadUint64(&counter)
-// }
-
 // makeRequest issues a request event, reads its response event and parse the
-// response back in JSON.
-// TODO - how async work in this case? is writeJSON and readJSON block or
-// should it? do i need to verify returned response? how do i do that?
+// response back.
+// FIXME - refer to #22. Need to think more about how async will work in this case.
 func (c *websocketClient) makeRequest(req, resp interface{}) error {
 	err := c.connection.WriteJSON(req)
 	if err != nil {
@@ -464,7 +469,7 @@ func (c *websocketClient) makeRequest(req, resp interface{}) error {
 	return nil
 }
 
-// verityResponse checks if the request/reponse metadata are matched.
+// verifyResponse checks if the request/reponse metadata are matched.
 func (c *websocketClient) verifyResponse(reqMeta, respMeta scheme.EventMeta) error {
 	// FIXME - diable linting here since we want to use the pkg/errors instead
 	// of fmt.Errorf.
@@ -485,6 +490,8 @@ func matchEvent(reqEvent string) string { // nolint
 	var respEvent string
 
 	switch reqEvent {
+	case requestStatus:
+		respEvent = responseStatus
 	case requestVersion:
 		respEvent = responseVersion
 	case requestConfig:

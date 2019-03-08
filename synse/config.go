@@ -34,6 +34,10 @@ type HTTPOptions struct {
 // WebSocketOptions is the config options for websocket protocol.
 type WebSocketOptions struct {
 	// HandshakeTimeout specifies the duration for the handshake to complete.
+	// FIXME - note that the DefaultDialer in the gorilla/websocket pkg that
+	// we're using that specifies the default handshake timeout to be 45s. I
+	// don't have a sense on what is a good value either so I just use what
+	// they have there.
 	HandshakeTimeout time.Duration `default:"45s"`
 }
 
