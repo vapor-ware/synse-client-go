@@ -30,7 +30,12 @@ type RequestPlugins struct {
 // RequestPlugin describes a scheme for request/plugin event.
 type RequestPlugin struct {
 	EventMeta
-	Data WriteData `json:"data"`
+	Data PluginData `json:"data"`
+}
+
+// PluginData describes the data for response/plugin event.
+type PluginData struct {
+	Plugin string `json:"plugin"`
 }
 
 // RequestPluginHealth describes a scheme for request/plugin_health event.
@@ -53,7 +58,12 @@ type RequestTags struct {
 // RequestInfo describes a scheme for request/info event.
 type RequestInfo struct {
 	EventMeta
-	Data WriteData `json:"data"`
+	Data DeviceData `json:"data"`
+}
+
+// DeviceData describes the data for response/info event.
+type DeviceData struct {
+	Device string `json:"device"`
 }
 
 // RequestRead describes a scheme for request/read event.
@@ -65,11 +75,11 @@ type RequestRead struct {
 // RequestReadDevice describes a scheme for request/read_device event.
 type RequestReadDevice struct {
 	EventMeta
-	Data ReadDeviceOptions `json:"data"`
+	Data ReadDeviceData `json:"data"`
 }
 
-// ReadDeviceOptions describes the data for response/read_device event.
-type ReadDeviceOptions struct {
+// ReadDeviceData describes the data for response/read_device event.
+type ReadDeviceData struct {
 	ID string `json:"id"`
 	ReadOptions
 }

@@ -209,7 +209,7 @@ func (c *websocketClient) Plugin(id string) (*scheme.Plugin, error) {
 			ID:    c.addCounter(),
 			Event: requestPlugin,
 		},
-		Data: scheme.WriteData{
+		Data: scheme.PluginData{
 			Plugin: id,
 		},
 	}
@@ -311,7 +311,7 @@ func (c *websocketClient) Info(id string) (*scheme.Info, error) {
 			ID:    c.addCounter(),
 			Event: requestInfo,
 		},
-		Data: scheme.WriteData{
+		Data: scheme.DeviceData{
 			Device: id,
 		},
 	}
@@ -364,7 +364,7 @@ func (c *websocketClient) ReadDevice(id string, opts scheme.ReadOptions) (*[]sch
 			ID:    c.addCounter(),
 			Event: requestReadDevice,
 		},
-		Data: scheme.ReadDeviceOptions{
+		Data: scheme.ReadDeviceData{
 			ID:          id,
 			ReadOptions: opts,
 		},
@@ -409,7 +409,6 @@ func (c *websocketClient) ReadCache(opts scheme.ReadCacheOptions) (*[]scheme.Rea
 }
 
 // WriteAsync writes data to a device, in an asynchronous manner.
-// TODO
 func (c *websocketClient) WriteAsync(id string, opts []scheme.WriteData) (*[]scheme.Write, error) {
 	return nil, nil
 }
