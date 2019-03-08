@@ -1125,6 +1125,44 @@ func TestWebSocketClientV3_WriteSync_200(t *testing.T) {
 	assert.Equal(t, expected, v)
 }
 
+func TestWebSocketClientV3_Transactions_200(t *testing.T) {
+	in := `
+{
+   "id":1,
+   "event":"response/transaction",
+   "data":[
+      "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
+      "56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
+      "56a32eba-1aa6-4868-84ee-fe01af8b2e6d"
+   ]
+}`
+
+	expected := &[]string{
+		"56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
+		"56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
+		"56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
+	}
+
+	s := test.NewWebSocketServerV3()
+	defer s.Close()
+
+	s.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: s.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	v, err := client.Transactions()
+	assert.NotNil(t, v)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, v)
+}
+
 func TestWebSocketClientV3_Transaction_200(t *testing.T) {
 	in := `
 {

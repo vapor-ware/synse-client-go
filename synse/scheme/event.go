@@ -21,8 +21,8 @@ type RequestConfig struct {
 	EventMeta
 }
 
-// RequestPlugins describes a scheme for request/plugin event, without no
-// plugin ID being provided.
+// RequestPlugins describes a scheme for request/plugin event, with no
+// plugin id being provided.
 type RequestPlugins struct {
 	EventMeta
 }
@@ -104,6 +104,12 @@ type RequestWriteData struct {
 	Data []WriteData `json:"data"`
 }
 
+// RequestTransactions describes a scheme for request/transaction event with no
+// transaction id being provided.
+type RequestTransactions struct {
+	EventMeta
+}
+
 // RequestTransaction describes a scheme for request/transaction event.
 type RequestTransaction struct {
 	EventMeta
@@ -128,8 +134,8 @@ type ResponseConfig struct {
 	Data Config
 }
 
-// ResponsePlugins describes a scheme for response/plugin event, without
-// plugin ID being provided.
+// ResponsePlugins describes a scheme for response/plugin event, with no
+// plugin id being provided.
 type ResponsePlugins struct {
 	EventMeta
 	Data []PluginMeta
@@ -186,6 +192,13 @@ type ResponseWriteAsync struct {
 type ResponseWriteSync struct {
 	EventMeta
 	Data []Transaction
+}
+
+// ResponseTransactions describes a scheme for response/transaction event, with
+// no transaction id being provided.
+type ResponseTransactions struct {
+	EventMeta
+	Data []string
 }
 
 // ResponseTransaction describes a scheme for response/transaction event.

@@ -463,9 +463,26 @@ func (c *websocketClient) WriteSync(id string, opts []scheme.WriteData) (*[]sche
 }
 
 // Transactions returns the sorted list of all cached transaction IDs.
-// TODO
 func (c *websocketClient) Transactions() (*[]string, error) {
-	return nil, nil
+	req := scheme.RequestTransactions{
+		EventMeta: scheme.EventMeta{
+			ID:    c.addCounter(),
+			Event: requestTransaction,
+		},
+	}
+
+	resp := new(scheme.ResponseTransactions)
+	err := c.makeRequest(req, resp)
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp.Data, nil
 }
 
 // Transaction returns the state and status of a write transaction.
