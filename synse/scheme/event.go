@@ -176,6 +176,12 @@ type ResponseReading struct {
 	Data []Read
 }
 
+// ResponseWriteAsync describes a scheme for response/write_async event.
+type ResponseWriteAsync struct {
+	EventMeta
+	Data []Write
+}
+
 // ResponseWriteSync describes a scheme for response/write_sync event.
 type ResponseWriteSync struct {
 	EventMeta

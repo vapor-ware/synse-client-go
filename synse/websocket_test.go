@@ -997,6 +997,75 @@ func TestWebSocketClientV3_ReadCache_200(t *testing.T) {
 	assert.Equal(t, expected, v)
 }
 
+func TestWebSocketClientV3_WriteAsync_200(t *testing.T) {
+	in := `
+{
+   "id":1,
+   "event":"response/write_async",
+   "data":[
+      {
+         "context":{
+            "action":"color",
+            "data":"f38ac2"
+         },
+         "device":"0fe8f06229aa9a01ef6032d1ddaf18a2",
+         "transaction":"56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
+         "timeout":"10s"
+      },
+      {
+         "context":{
+            "action":"state",
+            "data":"blink"
+         },
+         "device":"0fe8f06229aa9a01ef6032d1ddaf18a2",
+         "transaction":"56a32eba-1aa6-4868-84ee-fe01af8b2e6e",
+         "timeout":"10s"
+      }
+   ]
+}`
+
+	expected := &[]scheme.Write{
+		scheme.Write{
+			Context: scheme.WriteData{
+				Action: "color",
+				Data:   "f38ac2",
+			},
+			Device:      "0fe8f06229aa9a01ef6032d1ddaf18a2",
+			Transaction: "56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
+			Timeout:     "10s",
+		},
+		scheme.Write{
+			Context: scheme.WriteData{
+				Action: "state",
+				Data:   "blink",
+			},
+			Device:      "0fe8f06229aa9a01ef6032d1ddaf18a2",
+			Transaction: "56a32eba-1aa6-4868-84ee-fe01af8b2e6e",
+			Timeout:     "10s",
+		},
+	}
+
+	s := test.NewWebSocketServerV3()
+	defer s.Close()
+
+	s.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: s.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	opts := []scheme.WriteData{}
+	v, err := client.WriteAsync("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
+	assert.NotNil(t, v)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, v)
+}
+
 func TestWebSocketClientV3_WriteSync_200(t *testing.T) {
 	in := `
 {

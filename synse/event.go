@@ -36,6 +36,9 @@ const (
 	// requestReadCache describes the request/read_cache event.
 	requestReadCache = "request/read_cache"
 
+	// requestWriteAsync describes the request/write_async event.
+	requestWriteAsync = "request/write_async"
+
 	// requestWriteSync describes the request/write_sync event.
 	requestWriteSync = "request/write_sync"
 
@@ -68,6 +71,9 @@ const (
 
 	// responseReading describes the response/reading event.
 	responseReading = "response/reading"
+
+	// responseWriteAsync describes the response/write_async event.
+	responseWriteAsync = "response/write_async"
 
 	// responseWriteSync describes the response/write_sync event.
 	responseWriteSync = "response/write_sync"

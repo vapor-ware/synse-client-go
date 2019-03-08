@@ -410,7 +410,29 @@ func (c *websocketClient) ReadCache(opts scheme.ReadCacheOptions) (*[]scheme.Rea
 
 // WriteAsync writes data to a device, in an asynchronous manner.
 func (c *websocketClient) WriteAsync(id string, opts []scheme.WriteData) (*[]scheme.Write, error) {
-	return nil, nil
+	req := scheme.RequestWrite{
+		EventMeta: scheme.EventMeta{
+			ID:    c.addCounter(),
+			Event: requestWriteAsync,
+		},
+		Data: scheme.RequestWriteData{
+			ID:   id,
+			Data: opts,
+		},
+	}
+
+	resp := new(scheme.ResponseWriteAsync)
+	err := c.makeRequest(req, resp)
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp.Data, nil
 }
 
 // WriteSync writes data to a device, waiting for the write to complete.
@@ -544,6 +566,8 @@ func matchEvent(reqEvent string) string { // nolint
 		respEvent = responseReading
 	case requestWriteSync:
 		respEvent = responseWriteSync
+	case requestWriteAsync:
+		respEvent = responseWriteAsync
 	case requestTransaction:
 		respEvent = responseWriteState
 	default:
