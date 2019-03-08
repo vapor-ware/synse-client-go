@@ -78,8 +78,8 @@ const (
 	// responseWriteSync describes the response/write_sync event.
 	responseWriteSync = "response/write_sync"
 
-	// responseWriteState describes the response/write_state event.
-	responseWriteState = "response/write_state"
+	// responseTransaction describes the response/transaction event.
+	responseTransaction = "response/transaction"
 
 	// responseError describes the response/error event.
 	// responseError = "response/error"

@@ -188,8 +188,8 @@ type ResponseWriteSync struct {
 	Data []Transaction
 }
 
-// ResponseWriteState describes a scheme for response/write_state event.
-type ResponseWriteState struct {
+// ResponseTransaction describes a scheme for response/transaction event.
+type ResponseTransaction struct {
 	EventMeta
 	Data Transaction
 }

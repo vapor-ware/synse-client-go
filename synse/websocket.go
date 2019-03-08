@@ -480,7 +480,7 @@ func (c *websocketClient) Transaction(id string) (*scheme.Transaction, error) {
 		},
 	}
 
-	resp := new(scheme.ResponseWriteState)
+	resp := new(scheme.ResponseTransaction)
 	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
@@ -569,7 +569,7 @@ func matchEvent(reqEvent string) string { // nolint
 	case requestWriteAsync:
 		respEvent = responseWriteAsync
 	case requestTransaction:
-		respEvent = responseWriteState
+		respEvent = responseTransaction
 	default:
 		respEvent = ""
 	}

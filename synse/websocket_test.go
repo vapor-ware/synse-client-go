@@ -1129,7 +1129,7 @@ func TestWebSocketClientV3_Transaction_200(t *testing.T) {
 	in := `
 {
    "id":1,
-   "event":"response/write_state",
+   "event":"response/transaction",
    "data":{
       "id":"56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
       "timeout":"10s",
