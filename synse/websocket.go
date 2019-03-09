@@ -300,7 +300,7 @@ func (c *websocketClient) Tags(opts scheme.TagsOptions) (*[]string, error) {
 		return nil, err
 	}
 
-	return &resp.Data.Tags, nil
+	return &resp.Data, nil
 }
 
 // Info returns the full set of meta info and capabilities for a specific

@@ -566,12 +566,10 @@ func TestWebSocketClientV3_Tags_200(t *testing.T) {
 {
    "id":1,
    "event":"response/tags",
-   "data":{
-      "tags":[
-         "default/tag1",
-         "default/type:temperature"
-      ]
-   }
+   "data":[
+      "default/tag1",
+      "default/type:temperature"
+   ]
 }`
 
 	expected := &[]string{

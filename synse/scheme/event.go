@@ -156,12 +156,7 @@ type ResponsePluginHealth struct {
 // ResponseTags describes a scheme for response/tags event.
 type ResponseTags struct {
 	EventMeta
-	Data TagsData
-}
-
-// TagsData describes the data for response/tags event.
-type TagsData struct {
-	Tags []string `json:"tags"`
+	Data []string
 }
 
 // ResponseDevice describes a scheme for response/device event.
