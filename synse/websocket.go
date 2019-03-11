@@ -416,8 +416,8 @@ func (c *websocketClient) WriteAsync(id string, opts []scheme.WriteData) (*[]sch
 			Event: requestWriteAsync,
 		},
 		Data: scheme.RequestWriteData{
-			ID:   id,
-			Data: opts,
+			ID:      id,
+			Payload: opts,
 		},
 	}
 
@@ -443,8 +443,8 @@ func (c *websocketClient) WriteSync(id string, opts []scheme.WriteData) (*[]sche
 			Event: requestWriteSync,
 		},
 		Data: scheme.RequestWriteData{
-			ID:   id,
-			Data: opts,
+			ID:      id,
+			Payload: opts,
 		},
 	}
 

@@ -100,8 +100,8 @@ type RequestWrite struct {
 // RequestWriteData describes the data for request/write_async and
 // request/write_sync event.
 type RequestWriteData struct {
-	ID   string      `json:"id"`
-	Data []WriteData `json:"data"`
+	ID      string      `json:"id"`
+	Payload []WriteData `json:"payload"`
 }
 
 // RequestTransactions describes a scheme for request/transaction event with no
