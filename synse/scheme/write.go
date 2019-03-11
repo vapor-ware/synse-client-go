@@ -8,9 +8,10 @@ type Write struct {
 	Timeout     string    `json:"timeout"`
 }
 
-// WriteData describes an unit in the POST body for the `/write` endpoint.
+// WriteData describes an unit in the POST body for the `/write` endpoint. This
+// can also be used with in a websocket request event.
 type WriteData struct {
-	Transaction string
-	Action      string `json:"action"`
-	Data        string `json:"data"`
+	Transaction string      `json:"transaction"`
+	Action      string      `json:"action"`
+	Data        interface{} `json:"data"`
 }

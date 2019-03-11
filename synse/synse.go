@@ -6,7 +6,10 @@ import (
 	"github.com/vapor-ware/synse-client-go/synse/scheme"
 )
 
-// Client API for Synse Server.
+// Client API for Synse Server, for both WebSocket and HTTP client.
+// FIXME - refer to #21. Even though the Websocket and HTTP client share
+// a similar sets of API methods, they are largely different in their usage and
+// semantics, should we keep a Client interface that both should follow anymore?
 type Client interface {
 	// Status returns the status info. This is used to check if the server
 	// is responsive and reachable.
@@ -68,4 +71,15 @@ type Client interface {
 
 	// GetOptions returns the current config options of the client.
 	GetOptions() *Options
+
+	// Open opens the websocket connection between the client and Synse Server.
+	// As the description suggested, it is only applicable for a WebSocket
+	// client. Calling this method on a HTTP Client will have no effect.
+	Open() error
+
+	// Close closes the websocket connection between the client and Synse Server.
+	// It is only applicable for a WebSocket client in a sense that, one must
+	// close the connection after finish using it. Calling this method on a
+	// HTTP Client will have no effect.
+	Close() error
 }
