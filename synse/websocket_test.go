@@ -70,8 +70,15 @@ func TestNewWebSocketClientV3_ValidAddressAndTimeout(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestWebSocketClientV3_Status_200(t *testing.T) {
-	in := `
+func TestWebSocketClientV3_200(t *testing.T) { // nolint
+	tests := []struct {
+		request  string
+		in       string
+		expected interface{}
+	}{
+		{
+			"status",
+			`
 {
   "id":1,
   "event":"response/status",
@@ -79,35 +86,16 @@ func TestWebSocketClientV3_Status_200(t *testing.T) {
     "status":"ok",
 	"timestamp":"2019-01-24T14:34:24.926108Z"
   }
-}`
+}`,
 
-	expected := &scheme.Status{
-		Status:    "ok",
-		Timestamp: "2019-01-24T14:34:24.926108Z",
-	}
-
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
-
-	s.Serve(in)
-
-	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
-	})
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
-
-	err = client.Open()
-	assert.NoError(t, err)
-
-	v, err := client.Status()
-	assert.NotNil(t, v)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
-}
-
-func TestWebSocketClientV3_Version_200(t *testing.T) {
-	in := `
+			&scheme.Status{
+				Status:    "ok",
+				Timestamp: "2019-01-24T14:34:24.926108Z",
+			},
+		},
+		{
+			"version",
+			`
 {
   "id":1,
   "event":"response/version",
@@ -115,35 +103,15 @@ func TestWebSocketClientV3_Version_200(t *testing.T) {
     "version":"3.0.0",
 	"api_version":"v3"
   }
-}`
-
-	expected := &scheme.Version{
-		Version:    "3.0.0",
-		APIVersion: "v3",
-	}
-
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
-
-	s.Serve(in)
-
-	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
-	})
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
-
-	err = client.Open()
-	assert.NoError(t, err)
-
-	v, err := client.Version()
-	assert.NotNil(t, v)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
-}
-
-func TestWebSocketClientV3_Config_200(t *testing.T) {
-	in := `
+}`,
+			&scheme.Version{
+				Version:    "3.0.0",
+				APIVersion: "v3",
+			},
+		},
+		{
+			"config",
+			`
 {
   "id":1,
    "event":"response/config",
@@ -192,72 +160,52 @@ func TestWebSocketClientV3_Config_200(t *testing.T) {
          }
       }
    }
-}`
-
-	expected := &scheme.Config{
-		Logging:    "info",
-		PrettyJSON: true,
-		Locale:     "en_US",
-		Cache: scheme.CacheOptions{
-			Device: scheme.DeviceOptions{
-				TTL: int(20),
-			},
-			Transaction: scheme.TransactionOptions{
-				TTL: int(300),
-			},
-		},
-		GRPC: scheme.GRPCOptions{
-			Timeout: int(3),
-			TLS: scheme.TLSOptions{
-				Cert: "/tmp/ssl/synse.crt",
-			},
-		},
-		Metrics: scheme.MetricsOptions{
-			Enabled: false,
-		},
-		Transport: scheme.TransportOptions{
-			HTTP:      true,
-			WebSocket: true,
-		},
-		Plugin: scheme.PluginOptions{
-			TCP:  []string{"emulator-plugin:5001"},
-			Unix: []string{"/tmp/synse/plugin/foo.sock"},
-			Discover: scheme.DiscoveryOptions{
-				Kubernetes: scheme.KubernetesOptions{
-					Namespace: "vapor",
-					Endpoints: scheme.EndpointsOptions{
-						Labels: map[string]string{
-							"app":       "synse",
-							"component": "server",
+}`,
+			&scheme.Config{
+				Logging:    "info",
+				PrettyJSON: true,
+				Locale:     "en_US",
+				Cache: scheme.CacheOptions{
+					Device: scheme.DeviceOptions{
+						TTL: int(20),
+					},
+					Transaction: scheme.TransactionOptions{
+						TTL: int(300),
+					},
+				},
+				GRPC: scheme.GRPCOptions{
+					Timeout: int(3),
+					TLS: scheme.TLSOptions{
+						Cert: "/tmp/ssl/synse.crt",
+					},
+				},
+				Metrics: scheme.MetricsOptions{
+					Enabled: false,
+				},
+				Transport: scheme.TransportOptions{
+					HTTP:      true,
+					WebSocket: true,
+				},
+				Plugin: scheme.PluginOptions{
+					TCP:  []string{"emulator-plugin:5001"},
+					Unix: []string{"/tmp/synse/plugin/foo.sock"},
+					Discover: scheme.DiscoveryOptions{
+						Kubernetes: scheme.KubernetesOptions{
+							Namespace: "vapor",
+							Endpoints: scheme.EndpointsOptions{
+								Labels: map[string]string{
+									"app":       "synse",
+									"component": "server",
+								},
+							},
 						},
 					},
 				},
 			},
 		},
-	}
-
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
-
-	s.Serve(in)
-
-	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
-	})
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
-
-	err = client.Open()
-	assert.NoError(t, err)
-
-	v, err := client.Config()
-	assert.NotNil(t, v)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
-}
-
-func TestWebSocketClientV3_Plugins_200(t *testing.T) {
-	in := `
+		{
+			"plugins",
+			`
 {
    "id":1,
    "event":"response/plugin",
@@ -277,47 +225,27 @@ func TestWebSocketClientV3_Plugins_200(t *testing.T) {
          "active":true
       }
    ]
-}`
-
-	expected := &[]scheme.PluginMeta{
-		scheme.PluginMeta{
-			Description: "a plugin with emulated devices and data",
-			ID:          "12835beffd3e6c603aa4dd92127707b5",
-			Name:        "emulator plugin",
-			Maintainer:  "vapor io",
-			Active:      true,
+}`,
+			&[]scheme.PluginMeta{
+				scheme.PluginMeta{
+					Description: "a plugin with emulated devices and data",
+					ID:          "12835beffd3e6c603aa4dd92127707b5",
+					Name:        "emulator plugin",
+					Maintainer:  "vapor io",
+					Active:      true,
+				},
+				scheme.PluginMeta{
+					Description: "a custom third party plugin",
+					ID:          "12835beffd3e6c603aa4dd92127707b6",
+					Name:        "custom-plugin",
+					Maintainer:  "third-party",
+					Active:      true,
+				},
+			},
 		},
-		scheme.PluginMeta{
-			Description: "a custom third party plugin",
-			ID:          "12835beffd3e6c603aa4dd92127707b6",
-			Name:        "custom-plugin",
-			Maintainer:  "third-party",
-			Active:      true,
-		},
-	}
-
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
-
-	s.Serve(in)
-
-	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
-	})
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
-
-	err = client.Open()
-	assert.NoError(t, err)
-
-	v, err := client.Plugins()
-	assert.NotNil(t, v)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
-}
-
-func TestWebSocketClientV3_Plugin_200(t *testing.T) {
-	in := `
+		{
+			"plugin",
+			`
 {
    "id":1,
    "event":"response/plugin",
@@ -364,76 +292,56 @@ func TestWebSocketClientV3_Plugin_200(t *testing.T) {
          ]
       }
    }
-}`
-
-	expected := &scheme.Plugin{
-		PluginMeta: scheme.PluginMeta{
-			Active:      true,
-			ID:          "12835beffd3e6c603aa4dd92127707b5",
-			Tag:         "vaporio/emulator-plugin",
-			Name:        "emulator plugin",
-			Description: "A plugin with emulated devices and data",
-			Maintainer:  "vaporio",
-			VCS:         "github.com/vapor-ware/synse-emulator-plugin",
-			Version: scheme.VersionOptions{
-				PluginVersion: "2.0.0",
-				SDKVersion:    "1.0.0",
-				BuildDate:     "2018-06-14T16:24:09",
-				GitCommit:     "13e6478",
-				GitTag:        "1.0.2-5-g13e6478",
-				Arch:          "amd64",
-				OS:            "linux",
-			},
-		},
-		Network: scheme.NetworkOptions{
-			Protocol: "tcp",
-			Address:  "emulator-plugin:5001",
-		},
-		Health: scheme.HealthOptions{
-			Timestamp: "2018-06-15T20:04:33Z",
-			Status:    "ok",
-			Message:   "",
-			Checks: []scheme.CheckOptions{
-				scheme.CheckOptions{
-					Name:      "read buffer health",
+}`,
+			&scheme.Plugin{
+				PluginMeta: scheme.PluginMeta{
+					Active:      true,
+					ID:          "12835beffd3e6c603aa4dd92127707b5",
+					Tag:         "vaporio/emulator-plugin",
+					Name:        "emulator plugin",
+					Description: "A plugin with emulated devices and data",
+					Maintainer:  "vaporio",
+					VCS:         "github.com/vapor-ware/synse-emulator-plugin",
+					Version: scheme.VersionOptions{
+						PluginVersion: "2.0.0",
+						SDKVersion:    "1.0.0",
+						BuildDate:     "2018-06-14T16:24:09",
+						GitCommit:     "13e6478",
+						GitTag:        "1.0.2-5-g13e6478",
+						Arch:          "amd64",
+						OS:            "linux",
+					},
+				},
+				Network: scheme.NetworkOptions{
+					Protocol: "tcp",
+					Address:  "emulator-plugin:5001",
+				},
+				Health: scheme.HealthOptions{
+					Timestamp: "2018-06-15T20:04:33Z",
 					Status:    "ok",
 					Message:   "",
-					Timestamp: "2018-06-15T20:04:06Z",
-					Type:      "periodic",
-				},
-				scheme.CheckOptions{
-					Name:      "write buffer health",
-					Status:    "ok",
-					Message:   "",
-					Timestamp: "2018-06-15T20:04:06Z",
-					Type:      "periodic",
+					Checks: []scheme.CheckOptions{
+						scheme.CheckOptions{
+							Name:      "read buffer health",
+							Status:    "ok",
+							Message:   "",
+							Timestamp: "2018-06-15T20:04:06Z",
+							Type:      "periodic",
+						},
+						scheme.CheckOptions{
+							Name:      "write buffer health",
+							Status:    "ok",
+							Message:   "",
+							Timestamp: "2018-06-15T20:04:06Z",
+							Type:      "periodic",
+						},
+					},
 				},
 			},
 		},
-	}
-
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
-
-	s.Serve(in)
-
-	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
-	})
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
-
-	err = client.Open()
-	assert.NoError(t, err)
-
-	v, err := client.Plugin("12835beffd3e6c603aa4dd92127707b5")
-	assert.NotNil(t, v)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
-}
-
-func TestWebSocketClientV3_PluginHealth_200(t *testing.T) {
-	in := `
+		{
+			"plugin_health",
+			`
 {
    "id":1,
    "event":"response/plugin_health",
@@ -451,43 +359,23 @@ func TestWebSocketClientV3_PluginHealth_200(t *testing.T) {
       "active":3,
       "inactive":0
    }
-}`
-
-	expected := &scheme.PluginHealth{
-		Status:  "healthy",
-		Updated: "2018-06-15T20:04:33Z",
-		Healthy: []string{
-			"12835beffd3e6c603aa4dd92127707b5",
-			"12835beffd3e6c603aa4dd92127707b6",
-			"12835beffd3e6c603aa4dd92127707b7",
+}`,
+			&scheme.PluginHealth{
+				Status:  "healthy",
+				Updated: "2018-06-15T20:04:33Z",
+				Healthy: []string{
+					"12835beffd3e6c603aa4dd92127707b5",
+					"12835beffd3e6c603aa4dd92127707b6",
+					"12835beffd3e6c603aa4dd92127707b7",
+				},
+				Unhealthy: []string{},
+				Active:    int(3),
+				Inactive:  int(0),
+			},
 		},
-		Unhealthy: []string{},
-		Active:    int(3),
-		Inactive:  int(0),
-	}
-
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
-
-	s.Serve(in)
-
-	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
-	})
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
-
-	err = client.Open()
-	assert.NoError(t, err)
-
-	v, err := client.PluginHealth()
-	assert.NotNil(t, v)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
-}
-
-func TestWebSocketClientV3_Scan_200(t *testing.T) {
-	in := `
+		{
+			"scan",
+			`
 {
    "id":1,
    "event":"response/device_summary",
@@ -514,55 +402,34 @@ func TestWebSocketClientV3_Scan_200(t *testing.T) {
          ]
       }
    ]
-}`
-
-	expected := &[]scheme.Scan{
-		scheme.Scan{
-			ID:     "0fe8f06229aa9a01ef6032d1ddaf18a5",
-			Info:   "Synse Temperature Sensor",
-			Type:   "temperature",
-			Plugin: "12835beffd3e6c603aa4dd92127707b5",
-			Tags: []string{
-				"type:temperature",
-				"temperature",
-				"vio/fan-sensor",
+}`,
+			&[]scheme.Scan{
+				scheme.Scan{
+					ID:     "0fe8f06229aa9a01ef6032d1ddaf18a5",
+					Info:   "Synse Temperature Sensor",
+					Type:   "temperature",
+					Plugin: "12835beffd3e6c603aa4dd92127707b5",
+					Tags: []string{
+						"type:temperature",
+						"temperature",
+						"vio/fan-sensor",
+					},
+				},
+				scheme.Scan{
+					ID:     "12ea5644d052c6bf1bca3c9864fd8a44",
+					Info:   "Synse LED",
+					Type:   "led",
+					Plugin: "12835beffd3e6c603aa4dd92127707b5",
+					Tags: []string{
+						"type:led",
+						"led",
+					},
+				},
 			},
 		},
-		scheme.Scan{
-			ID:     "12ea5644d052c6bf1bca3c9864fd8a44",
-			Info:   "Synse LED",
-			Type:   "led",
-			Plugin: "12835beffd3e6c603aa4dd92127707b5",
-			Tags: []string{
-				"type:led",
-				"led",
-			},
-		},
-	}
-
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
-
-	s.Serve(in)
-
-	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
-	})
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
-
-	err = client.Open()
-	assert.NoError(t, err)
-
-	opts := scheme.ScanOptions{}
-	v, err := client.Scan(opts)
-	assert.NotNil(t, v)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
-}
-
-func TestWebSocketClientV3_Tags_200(t *testing.T) {
-	in := `
+		{
+			"tags",
+			`
 {
    "id":1,
    "event":"response/tags",
@@ -570,36 +437,15 @@ func TestWebSocketClientV3_Tags_200(t *testing.T) {
       "default/tag1",
       "default/type:temperature"
    ]
-}`
-
-	expected := &[]string{
-		"default/tag1",
-		"default/type:temperature",
-	}
-
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
-
-	s.Serve(in)
-
-	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
-	})
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
-
-	err = client.Open()
-	assert.NoError(t, err)
-
-	opts := scheme.TagsOptions{}
-	v, err := client.Tags(opts)
-	assert.NotNil(t, v)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
-}
-
-func TestWebSocketClientV3_Info_200(t *testing.T) {
-	in := `
+}`,
+			&[]string{
+				"default/tag1",
+				"default/type:temperature",
+			},
+		},
+		{
+			"info",
+			`
 {
    "id":1,
    "event":"response/device",
@@ -663,89 +509,69 @@ func TestWebSocketClientV3_Info_200(t *testing.T) {
          }
       ]
    }
-}`
-
-	expected := &scheme.Info{
-		Timestamp: "2018-06-18T13:30:15Z",
-		ID:        "34c226b1afadaae5f172a4e1763fd1a6",
-		Type:      "humidity",
-		Metadata: scheme.MetadataOptions{
-			Model: "emul8-humidity",
-		},
-		Plugin: "12835beffd3e6c603aa4dd92127707b5",
-		Info:   "Synse Humidity Sensor",
-		Tags: []string{
-			"type:humidity",
-			"humidity",
-			"vio/fan-sensor",
-		},
-		Capabilities: scheme.CapabilitiesOptions{
-			Mode: "rw",
-			Read: map[string]string{},
-			Write: scheme.WriteOptions{
-				Actions: []string{
-					"color",
-					"state",
+}`,
+			&scheme.Info{
+				Timestamp: "2018-06-18T13:30:15Z",
+				ID:        "34c226b1afadaae5f172a4e1763fd1a6",
+				Type:      "humidity",
+				Metadata: scheme.MetadataOptions{
+					Model: "emul8-humidity",
 				},
-			},
-		},
-		Output: []scheme.OutputOptions{
-			scheme.OutputOptions{
-				Name:          "humidity",
-				Type:          "humidity",
-				Precision:     int(3),
-				ScalingFactor: float64(1.0),
-				Units: []scheme.UnitOptions{
-					scheme.UnitOptions{
-						System: "",
-						Name:   "percent humidity",
-						Symbol: "%",
+				Plugin: "12835beffd3e6c603aa4dd92127707b5",
+				Info:   "Synse Humidity Sensor",
+				Tags: []string{
+					"type:humidity",
+					"humidity",
+					"vio/fan-sensor",
+				},
+				Capabilities: scheme.CapabilitiesOptions{
+					Mode: "rw",
+					Read: map[string]string{},
+					Write: scheme.WriteOptions{
+						Actions: []string{
+							"color",
+							"state",
+						},
+					},
+				},
+				Output: []scheme.OutputOptions{
+					scheme.OutputOptions{
+						Name:          "humidity",
+						Type:          "humidity",
+						Precision:     int(3),
+						ScalingFactor: float64(1.0),
+						Units: []scheme.UnitOptions{
+							scheme.UnitOptions{
+								System: "",
+								Name:   "percent humidity",
+								Symbol: "%",
+							},
+						},
+					},
+					scheme.OutputOptions{
+						Name:          "temperature",
+						Type:          "temperature",
+						Precision:     int(3),
+						ScalingFactor: float64(1.0),
+						Units: []scheme.UnitOptions{
+							scheme.UnitOptions{
+								System: "metric",
+								Name:   "celsius",
+								Symbol: "C",
+							},
+							scheme.UnitOptions{
+								System: "imperial",
+								Name:   "fahrenheit",
+								Symbol: "F",
+							},
+						},
 					},
 				},
 			},
-			scheme.OutputOptions{
-				Name:          "temperature",
-				Type:          "temperature",
-				Precision:     int(3),
-				ScalingFactor: float64(1.0),
-				Units: []scheme.UnitOptions{
-					scheme.UnitOptions{
-						System: "metric",
-						Name:   "celsius",
-						Symbol: "C",
-					},
-					scheme.UnitOptions{
-						System: "imperial",
-						Name:   "fahrenheit",
-						Symbol: "F",
-					},
-				},
-			},
 		},
-	}
-
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
-
-	s.Serve(in)
-
-	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
-	})
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
-
-	err = client.Open()
-	assert.NoError(t, err)
-
-	v, err := client.Info("34c226b1afadaae5f172a4e1763fd1a6")
-	assert.NotNil(t, v)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
-}
-
-func TestWebSocketClientV3_Read_200(t *testing.T) {
-	in := `
+		{
+			"read",
+			`
 {
    "id":1,
    "event":"response/reading",
@@ -795,78 +621,58 @@ func TestWebSocketClientV3_Read_200(t *testing.T) {
          }
       }
    ]
-}`
+}`,
 
-	expected := &[]scheme.Read{
-		scheme.Read{
-			Device:     "a72cs6519ee675b",
-			DeviceType: "temperature",
-			Type:       "temperature",
-			Value:      float64(20.3),
-			Timestamp:  "2018-02-01T13:47:40Z",
-			Unit: scheme.UnitOptions{
-				System: "metric",
-				Symbol: "C",
-				Name:   "degrees celsius",
+			&[]scheme.Read{
+				scheme.Read{
+					Device:     "a72cs6519ee675b",
+					DeviceType: "temperature",
+					Type:       "temperature",
+					Value:      float64(20.3),
+					Timestamp:  "2018-02-01T13:47:40Z",
+					Unit: scheme.UnitOptions{
+						System: "metric",
+						Symbol: "C",
+						Name:   "degrees celsius",
+					},
+					Context: map[string]interface{}{
+						"host":        "127.0.0.1",
+						"sample_rate": float64(8),
+					},
+				},
+				scheme.Read{
+					Device:     "929b923de65a811",
+					DeviceType: "led",
+					Type:       "state",
+					Value:      "off",
+					Timestamp:  "2018-02-01T13:47:40Z",
+					Unit:       scheme.UnitOptions{},
+				},
+				scheme.Read{
+					Device:     "929b923de65a811",
+					DeviceType: "led",
+					Type:       "color",
+					Value:      "000000",
+					Timestamp:  "2018-02-01T13:47:40Z",
+					Unit:       scheme.UnitOptions{},
+				},
+				scheme.Read{
+					Device:     "12bb12c1f86a86e",
+					DeviceType: "door_lock",
+					Type:       "status",
+					Value:      "locked",
+					Timestamp:  "2018-02-01T13:47:40Z",
+					Unit:       scheme.UnitOptions{},
+					Context: map[string]interface{}{
+						"wedge": float64(1),
+						"zone":  "6B",
+					},
+				},
 			},
-			Context: map[string]interface{}{
-				"host":        "127.0.0.1",
-				"sample_rate": float64(8),
-			},
 		},
-		scheme.Read{
-			Device:     "929b923de65a811",
-			DeviceType: "led",
-			Type:       "state",
-			Value:      "off",
-			Timestamp:  "2018-02-01T13:47:40Z",
-			Unit:       scheme.UnitOptions{},
-		},
-		scheme.Read{
-			Device:     "929b923de65a811",
-			DeviceType: "led",
-			Type:       "color",
-			Value:      "000000",
-			Timestamp:  "2018-02-01T13:47:40Z",
-			Unit:       scheme.UnitOptions{},
-		},
-		scheme.Read{
-			Device:     "12bb12c1f86a86e",
-			DeviceType: "door_lock",
-			Type:       "status",
-			Value:      "locked",
-			Timestamp:  "2018-02-01T13:47:40Z",
-			Unit:       scheme.UnitOptions{},
-			Context: map[string]interface{}{
-				"wedge": float64(1),
-				"zone":  "6B",
-			},
-		},
-	}
-
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
-
-	s.Serve(in)
-
-	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
-	})
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
-
-	err = client.Open()
-	assert.NoError(t, err)
-
-	opts := scheme.ReadOptions{}
-	v, err := client.Read(opts)
-	assert.NotNil(t, v)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
-}
-
-func TestWebSocketClientV3_ReadDevice_200(t *testing.T) {
-	in := `
+		{
+			"read_device",
+			`
 {
    "id":1,
    "event":"response/reading",
@@ -888,50 +694,29 @@ func TestWebSocketClientV3_ReadDevice_200(t *testing.T) {
          }
       }
    ]
-}`
-
-	expected := &[]scheme.Read{
-		scheme.Read{
-			Device:     "12bb12c1f86a86e",
-			DeviceType: "temperature",
-			Type:       "temperature",
-			Value:      float64(20.3),
-			Timestamp:  "2018-02-01T13:47:40Z",
-			Unit: scheme.UnitOptions{
-				System: "metric",
-				Symbol: "C",
-				Name:   "degrees celsius",
-			},
-			Context: map[string]interface{}{
-				"host":        "127.0.0.1",
-				"sample_rate": float64(8),
+}`,
+			&[]scheme.Read{
+				scheme.Read{
+					Device:     "12bb12c1f86a86e",
+					DeviceType: "temperature",
+					Type:       "temperature",
+					Value:      float64(20.3),
+					Timestamp:  "2018-02-01T13:47:40Z",
+					Unit: scheme.UnitOptions{
+						System: "metric",
+						Symbol: "C",
+						Name:   "degrees celsius",
+					},
+					Context: map[string]interface{}{
+						"host":        "127.0.0.1",
+						"sample_rate": float64(8),
+					},
+				},
 			},
 		},
-	}
-
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
-
-	s.Serve(in)
-
-	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
-	})
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
-
-	err = client.Open()
-	assert.NoError(t, err)
-
-	opts := scheme.ReadOptions{}
-	v, err := client.ReadDevice("12bb12c1f86a86e", opts)
-	assert.NotNil(t, v)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
-}
-
-func TestWebSocketClientV3_ReadCache_200(t *testing.T) {
-	in := `
+		{
+			"read_cache",
+			`
 {
    "id":1,
    "event":"response/reading",
@@ -953,50 +738,29 @@ func TestWebSocketClientV3_ReadCache_200(t *testing.T) {
          "unit":null
       }
    ]
-}`
-
-	expected := &[]scheme.Read{
-		scheme.Read{
-			Device:     "929b923de65a811",
-			DeviceType: "led",
-			Type:       "state",
-			Value:      "off",
-			Timestamp:  "2018-02-01T13:47:40Z",
-			Unit:       scheme.UnitOptions{},
+}`,
+			&[]scheme.Read{
+				scheme.Read{
+					Device:     "929b923de65a811",
+					DeviceType: "led",
+					Type:       "state",
+					Value:      "off",
+					Timestamp:  "2018-02-01T13:47:40Z",
+					Unit:       scheme.UnitOptions{},
+				},
+				scheme.Read{
+					Device:     "929b923de65a811",
+					DeviceType: "led",
+					Type:       "color",
+					Value:      "000000",
+					Timestamp:  "2018-02-01T13:47:40Z",
+					Unit:       scheme.UnitOptions{},
+				},
+			},
 		},
-		scheme.Read{
-			Device:     "929b923de65a811",
-			DeviceType: "led",
-			Type:       "color",
-			Value:      "000000",
-			Timestamp:  "2018-02-01T13:47:40Z",
-			Unit:       scheme.UnitOptions{},
-		},
-	}
-
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
-
-	s.Serve(in)
-
-	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
-	})
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
-
-	err = client.Open()
-	assert.NoError(t, err)
-
-	opts := scheme.ReadCacheOptions{}
-	v, err := client.ReadCache(opts)
-	assert.NotNil(t, v)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
-}
-
-func TestWebSocketClientV3_WriteAsync_200(t *testing.T) {
-	in := `
+		{
+			"write_async",
+			`
 {
    "id":1,
    "event":"response/write_async",
@@ -1020,52 +784,31 @@ func TestWebSocketClientV3_WriteAsync_200(t *testing.T) {
          "timeout":"10s"
       }
    ]
-}`
-
-	expected := &[]scheme.Write{
-		scheme.Write{
-			Context: scheme.WriteData{
-				Action: "color",
-				Data:   "f38ac2",
+}`,
+			&[]scheme.Write{
+				scheme.Write{
+					Context: scheme.WriteData{
+						Action: "color",
+						Data:   "f38ac2",
+					},
+					Device:      "0fe8f06229aa9a01ef6032d1ddaf18a2",
+					Transaction: "56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
+					Timeout:     "10s",
+				},
+				scheme.Write{
+					Context: scheme.WriteData{
+						Action: "state",
+						Data:   "blink",
+					},
+					Device:      "0fe8f06229aa9a01ef6032d1ddaf18a2",
+					Transaction: "56a32eba-1aa6-4868-84ee-fe01af8b2e6e",
+					Timeout:     "10s",
+				},
 			},
-			Device:      "0fe8f06229aa9a01ef6032d1ddaf18a2",
-			Transaction: "56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
-			Timeout:     "10s",
 		},
-		scheme.Write{
-			Context: scheme.WriteData{
-				Action: "state",
-				Data:   "blink",
-			},
-			Device:      "0fe8f06229aa9a01ef6032d1ddaf18a2",
-			Transaction: "56a32eba-1aa6-4868-84ee-fe01af8b2e6e",
-			Timeout:     "10s",
-		},
-	}
-
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
-
-	s.Serve(in)
-
-	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
-	})
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
-
-	err = client.Open()
-	assert.NoError(t, err)
-
-	opts := []scheme.WriteData{}
-	v, err := client.WriteAsync("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
-	assert.NotNil(t, v)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
-}
-
-func TestWebSocketClientV3_WriteSync_200(t *testing.T) {
-	in := `
+		{
+			"write_sync",
+			`
 {
    "id":1,
    "event":"response/write_sync",
@@ -1084,47 +827,26 @@ func TestWebSocketClientV3_WriteSync_200(t *testing.T) {
          "message":""
       }
    ]
-}`
-
-	expected := &[]scheme.Transaction{
-		scheme.Transaction{
-			ID:      "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
-			Timeout: "10s",
-			Device:  "0fe8f06229aa9a01ef6032d1ddaf18a5",
-			Context: scheme.WriteData{
-				Action: "color",
-				Data:   "f38ac2",
+}`,
+			&[]scheme.Transaction{
+				scheme.Transaction{
+					ID:      "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
+					Timeout: "10s",
+					Device:  "0fe8f06229aa9a01ef6032d1ddaf18a5",
+					Context: scheme.WriteData{
+						Action: "color",
+						Data:   "f38ac2",
+					},
+					Status:  "done",
+					Created: "2018-02-01T15:00:51Z",
+					Updated: "2018-02-01T15:00:51Z",
+					Message: "",
+				},
 			},
-			Status:  "done",
-			Created: "2018-02-01T15:00:51Z",
-			Updated: "2018-02-01T15:00:51Z",
-			Message: "",
 		},
-	}
-
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
-
-	s.Serve(in)
-
-	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
-	})
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
-
-	err = client.Open()
-	assert.NoError(t, err)
-
-	opts := []scheme.WriteData{}
-	v, err := client.WriteSync("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
-	assert.NotNil(t, v)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
-}
-
-func TestWebSocketClientV3_Transactions_200(t *testing.T) {
-	in := `
+		{
+			"transactions",
+			`
 {
    "id":1,
    "event":"response/transaction",
@@ -1133,36 +855,16 @@ func TestWebSocketClientV3_Transactions_200(t *testing.T) {
       "56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
       "56a32eba-1aa6-4868-84ee-fe01af8b2e6d"
    ]
-}`
-
-	expected := &[]string{
-		"56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
-		"56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
-		"56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
-	}
-
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
-
-	s.Serve(in)
-
-	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
-	})
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
-
-	err = client.Open()
-	assert.NoError(t, err)
-
-	v, err := client.Transactions()
-	assert.NotNil(t, v)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
-}
-
-func TestWebSocketClientV3_Transaction_200(t *testing.T) {
-	in := `
+}`,
+			&[]string{
+				"56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
+				"56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
+				"56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
+			},
+		},
+		{
+			"transaction",
+			`
 {
    "id":1,
    "event":"response/transaction",
@@ -1179,38 +881,87 @@ func TestWebSocketClientV3_Transaction_200(t *testing.T) {
       "updated":"2018-02-01T15:00:51Z",
       "message":""
    }
-}`
-
-	expected := &scheme.Transaction{
-		ID:      "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
-		Timeout: "10s",
-		Device:  "0fe8f06229aa9a01ef6032d1ddaf18a5",
-		Context: scheme.WriteData{
-			Action: "color",
-			Data:   "f38ac2",
+}`,
+			&scheme.Transaction{
+				ID:      "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
+				Timeout: "10s",
+				Device:  "0fe8f06229aa9a01ef6032d1ddaf18a5",
+				Context: scheme.WriteData{
+					Action: "color",
+					Data:   "f38ac2",
+				},
+				Status:  "done",
+				Created: "2018-02-01T15:00:51Z",
+				Updated: "2018-02-01T15:00:51Z",
+				Message: "",
+			},
 		},
-		Status:  "done",
-		Created: "2018-02-01T15:00:51Z",
-		Updated: "2018-02-01T15:00:51Z",
-		Message: "",
 	}
 
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
+	for _, tt := range tests {
+		s := test.NewWebSocketServerV3()
+		defer s.Close()
 
-	s.Serve(in)
+		s.Serve(tt.in)
 
-	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
-	})
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
+		client, err := NewWebSocketClientV3(&Options{
+			Address: s.URL,
+		})
+		assert.NotNil(t, client)
+		assert.NoError(t, err)
 
-	err = client.Open()
-	assert.NoError(t, err)
+		err = client.Open()
+		assert.NoError(t, err)
 
-	v, err := client.Transaction("56a32eba-1aa6-4868-84ee-fe01af8b2e6b")
-	assert.NotNil(t, v)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
+		var resp interface{}
+
+		switch tt.request {
+		case "status":
+			resp, err = client.Status()
+		case "version":
+			resp, err = client.Version()
+		case "config":
+			resp, err = client.Config()
+		case "plugins":
+			resp, err = client.Plugins()
+		case "plugin":
+			resp, err = client.Plugin("12835beffd3e6c603aa4dd92127707b5")
+		case "plugin_health":
+			resp, err = client.PluginHealth()
+		case "scan":
+			opts := scheme.ScanOptions{}
+			resp, err = client.Scan(opts)
+		case "tags":
+			opts := scheme.TagsOptions{}
+			resp, err = client.Tags(opts)
+		case "info":
+			resp, err = client.Info("34c226b1afadaae5f172a4e1763fd1a6")
+		case "read":
+			opts := scheme.ReadOptions{}
+			resp, err = client.Read(opts)
+		case "read_device":
+			opts := scheme.ReadOptions{}
+			resp, err = client.ReadDevice("12bb12c1f86a86e", opts)
+		case "read_cache":
+			opts := scheme.ReadCacheOptions{}
+			resp, err = client.ReadCache(opts)
+		case "write_async":
+			opts := []scheme.WriteData{}
+			resp, err = client.WriteAsync("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
+		case "write_sync":
+			opts := []scheme.WriteData{}
+			resp, err = client.WriteSync("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
+		case "transactions":
+			resp, err = client.Transactions()
+		case "transaction":
+			resp, err = client.Transaction("56a32eba-1aa6-4868-84ee-fe01af8b2e6b")
+		}
+
+		assert.NotNil(t, resp)
+		assert.NoError(t, err)
+		assert.Equal(t, tt.expected, resp)
+
+		err = client.Close()
+		assert.NoError(t, err)
+	}
 }
