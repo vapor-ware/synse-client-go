@@ -48,6 +48,7 @@ func TestNewWebSocketClientV3_defaults(t *testing.T) {
 	assert.Equal(t, 45*time.Second, client.GetOptions().WebSocket.HandshakeTimeout)
 	assert.Empty(t, client.GetOptions().TLS.CertFile)
 	assert.Empty(t, client.GetOptions().TLS.KeyFile)
+	assert.False(t, client.GetOptions().TLS.Enabled)
 	assert.False(t, client.GetOptions().TLS.SkipVerify)
 }
 
