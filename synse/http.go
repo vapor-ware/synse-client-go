@@ -74,7 +74,7 @@ func createHTTPClient(opts *Options) (*resty.Client, error) {
 		return nil, err
 	}
 
-	// FIXME - refer to #24. If not disable linting, a warning will happen:
+	// NOTE - refer to #24. If not disable linting, a warning will happen:
 	// TLS InsecureSkipVerify may be true.,HIGH,LOW (gosec)
 	return client.
 		SetCertificates(cert).
