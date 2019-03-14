@@ -82,7 +82,7 @@ func createWebSocketClient(opts *Options) (*websocket.Dialer, error) {
 		TLSClientConfig: &tls.Config{
 			Certificates: []tls.Certificate{cert},
 
-			// FIXME - refer to #24. If not disable linting, a warning will happen:
+			// NOTE - refer to #24. If not disable linting, a warning will happen:
 			// TLS InsecureSkipVerify may be true.,HIGH,LOW (gosec)
 			InsecureSkipVerify: opts.TLS.SkipVerify, // nolint
 		},
