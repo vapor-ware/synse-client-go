@@ -1273,3 +1273,37 @@ func TestWebSocketClientV3_TLS(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, expected, v)
 }
+
+func TestWebSocketClientV3_TLS_UnknownCA(t *testing.T) {
+	// certFile and keyFile are self-signed test certificates' locations.
+	certFile, keyFile := "testdata/cert.pem", "testdata/key.pem"
+
+	// Parse the certificates.
+	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	assert.NotNil(t, cert)
+	assert.NoError(t, err)
+
+	// Create a mock websocket server and let it use the certificates.
+	server := test.NewWebSocketTLSServerV3()
+	defer server.Close()
+
+	cfg := &tls.Config{Certificates: []tls.Certificate{cert}}
+	server.SetTLS(cfg)
+	assert.NotNil(t, server.GetCertificates())
+
+	// Setup a client that also uses the certificates. However, this time we
+	// don't skip the CA known security check.
+	client, err := NewWebSocketClientV3(&Options{
+		Address: server.URL,
+		TLS: TLSOptions{
+			Enabled:  true,
+			CertFile: certFile,
+			KeyFile:  keyFile,
+		},
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.Error(t, err)
+}
