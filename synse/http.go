@@ -74,7 +74,8 @@ func createHTTPClient(opts *Options) (*resty.Client, error) {
 		return nil, err
 	}
 
-	// FIXME - for some reasons linting doesn't like how we skip tls checking here.
+	// FIXME - refer to #24. If not disable linting, a warning will happen:
+	// TLS InsecureSkipVerify may be true.,HIGH,LOW (gosec)
 	return client.
 		SetCertificates(cert).
 		SetTLSClientConfig(&tls.Config{InsecureSkipVerify: opts.TLS.SkipVerify}), nil // nolint

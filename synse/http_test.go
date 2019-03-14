@@ -51,6 +51,7 @@ func TestNewHTTPClientV3_defaults(t *testing.T) {
 	assert.Equal(t, 2*time.Second, client.GetOptions().HTTP.Retry.MaxWaitTime)
 	assert.Empty(t, client.GetOptions().TLS.CertFile)
 	assert.Empty(t, client.GetOptions().TLS.KeyFile)
+	assert.False(t, client.GetOptions().TLS.Enabled)
 	assert.False(t, client.GetOptions().TLS.SkipVerify)
 }
 

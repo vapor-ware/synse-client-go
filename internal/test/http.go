@@ -37,7 +37,7 @@ func NewHTTPServerV3() HTTPServer {
 	s := httptest.NewServer(m)
 
 	return HTTPServer{
-		URL:     s.URL[7:],
+		URL:     s.URL[7:], // remove `http://` prefix
 		server:  s,
 		mux:     m,
 		version: "v3",
@@ -50,7 +50,7 @@ func NewHTTPSServerV3() HTTPServer {
 	s := httptest.NewTLSServer(m)
 
 	return HTTPServer{
-		URL:     s.URL[8:],
+		URL:     s.URL[8:], // remove `https://`
 		server:  s,
 		mux:     m,
 		version: "v3",
