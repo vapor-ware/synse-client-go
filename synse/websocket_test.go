@@ -1,7 +1,7 @@
 package synse
 
 import (
-	// "crypto/tls"
+	"crypto/tls"
 	"testing"
 	"time"
 
@@ -1211,6 +1211,64 @@ func TestWebSocketClientV3_Transaction_200(t *testing.T) {
 	assert.NoError(t, err)
 
 	v, err := client.Transaction("56a32eba-1aa6-4868-84ee-fe01af8b2e6b")
+	assert.NotNil(t, v)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, v)
+}
+
+func TestWebSocketClientV3_TLS(t *testing.T) {
+	// certFile and keyFile are self-signed test certificates' locations.
+	certFile, keyFile := "testdata/cert.pem", "testdata/key.pem"
+
+	// Parse the certificates.
+	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	assert.NotNil(t, cert)
+	assert.NoError(t, err)
+
+	// Create a mock websocket server and let it use the certificates.
+	server := test.NewWebSocketTLSServerV3()
+	defer server.Close()
+
+	cfg := &tls.Config{Certificates: []tls.Certificate{cert}}
+	server.SetTLS(cfg)
+	assert.NotNil(t, server.GetCertificates())
+
+	// Setup a client that also uses the certificates.
+	client, err := NewWebSocketClientV3(&Options{
+		Address: server.URL,
+		TLS: TLSOptions{
+			Enabled:    true,
+			CertFile:   certFile,
+			KeyFile:    keyFile,
+			SkipVerify: true, // skip CA known authority check
+		},
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	// Only need to setup one test case since we already have tests for all
+	// other requests and the works there are pretty much the same.
+	in := `
+{
+  "id":1,
+  "event":"response/status",
+  "data":{
+    "status":"ok",
+	"timestamp":"2019-01-24T14:34:24.926108Z"
+  }
+}`
+
+	expected := &scheme.Status{
+		Status:    "ok",
+		Timestamp: "2019-01-24T14:34:24.926108Z",
+	}
+
+	server.Serve(in)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	v, err := client.Status()
 	assert.NotNil(t, v)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, v)
