@@ -81,7 +81,8 @@ func createWebSocketClient(opts *Options) (*websocket.Dialer, error) {
 	return &websocket.Dialer{
 		HandshakeTimeout: opts.WebSocket.HandshakeTimeout,
 		TLSClientConfig: &tls.Config{
-			Certificates: []tls.Certificate{cert},
+			Certificates:       []tls.Certificate{cert},
+			InsecureSkipVerify: opts.TLS.SkipVerify,
 		},
 	}, nil
 }
