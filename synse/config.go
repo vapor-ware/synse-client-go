@@ -67,6 +67,8 @@ type TLSOptions struct {
 	// Enabled specifies whethere tls is enabled.
 	Enabled bool `default:"false"`
 
-	// SkipVerify specifies whether the client can skip certificate checks.
+	// SkipVerify specifies whether the client can skip certificate check. If
+	// it is set to true, TLS will accept any certificate presented. However,
+	// due to security concern, this should only be used for testing.
 	SkipVerify bool `default:"false"`
 }
