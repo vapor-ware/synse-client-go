@@ -4,7 +4,6 @@ package synse
 
 import (
 	"crypto/tls"
-	"fmt"
 	"sync/atomic"
 
 	"github.com/gorilla/websocket"
@@ -540,14 +539,12 @@ func (c *websocketClient) makeRequest(req, resp interface{}) error {
 
 // verifyResponse checks if the request/reponse metadata are matched.
 func (c *websocketClient) verifyResponse(reqMeta, respMeta scheme.EventMeta) error {
-	// FIXME - diable linting here since we want to use the pkg/errors instead
-	// of fmt.Errorf.
 	if reqMeta.ID != respMeta.ID {
-		return errors.New(fmt.Sprintf("%v did not match %v", reqMeta.ID, respMeta.ID)) // nolint
+		return errors.Errorf("%v did not match %v", reqMeta.ID, respMeta.ID)
 	}
 
 	if matchEvent(reqMeta.Event) != respMeta.Event {
-		return errors.New(fmt.Sprintf("%s did not match %s", reqMeta.Event, respMeta.Event)) //nolint
+		return errors.Errorf("%s did not match %s", reqMeta.Event, respMeta.Event)
 	}
 
 	return nil
