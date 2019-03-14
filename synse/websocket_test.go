@@ -87,13 +87,13 @@ func TestWebSocketClientV3_Status_200(t *testing.T) {
 		Timestamp: "2019-01-24T14:34:24.926108Z",
 	}
 
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
 
-	s.Serve(in)
+	server.Serve(in)
 
 	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
+		Address: server.URL,
 	})
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
@@ -101,10 +101,10 @@ func TestWebSocketClientV3_Status_200(t *testing.T) {
 	err = client.Open()
 	assert.NoError(t, err)
 
-	v, err := client.Status()
-	assert.NotNil(t, v)
+	resp, err := client.Status()
+	assert.NotNil(t, resp)
 	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
+	assert.Equal(t, expected, resp)
 }
 
 func TestWebSocketClientV3_Version_200(t *testing.T) {
@@ -123,13 +123,13 @@ func TestWebSocketClientV3_Version_200(t *testing.T) {
 		APIVersion: "v3",
 	}
 
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
 
-	s.Serve(in)
+	server.Serve(in)
 
 	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
+		Address: server.URL,
 	})
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
@@ -137,10 +137,10 @@ func TestWebSocketClientV3_Version_200(t *testing.T) {
 	err = client.Open()
 	assert.NoError(t, err)
 
-	v, err := client.Version()
-	assert.NotNil(t, v)
+	resp, err := client.Version()
+	assert.NotNil(t, resp)
 	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
+	assert.Equal(t, expected, resp)
 }
 
 func TestWebSocketClientV3_Config_200(t *testing.T) {
@@ -237,13 +237,13 @@ func TestWebSocketClientV3_Config_200(t *testing.T) {
 		},
 	}
 
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
 
-	s.Serve(in)
+	server.Serve(in)
 
 	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
+		Address: server.URL,
 	})
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
@@ -251,10 +251,10 @@ func TestWebSocketClientV3_Config_200(t *testing.T) {
 	err = client.Open()
 	assert.NoError(t, err)
 
-	v, err := client.Config()
-	assert.NotNil(t, v)
+	resp, err := client.Config()
+	assert.NotNil(t, resp)
 	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
+	assert.Equal(t, expected, resp)
 }
 
 func TestWebSocketClientV3_Plugins_200(t *testing.T) {
@@ -297,13 +297,13 @@ func TestWebSocketClientV3_Plugins_200(t *testing.T) {
 		},
 	}
 
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
 
-	s.Serve(in)
+	server.Serve(in)
 
 	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
+		Address: server.URL,
 	})
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
@@ -311,10 +311,10 @@ func TestWebSocketClientV3_Plugins_200(t *testing.T) {
 	err = client.Open()
 	assert.NoError(t, err)
 
-	v, err := client.Plugins()
-	assert.NotNil(t, v)
+	resp, err := client.Plugins()
+	assert.NotNil(t, resp)
 	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
+	assert.Equal(t, expected, resp)
 }
 
 func TestWebSocketClientV3_Plugin_200(t *testing.T) {
@@ -413,13 +413,13 @@ func TestWebSocketClientV3_Plugin_200(t *testing.T) {
 		},
 	}
 
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
 
-	s.Serve(in)
+	server.Serve(in)
 
 	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
+		Address: server.URL,
 	})
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
@@ -427,10 +427,10 @@ func TestWebSocketClientV3_Plugin_200(t *testing.T) {
 	err = client.Open()
 	assert.NoError(t, err)
 
-	v, err := client.Plugin("12835beffd3e6c603aa4dd92127707b5")
-	assert.NotNil(t, v)
+	resp, err := client.Plugin("12835beffd3e6c603aa4dd92127707b5")
+	assert.NotNil(t, resp)
 	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
+	assert.Equal(t, expected, resp)
 }
 
 func TestWebSocketClientV3_PluginHealth_200(t *testing.T) {
@@ -467,13 +467,13 @@ func TestWebSocketClientV3_PluginHealth_200(t *testing.T) {
 		Inactive:  int(0),
 	}
 
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
 
-	s.Serve(in)
+	server.Serve(in)
 
 	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
+		Address: server.URL,
 	})
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
@@ -481,10 +481,10 @@ func TestWebSocketClientV3_PluginHealth_200(t *testing.T) {
 	err = client.Open()
 	assert.NoError(t, err)
 
-	v, err := client.PluginHealth()
-	assert.NotNil(t, v)
+	resp, err := client.PluginHealth()
+	assert.NotNil(t, resp)
 	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
+	assert.Equal(t, expected, resp)
 }
 
 func TestWebSocketClientV3_Scan_200(t *testing.T) {
@@ -541,13 +541,13 @@ func TestWebSocketClientV3_Scan_200(t *testing.T) {
 		},
 	}
 
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
 
-	s.Serve(in)
+	server.Serve(in)
 
 	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
+		Address: server.URL,
 	})
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
@@ -556,10 +556,10 @@ func TestWebSocketClientV3_Scan_200(t *testing.T) {
 	assert.NoError(t, err)
 
 	opts := scheme.ScanOptions{}
-	v, err := client.Scan(opts)
-	assert.NotNil(t, v)
+	resp, err := client.Scan(opts)
+	assert.NotNil(t, resp)
 	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
+	assert.Equal(t, expected, resp)
 }
 
 func TestWebSocketClientV3_Tags_200(t *testing.T) {
@@ -578,13 +578,13 @@ func TestWebSocketClientV3_Tags_200(t *testing.T) {
 		"default/type:temperature",
 	}
 
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
 
-	s.Serve(in)
+	server.Serve(in)
 
 	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
+		Address: server.URL,
 	})
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
@@ -593,10 +593,10 @@ func TestWebSocketClientV3_Tags_200(t *testing.T) {
 	assert.NoError(t, err)
 
 	opts := scheme.TagsOptions{}
-	v, err := client.Tags(opts)
-	assert.NotNil(t, v)
+	resp, err := client.Tags(opts)
+	assert.NotNil(t, resp)
 	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
+	assert.Equal(t, expected, resp)
 }
 
 func TestWebSocketClientV3_Info_200(t *testing.T) {
@@ -725,13 +725,13 @@ func TestWebSocketClientV3_Info_200(t *testing.T) {
 		},
 	}
 
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
 
-	s.Serve(in)
+	server.Serve(in)
 
 	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
+		Address: server.URL,
 	})
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
@@ -739,10 +739,10 @@ func TestWebSocketClientV3_Info_200(t *testing.T) {
 	err = client.Open()
 	assert.NoError(t, err)
 
-	v, err := client.Info("34c226b1afadaae5f172a4e1763fd1a6")
-	assert.NotNil(t, v)
+	resp, err := client.Info("34c226b1afadaae5f172a4e1763fd1a6")
+	assert.NotNil(t, resp)
 	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
+	assert.Equal(t, expected, resp)
 }
 
 func TestWebSocketClientV3_Read_200(t *testing.T) {
@@ -845,13 +845,13 @@ func TestWebSocketClientV3_Read_200(t *testing.T) {
 		},
 	}
 
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
 
-	s.Serve(in)
+	server.Serve(in)
 
 	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
+		Address: server.URL,
 	})
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
@@ -860,10 +860,10 @@ func TestWebSocketClientV3_Read_200(t *testing.T) {
 	assert.NoError(t, err)
 
 	opts := scheme.ReadOptions{}
-	v, err := client.Read(opts)
-	assert.NotNil(t, v)
+	resp, err := client.Read(opts)
+	assert.NotNil(t, resp)
 	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
+	assert.Equal(t, expected, resp)
 }
 
 func TestWebSocketClientV3_ReadDevice_200(t *testing.T) {
@@ -910,13 +910,13 @@ func TestWebSocketClientV3_ReadDevice_200(t *testing.T) {
 		},
 	}
 
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
 
-	s.Serve(in)
+	server.Serve(in)
 
 	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
+		Address: server.URL,
 	})
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
@@ -925,10 +925,10 @@ func TestWebSocketClientV3_ReadDevice_200(t *testing.T) {
 	assert.NoError(t, err)
 
 	opts := scheme.ReadOptions{}
-	v, err := client.ReadDevice("12bb12c1f86a86e", opts)
-	assert.NotNil(t, v)
+	resp, err := client.ReadDevice("12bb12c1f86a86e", opts)
+	assert.NotNil(t, resp)
 	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
+	assert.Equal(t, expected, resp)
 }
 
 func TestWebSocketClientV3_ReadCache_200(t *testing.T) {
@@ -975,13 +975,13 @@ func TestWebSocketClientV3_ReadCache_200(t *testing.T) {
 		},
 	}
 
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
 
-	s.Serve(in)
+	server.Serve(in)
 
 	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
+		Address: server.URL,
 	})
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
@@ -990,10 +990,10 @@ func TestWebSocketClientV3_ReadCache_200(t *testing.T) {
 	assert.NoError(t, err)
 
 	opts := scheme.ReadCacheOptions{}
-	v, err := client.ReadCache(opts)
-	assert.NotNil(t, v)
+	resp, err := client.ReadCache(opts)
+	assert.NotNil(t, resp)
 	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
+	assert.Equal(t, expected, resp)
 }
 
 func TestWebSocketClientV3_WriteAsync_200(t *testing.T) {
@@ -1044,13 +1044,13 @@ func TestWebSocketClientV3_WriteAsync_200(t *testing.T) {
 		},
 	}
 
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
 
-	s.Serve(in)
+	server.Serve(in)
 
 	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
+		Address: server.URL,
 	})
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
@@ -1059,10 +1059,10 @@ func TestWebSocketClientV3_WriteAsync_200(t *testing.T) {
 	assert.NoError(t, err)
 
 	opts := []scheme.WriteData{}
-	v, err := client.WriteAsync("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
-	assert.NotNil(t, v)
+	resp, err := client.WriteAsync("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
+	assert.NotNil(t, resp)
 	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
+	assert.Equal(t, expected, resp)
 }
 
 func TestWebSocketClientV3_WriteSync_200(t *testing.T) {
@@ -1103,13 +1103,13 @@ func TestWebSocketClientV3_WriteSync_200(t *testing.T) {
 		},
 	}
 
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
 
-	s.Serve(in)
+	server.Serve(in)
 
 	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
+		Address: server.URL,
 	})
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
@@ -1118,10 +1118,10 @@ func TestWebSocketClientV3_WriteSync_200(t *testing.T) {
 	assert.NoError(t, err)
 
 	opts := []scheme.WriteData{}
-	v, err := client.WriteSync("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
-	assert.NotNil(t, v)
+	resp, err := client.WriteSync("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
+	assert.NotNil(t, resp)
 	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
+	assert.Equal(t, expected, resp)
 }
 
 func TestWebSocketClientV3_Transactions_200(t *testing.T) {
@@ -1142,13 +1142,13 @@ func TestWebSocketClientV3_Transactions_200(t *testing.T) {
 		"56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
 	}
 
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
 
-	s.Serve(in)
+	server.Serve(in)
 
 	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
+		Address: server.URL,
 	})
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
@@ -1156,10 +1156,10 @@ func TestWebSocketClientV3_Transactions_200(t *testing.T) {
 	err = client.Open()
 	assert.NoError(t, err)
 
-	v, err := client.Transactions()
-	assert.NotNil(t, v)
+	resp, err := client.Transactions()
+	assert.NotNil(t, resp)
 	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
+	assert.Equal(t, expected, resp)
 }
 
 func TestWebSocketClientV3_Transaction_200(t *testing.T) {
@@ -1196,13 +1196,13 @@ func TestWebSocketClientV3_Transaction_200(t *testing.T) {
 		Message: "",
 	}
 
-	s := test.NewWebSocketServerV3()
-	defer s.Close()
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
 
-	s.Serve(in)
+	server.Serve(in)
 
 	client, err := NewWebSocketClientV3(&Options{
-		Address: s.URL,
+		Address: server.URL,
 	})
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
@@ -1210,10 +1210,10 @@ func TestWebSocketClientV3_Transaction_200(t *testing.T) {
 	err = client.Open()
 	assert.NoError(t, err)
 
-	v, err := client.Transaction("56a32eba-1aa6-4868-84ee-fe01af8b2e6b")
-	assert.NotNil(t, v)
+	resp, err := client.Transaction("56a32eba-1aa6-4868-84ee-fe01af8b2e6b")
+	assert.NotNil(t, resp)
 	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
+	assert.Equal(t, expected, resp)
 }
 
 func TestWebSocketClientV3_TLS(t *testing.T) {
@@ -1268,10 +1268,10 @@ func TestWebSocketClientV3_TLS(t *testing.T) {
 	err = client.Open()
 	assert.NoError(t, err)
 
-	v, err := client.Status()
-	assert.NotNil(t, v)
+	resp, err := client.Status()
+	assert.NotNil(t, resp)
 	assert.NoError(t, err)
-	assert.Equal(t, expected, v)
+	assert.Equal(t, expected, resp)
 }
 
 func TestWebSocketClientV3_TLS_UnknownCA(t *testing.T) {
