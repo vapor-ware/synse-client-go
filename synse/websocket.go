@@ -303,18 +303,13 @@ func (c *websocketClient) Read(opts scheme.ReadOptions) (*[]scheme.Read, error) 
 		Data: opts,
 	}
 
-	resp := new(scheme.ResponseReading)
-	err := c.makeRequest(req, resp)
+	resp := new([]scheme.Read)
+	err := c.makeRequestv1(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // ReadDevice returns data from a specific device.
