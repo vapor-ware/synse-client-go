@@ -390,18 +390,13 @@ func (c *websocketClient) WriteSync(id string, opts []scheme.WriteData) (*[]sche
 		},
 	}
 
-	resp := new(scheme.ResponseWriteSync)
-	err := c.makeRequest(req, resp)
+	resp := new([]scheme.Transaction)
+	err := c.makeRequestv1(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // Transactions returns the sorted list of all cached transaction IDs.
