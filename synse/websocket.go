@@ -161,18 +161,13 @@ func (c *websocketClient) Config() (*scheme.Config, error) {
 		},
 	}
 
-	resp := new(scheme.ResponseConfig)
-	err := c.makeRequest(req, resp)
+	resp := new(scheme.Config)
+	err := c.makeRequestv1(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // Plugins returns the summary of all plugins currently registered with
@@ -185,18 +180,13 @@ func (c *websocketClient) Plugins() (*[]scheme.PluginMeta, error) {
 		},
 	}
 
-	resp := new(scheme.ResponsePlugins)
-	err := c.makeRequest(req, resp)
+	resp := new([]scheme.PluginMeta)
+	err := c.makeRequestv1(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // Plugin returns data from a specific plugin.
@@ -211,18 +201,13 @@ func (c *websocketClient) Plugin(id string) (*scheme.Plugin, error) {
 		},
 	}
 
-	resp := new(scheme.ResponsePlugin)
-	err := c.makeRequest(req, resp)
+	resp := new(scheme.Plugin)
+	err := c.makeRequestv1(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // PluginHealth returns the summary of the health of registered plugins.
