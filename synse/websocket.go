@@ -429,18 +429,13 @@ func (c *websocketClient) Transaction(id string) (*scheme.Transaction, error) {
 		},
 	}
 
-	resp := new(scheme.ResponseTransaction)
-	err := c.makeRequest(req, resp)
+	resp := new(scheme.Transaction)
+	err := c.makeRequestv1(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // GetOptions returns the current config options of the client.
