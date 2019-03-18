@@ -283,18 +283,13 @@ func (c *websocketClient) Info(id string) (*scheme.Info, error) {
 		},
 	}
 
-	resp := new(scheme.ResponseDevice)
-	err := c.makeRequest(req, resp)
+	resp := new(scheme.Info)
+	err := c.makeRequestv1(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // Read returns data from devices which match the set of provided tags
