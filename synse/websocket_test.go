@@ -505,7 +505,7 @@ func TestWebSocketClientV3_PluginHealth_200(t *testing.T) {
 			"12835beffd3e6c603aa4dd92127707b6",
 			"12835beffd3e6c603aa4dd92127707b7",
 		},
-		Unhealthy: []string{},
+		Unhealthy: []string(nil),
 		Active:    int(3),
 		Inactive:  int(0),
 	}

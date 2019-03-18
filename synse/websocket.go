@@ -219,18 +219,13 @@ func (c *websocketClient) PluginHealth() (*scheme.PluginHealth, error) {
 		},
 	}
 
-	resp := new(scheme.ResponsePluginHealth)
-	err := c.makeRequest(req, resp)
+	resp := new(scheme.PluginHealth)
+	err := c.makeRequestv1(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // Scan returns the list of devices that Synse knows about and can read
