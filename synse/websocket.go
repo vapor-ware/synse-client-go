@@ -327,18 +327,13 @@ func (c *websocketClient) ReadDevice(id string, opts scheme.ReadOptions) (*[]sch
 		},
 	}
 
-	resp := new(scheme.ResponseReading)
-	err := c.makeRequest(req, resp)
+	resp := new([]scheme.Read)
+	err := c.makeRequestv1(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // ReadCache returns stream reading data from the registered plugins.
