@@ -241,18 +241,13 @@ func (c *websocketClient) Scan(opts scheme.ScanOptions) (*[]scheme.Scan, error) 
 		Data: opts,
 	}
 
-	resp := new(scheme.ResponseDeviceSummary)
-	err := c.makeRequest(req, resp)
+	resp := new([]scheme.Scan)
+	err := c.makeRequestv1(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // Tags returns the list of all tags currently associated with devices.
