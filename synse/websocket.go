@@ -126,7 +126,7 @@ func (c *websocketClient) Status() (*scheme.Status, error) {
 	}
 
 	resp := new(scheme.Status)
-	err := c.makeRequestv1(req, resp)
+	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +144,7 @@ func (c *websocketClient) Version() (*scheme.Version, error) {
 	}
 
 	resp := new(scheme.Version)
-	err := c.makeRequestv1(req, resp)
+	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +162,7 @@ func (c *websocketClient) Config() (*scheme.Config, error) {
 	}
 
 	resp := new(scheme.Config)
-	err := c.makeRequestv1(req, resp)
+	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -181,7 +181,7 @@ func (c *websocketClient) Plugins() (*[]scheme.PluginMeta, error) {
 	}
 
 	resp := new([]scheme.PluginMeta)
-	err := c.makeRequestv1(req, resp)
+	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -202,7 +202,7 @@ func (c *websocketClient) Plugin(id string) (*scheme.Plugin, error) {
 	}
 
 	resp := new(scheme.Plugin)
-	err := c.makeRequestv1(req, resp)
+	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -220,7 +220,7 @@ func (c *websocketClient) PluginHealth() (*scheme.PluginHealth, error) {
 	}
 
 	resp := new(scheme.PluginHealth)
-	err := c.makeRequestv1(req, resp)
+	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -242,7 +242,7 @@ func (c *websocketClient) Scan(opts scheme.ScanOptions) (*[]scheme.Scan, error) 
 	}
 
 	resp := new([]scheme.Scan)
-	err := c.makeRequestv1(req, resp)
+	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -262,7 +262,7 @@ func (c *websocketClient) Tags(opts scheme.TagsOptions) (*[]string, error) {
 	}
 
 	resp := new([]string)
-	err := c.makeRequestv1(req, resp)
+	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -284,7 +284,7 @@ func (c *websocketClient) Info(id string) (*scheme.Info, error) {
 	}
 
 	resp := new(scheme.Info)
-	err := c.makeRequestv1(req, resp)
+	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -304,7 +304,7 @@ func (c *websocketClient) Read(opts scheme.ReadOptions) (*[]scheme.Read, error) 
 	}
 
 	resp := new([]scheme.Read)
-	err := c.makeRequestv1(req, resp)
+	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -328,7 +328,7 @@ func (c *websocketClient) ReadDevice(id string, opts scheme.ReadOptions) (*[]sch
 	}
 
 	resp := new([]scheme.Read)
-	err := c.makeRequestv1(req, resp)
+	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -347,7 +347,7 @@ func (c *websocketClient) ReadCache(opts scheme.ReadCacheOptions) (*[]scheme.Rea
 	}
 
 	resp := new([]scheme.Read)
-	err := c.makeRequestv1(req, resp)
+	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -369,7 +369,7 @@ func (c *websocketClient) WriteAsync(id string, opts []scheme.WriteData) (*[]sch
 	}
 
 	resp := new([]scheme.Write)
-	err := c.makeRequestv1(req, resp)
+	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -391,7 +391,7 @@ func (c *websocketClient) WriteSync(id string, opts []scheme.WriteData) (*[]sche
 	}
 
 	resp := new([]scheme.Transaction)
-	err := c.makeRequestv1(req, resp)
+	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -409,7 +409,7 @@ func (c *websocketClient) Transactions() (*[]string, error) {
 	}
 
 	resp := new([]string)
-	err := c.makeRequestv1(req, resp)
+	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -430,7 +430,7 @@ func (c *websocketClient) Transaction(id string) (*scheme.Transaction, error) {
 	}
 
 	resp := new(scheme.Transaction)
-	err := c.makeRequestv1(req, resp)
+	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -452,21 +452,6 @@ func (c *websocketClient) addCounter() uint64 {
 // response back.
 // FIXME - refer to #22. Need to think more about how async will work in this case.
 func (c *websocketClient) makeRequest(req, resp interface{}) error {
-	err := c.connection.WriteJSON(req)
-	if err != nil {
-		return errors.Wrap(err, "failed to write to connection")
-	}
-
-	err = c.connection.ReadJSON(resp)
-	if err != nil {
-		return errors.Wrap(err, "failed to read from connection")
-	}
-
-	return nil
-}
-
-// TODO
-func (c *websocketClient) makeRequestv1(req, resp interface{}) error {
 	// Write to the connection.
 	err := c.connection.WriteJSON(req)
 	if err != nil {
@@ -515,19 +500,6 @@ func (c *websocketClient) makeRequestv1(req, resp interface{}) error {
 	err = mapstructure.Decode(re.Data, resp)
 	if err != nil {
 		return errors.Wrap(err, "failed to decode map into a proper scheme")
-	}
-
-	return nil
-}
-
-// verifyResponse checks if the request/reponse metadata are matched.
-func (c *websocketClient) verifyResponse(reqMeta, respMeta scheme.EventMeta) error {
-	if reqMeta.ID != respMeta.ID {
-		return errors.Errorf("%v did not match %v", reqMeta.ID, respMeta.ID)
-	}
-
-	if matchEvent(reqMeta.Event) != respMeta.Event {
-		return errors.Errorf("%s did not match %s", reqMeta.Event, respMeta.Event)
 	}
 
 	return nil
