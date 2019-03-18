@@ -261,18 +261,13 @@ func (c *websocketClient) Tags(opts scheme.TagsOptions) (*[]string, error) {
 		Data: opts,
 	}
 
-	resp := new(scheme.ResponseTags)
-	err := c.makeRequest(req, resp)
+	resp := new([]string)
+	err := c.makeRequestv1(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // Info returns the full set of meta info and capabilities for a specific
