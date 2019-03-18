@@ -346,18 +346,13 @@ func (c *websocketClient) ReadCache(opts scheme.ReadCacheOptions) (*[]scheme.Rea
 		Data: opts,
 	}
 
-	resp := new(scheme.ResponseReading)
-	err := c.makeRequest(req, resp)
+	resp := new([]scheme.Read)
+	err := c.makeRequestv1(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // WriteAsync writes data to a device, in an asynchronous manner.
