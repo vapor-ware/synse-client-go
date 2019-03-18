@@ -101,15 +101,13 @@ func TestWebSocketClientV3_Status_200(t *testing.T) {
 	err = client.Open()
 	assert.NoError(t, err)
 
-	defer func() {
-		err := client.Close()
-		assert.NoError(t, err)
-	}()
-
 	resp, err := client.Status()
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_Status_500(t *testing.T) {
@@ -140,14 +138,12 @@ func TestWebSocketClientV3_Status_500(t *testing.T) {
 	err = client.Open()
 	assert.NoError(t, err)
 
-	defer func() {
-		err := client.Close()
-		assert.NoError(t, err)
-	}()
-
 	resp, err := client.Status()
 	assert.Nil(t, resp)
 	assert.Error(t, err)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_Version_200(t *testing.T) {
