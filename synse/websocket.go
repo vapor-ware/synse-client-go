@@ -408,18 +408,13 @@ func (c *websocketClient) Transactions() (*[]string, error) {
 		},
 	}
 
-	resp := new(scheme.ResponseTransactions)
-	err := c.makeRequest(req, resp)
+	resp := new([]string)
+	err := c.makeRequestv1(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // Transaction returns the state and status of a write transaction.
