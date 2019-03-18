@@ -143,18 +143,13 @@ func (c *websocketClient) Version() (*scheme.Version, error) {
 		},
 	}
 
-	resp := new(scheme.ResponseVersion)
-	err := c.makeRequest(req, resp)
+	resp := new(scheme.Version)
+	err := c.makeRequestv1(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // Config returns the unified configuration info.
