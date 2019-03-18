@@ -2,10 +2,10 @@ package scheme
 
 // Write describes an unit in a response for the `/write` endpoint.
 type Write struct {
-	Context     WriteData `json:"context"`
-	Device      string    `json:"device"`
-	Transaction string    `json:"transaction"`
-	Timeout     string    `json:"timeout"`
+	Context     WriteData `json:"context" mapstructure:"context"`
+	Device      string    `json:"device" mapstructure:"device"`
+	Transaction string    `json:"transaction" mapstructure:"transaction"`
+	Timeout     string    `json:"timeout" mapstructure:"timeout"`
 }
 
 // WriteData describes an unit in the POST body for the `/write` endpoint. This

@@ -368,18 +368,13 @@ func (c *websocketClient) WriteAsync(id string, opts []scheme.WriteData) (*[]sch
 		},
 	}
 
-	resp := new(scheme.ResponseWriteAsync)
-	err := c.makeRequest(req, resp)
+	resp := new([]scheme.Write)
+	err := c.makeRequestv1(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // WriteSync writes data to a device, waiting for the write to complete.
