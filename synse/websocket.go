@@ -4,11 +4,15 @@ package synse
 
 import (
 	"crypto/tls"
+	"encoding/json"
+	"reflect"
 	"sync/atomic"
 
-	"github.com/gorilla/websocket"
-	"github.com/pkg/errors"
 	"github.com/vapor-ware/synse-client-go/synse/scheme"
+
+	"github.com/gorilla/websocket"
+	"github.com/mitchellh/mapstructure"
+	"github.com/pkg/errors"
 )
 
 type websocketClient struct {
@@ -121,18 +125,13 @@ func (c *websocketClient) Status() (*scheme.Status, error) {
 		},
 	}
 
-	resp := new(scheme.ResponseStatus)
-	err := c.makeRequest(req, resp)
+	resp := new(scheme.Status)
+	err := c.makeRequestv1(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // Version returns the version info.
@@ -536,6 +535,61 @@ func (c *websocketClient) makeRequest(req, resp interface{}) error {
 	err = c.connection.ReadJSON(resp)
 	if err != nil {
 		return errors.Wrap(err, "failed to read from connection")
+	}
+
+	return nil
+}
+
+// TODO
+func (c *websocketClient) makeRequestv1(req, resp interface{}) error {
+	// Write to the connection.
+	err := c.connection.WriteJSON(req)
+	if err != nil {
+		return errors.Wrap(err, "failed to write to connection")
+	}
+
+	// Read from the connection.
+	_, r, err := c.connection.NextReader()
+	if err != nil {
+		return errors.Wrap(err, "failed to get the next data message")
+	}
+
+	// Decode the response into a proper scheme.
+	var re scheme.Response
+	err = json.NewDecoder(r).Decode(&re)
+	if err != nil {
+		return errors.Wrap(err, "failed to decode json message into a proper scheme")
+	}
+
+	// Handle error response.
+	if re.Event == responseError {
+		var e scheme.Error
+
+		err = mapstructure.Decode(re.Data, &e)
+		if err != nil {
+			return errors.Wrap(err, "failed to decode map into a proper scheme")
+		}
+
+		return errors.Errorf(
+			"got a %v error response from synse server at %v, saying %v, with context: %v",
+			e.HTTPCode, e.Timestamp, e.Description, e.Context,
+		)
+	}
+
+	// Verify if the request and response metadata are matched.
+	v := reflect.ValueOf(req)
+	if v.FieldByName("ID").Uint() != re.ID {
+		return errors.Errorf("%v did not match %v", v.FieldByName("ID"), re.ID)
+	}
+
+	if matchEvent(v.FieldByName("Event").String()) != re.Event {
+		return errors.Errorf("%v did not match %v", v.FieldByName("Event"), re.Event)
+	}
+
+	// Handle successful response.
+	err = mapstructure.Decode(re.Data, resp)
+	if err != nil {
+		return errors.Wrap(err, "failed to decode map into a proper scheme")
 	}
 
 	return nil

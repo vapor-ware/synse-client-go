@@ -331,7 +331,6 @@ func check(err error, errResp *scheme.Error) error {
 			"got a %v error response from synse server at %v, saying %v, with context: %v",
 			errResp.HTTPCode, errResp.Timestamp, errResp.Description, errResp.Context,
 		)
-
 	}
 
 	return nil

@@ -116,6 +116,12 @@ type RequestTransaction struct {
 	Data WriteData `json:"data"`
 }
 
+// Response describes a generic response scheme.
+type Response struct {
+	EventMeta
+	Data interface{} `json:"data"`
+}
+
 // ResponseStatus describes a scheme for response/status event.
 type ResponseStatus struct {
 	EventMeta
