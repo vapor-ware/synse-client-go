@@ -117,7 +117,6 @@ func TestWebSocketClientV3_Status_500(t *testing.T) {
    "event":"response/error",
    "data":{
       "http_code":500,
-      "error_id":0,
       "description":"unknown error",
       "timestamp":"2019-01-24T14:36:53.166038Z",
       "context":"unknown error"
@@ -192,7 +191,6 @@ func TestWebSocketClientV3_Version_500(t *testing.T) {
    "event":"response/error",
    "data":{
       "http_code":500,
-      "error_id":0,
       "description":"unknown error",
       "timestamp":"2019-01-24T14:36:53.166038Z",
       "context":"unknown error"
@@ -345,7 +343,6 @@ func TestWebSocketClientV3_Config_500(t *testing.T) {
    "event":"response/error",
    "data":{
       "http_code":500,
-      "error_id":0,
       "description":"unknown error",
       "timestamp":"2019-01-24T14:36:53.166038Z",
       "context":"unknown error"
@@ -444,7 +441,6 @@ func TestWebSocketClientV3_Plugins_500(t *testing.T) {
    "event":"response/error",
    "data":{
       "http_code":500,
-      "error_id":0,
       "description":"unknown error",
       "timestamp":"2019-01-24T14:36:53.166038Z",
       "context":"unknown error"
@@ -599,7 +595,6 @@ func TestWebSocketClientV3_Plugin_500(t *testing.T) {
    "event":"response/error",
    "data":{
       "http_code":500,
-      "error_id":0,
       "description":"unknown error",
       "timestamp":"2019-01-24T14:36:53.166038Z",
       "context":"unknown error"
@@ -692,7 +687,6 @@ func TestWebSocketClientV3_PluginHealth_500(t *testing.T) {
    "event":"response/error",
    "data":{
       "http_code":500,
-      "error_id":0,
       "description":"unknown error",
       "timestamp":"2019-01-24T14:36:53.166038Z",
       "context":"unknown error"
@@ -806,7 +800,6 @@ func TestWebSocketClientV3_Scan_500(t *testing.T) {
    "event":"response/error",
    "data":{
       "http_code":500,
-      "error_id":0,
       "description":"unknown error",
       "timestamp":"2019-01-24T14:36:53.166038Z",
       "context":"unknown error"
@@ -883,7 +876,6 @@ func TestWebSocketClientV3_Tags_500(t *testing.T) {
    "event":"response/error",
    "data":{
       "http_code":500,
-      "error_id":0,
       "description":"unknown error",
       "timestamp":"2019-01-24T14:36:53.166038Z",
       "context":"unknown error"
@@ -1069,7 +1061,6 @@ func TestWebSocketClientV3_Info_500(t *testing.T) {
    "event":"response/error",
    "data":{
       "http_code":500,
-      "error_id":0,
       "description":"unknown error",
       "timestamp":"2019-01-24T14:36:53.166038Z",
       "context":"unknown error"
@@ -1229,7 +1220,6 @@ func TestWebSocketClientV3_Read_500(t *testing.T) {
    "event":"response/error",
    "data":{
       "http_code":500,
-      "error_id":0,
       "description":"unknown error",
       "timestamp":"2019-01-24T14:36:53.166038Z",
       "context":"unknown error"
@@ -1334,7 +1324,6 @@ func TestWebSocketClientV3_ReadDevice_500(t *testing.T) {
    "event":"response/error",
    "data":{
       "http_code":500,
-      "error_id":0,
       "description":"unknown error",
       "timestamp":"2019-01-24T14:36:53.166038Z",
       "context":"unknown error"
@@ -1439,7 +1428,6 @@ func TestWebSocketClientV3_ReadCache_500(t *testing.T) {
    "event":"response/error",
    "data":{
       "http_code":500,
-      "error_id":0,
       "description":"unknown error",
       "timestamp":"2019-01-24T14:36:53.166038Z",
       "context":"unknown error"
@@ -1548,7 +1536,6 @@ func TestWebSocketClientV3_WriteAsync_500(t *testing.T) {
    "event":"response/error",
    "data":{
       "http_code":500,
-      "error_id":0,
       "description":"unknown error",
       "timestamp":"2019-01-24T14:36:53.166038Z",
       "context":"unknown error"
@@ -1647,7 +1634,6 @@ func TestWebSocketClientV3_WriteSync_500(t *testing.T) {
    "event":"response/error",
    "data":{
       "http_code":500,
-      "error_id":0,
       "description":"unknown error",
       "timestamp":"2019-01-24T14:36:53.166038Z",
       "context":"unknown error"
@@ -1722,7 +1708,6 @@ func TestWebSocketClientV3_Transactions_500(t *testing.T) {
    "event":"response/error",
    "data":{
       "http_code":500,
-      "error_id":0,
       "description":"unknown error",
       "timestamp":"2019-01-24T14:36:53.166038Z",
       "context":"unknown error"
@@ -1815,7 +1800,6 @@ func TestWebSocketClientV3_Transaction_500(t *testing.T) {
    "event":"response/error",
    "data":{
       "http_code":500,
-      "error_id":0,
       "description":"unknown error",
       "timestamp":"2019-01-24T14:36:53.166038Z",
       "context":"unknown error"

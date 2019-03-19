@@ -169,7 +169,6 @@ func TestHTTPClientV3_Unversioned_500(t *testing.T) {
 	in := `
 {
   "http_code":500,
-  "error_id":0,
   "description":"unknown error",
   "timestamp":"2019-01-24T14:36:53.166038Z",
   "context":"unknown error"
@@ -1016,7 +1015,6 @@ func TestHTTPClientV3_Versioned_500(t *testing.T) { // nolint
 	in := `
 {
   "http_code":500,
-  "error_id":0,
   "description":"unknown error",
   "timestamp":"2019-01-24T14:36:53.166038Z",
   "context":"unknown error"
