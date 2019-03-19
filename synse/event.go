@@ -82,5 +82,5 @@ const (
 	responseTransaction = "response/transaction"
 
 	// responseError describes the response/error event.
-	// responseError = "response/error"
+	responseError = "response/error"
 )

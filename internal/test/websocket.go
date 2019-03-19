@@ -3,7 +3,8 @@ package test
 // websocket.go provides testing functionalities against a mock websocket server.
 
 import (
-	// "crypto/tls"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -21,7 +22,7 @@ type WebSocketServer struct {
 	URL string
 
 	// tls holds the TLS configuration.
-	// tls *tls.Config
+	tls *tls.Config
 
 	// server is the mock websocket server.
 	server *httptest.Server
@@ -37,13 +38,27 @@ type WebSocketServer struct {
 	entryRoute string
 }
 
-// NewWebSocketServerV3 returns an instance of a mock http server for v3 API.
+// NewWebSocketServerV3 returns an instance of a mock websocket server for v3 API.
 func NewWebSocketServerV3() WebSocketServer {
 	m := http.NewServeMux()
 	s := httptest.NewServer(m)
 
 	return WebSocketServer{
-		URL:        s.URL[7:],
+		URL:        s.URL[7:], // remove `http://` prefix
+		server:     s,
+		mux:        m,
+		version:    "v3",
+		entryRoute: "connect",
+	}
+}
+
+// NewWebSocketTLSServerV3 returns an instance of a mock websocket tls server for v3 API.
+func NewWebSocketTLSServerV3() WebSocketServer {
+	m := http.NewServeMux()
+	s := httptest.NewTLSServer(m)
+
+	return WebSocketServer{
+		URL:        s.URL[8:], // remove `https://` prefix
 		server:     s,
 		mux:        m,
 		version:    "v3",
@@ -81,6 +96,16 @@ func (s WebSocketServer) Serve(resp string) {
 			}
 		},
 	)
+}
+
+// SetTLS starts TLS using the configured options.
+func (s WebSocketServer) SetTLS(cfg *tls.Config) {
+	s.tls = cfg
+}
+
+// GetCertificates returns the certificate used by the server.
+func (s WebSocketServer) GetCertificates() *x509.Certificate {
+	return s.server.Certificate()
 }
 
 // Close closes the connection.

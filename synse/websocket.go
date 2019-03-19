@@ -4,12 +4,15 @@ package synse
 
 import (
 	"crypto/tls"
-	"fmt"
+	"encoding/json"
+	"reflect"
 	"sync/atomic"
 
-	"github.com/gorilla/websocket"
-	"github.com/pkg/errors"
 	"github.com/vapor-ware/synse-client-go/synse/scheme"
+
+	"github.com/gorilla/websocket"
+	"github.com/mitchellh/mapstructure"
+	"github.com/pkg/errors"
 )
 
 type websocketClient struct {
@@ -82,6 +85,10 @@ func createWebSocketClient(opts *Options) (*websocket.Dialer, error) {
 		HandshakeTimeout: opts.WebSocket.HandshakeTimeout,
 		TLSClientConfig: &tls.Config{
 			Certificates: []tls.Certificate{cert},
+
+			// NOTE - refer to #24. If not disable linting, a warning will happen:
+			// TLS InsecureSkipVerify may be true.,HIGH,LOW (gosec)
+			InsecureSkipVerify: opts.TLS.SkipVerify, // nolint
 		},
 	}, nil
 }
@@ -118,18 +125,13 @@ func (c *websocketClient) Status() (*scheme.Status, error) {
 		},
 	}
 
-	resp := new(scheme.ResponseStatus)
+	resp := new(scheme.Status)
 	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // Version returns the version info.
@@ -141,18 +143,13 @@ func (c *websocketClient) Version() (*scheme.Version, error) {
 		},
 	}
 
-	resp := new(scheme.ResponseVersion)
+	resp := new(scheme.Version)
 	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // Config returns the unified configuration info.
@@ -164,18 +161,13 @@ func (c *websocketClient) Config() (*scheme.Config, error) {
 		},
 	}
 
-	resp := new(scheme.ResponseConfig)
+	resp := new(scheme.Config)
 	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // Plugins returns the summary of all plugins currently registered with
@@ -188,18 +180,13 @@ func (c *websocketClient) Plugins() (*[]scheme.PluginMeta, error) {
 		},
 	}
 
-	resp := new(scheme.ResponsePlugins)
+	resp := new([]scheme.PluginMeta)
 	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // Plugin returns data from a specific plugin.
@@ -214,18 +201,13 @@ func (c *websocketClient) Plugin(id string) (*scheme.Plugin, error) {
 		},
 	}
 
-	resp := new(scheme.ResponsePlugin)
+	resp := new(scheme.Plugin)
 	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // PluginHealth returns the summary of the health of registered plugins.
@@ -237,18 +219,13 @@ func (c *websocketClient) PluginHealth() (*scheme.PluginHealth, error) {
 		},
 	}
 
-	resp := new(scheme.ResponsePluginHealth)
+	resp := new(scheme.PluginHealth)
 	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // Scan returns the list of devices that Synse knows about and can read
@@ -264,18 +241,13 @@ func (c *websocketClient) Scan(opts scheme.ScanOptions) (*[]scheme.Scan, error) 
 		Data: opts,
 	}
 
-	resp := new(scheme.ResponseDeviceSummary)
+	resp := new([]scheme.Scan)
 	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // Tags returns the list of all tags currently associated with devices.
@@ -289,18 +261,13 @@ func (c *websocketClient) Tags(opts scheme.TagsOptions) (*[]string, error) {
 		Data: opts,
 	}
 
-	resp := new(scheme.ResponseTags)
+	resp := new([]string)
 	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // Info returns the full set of meta info and capabilities for a specific
@@ -316,18 +283,13 @@ func (c *websocketClient) Info(id string) (*scheme.Info, error) {
 		},
 	}
 
-	resp := new(scheme.ResponseDevice)
+	resp := new(scheme.Info)
 	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // Read returns data from devices which match the set of provided tags
@@ -341,18 +303,13 @@ func (c *websocketClient) Read(opts scheme.ReadOptions) (*[]scheme.Read, error) 
 		Data: opts,
 	}
 
-	resp := new(scheme.ResponseReading)
+	resp := new([]scheme.Read)
 	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // ReadDevice returns data from a specific device.
@@ -370,18 +327,13 @@ func (c *websocketClient) ReadDevice(id string, opts scheme.ReadOptions) (*[]sch
 		},
 	}
 
-	resp := new(scheme.ResponseReading)
+	resp := new([]scheme.Read)
 	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // ReadCache returns stream reading data from the registered plugins.
@@ -394,18 +346,13 @@ func (c *websocketClient) ReadCache(opts scheme.ReadCacheOptions) (*[]scheme.Rea
 		Data: opts,
 	}
 
-	resp := new(scheme.ResponseReading)
+	resp := new([]scheme.Read)
 	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // WriteAsync writes data to a device, in an asynchronous manner.
@@ -421,18 +368,13 @@ func (c *websocketClient) WriteAsync(id string, opts []scheme.WriteData) (*[]sch
 		},
 	}
 
-	resp := new(scheme.ResponseWriteAsync)
+	resp := new([]scheme.Write)
 	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // WriteSync writes data to a device, waiting for the write to complete.
@@ -448,18 +390,13 @@ func (c *websocketClient) WriteSync(id string, opts []scheme.WriteData) (*[]sche
 		},
 	}
 
-	resp := new(scheme.ResponseWriteSync)
+	resp := new([]scheme.Transaction)
 	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // Transactions returns the sorted list of all cached transaction IDs.
@@ -471,18 +408,13 @@ func (c *websocketClient) Transactions() (*[]string, error) {
 		},
 	}
 
-	resp := new(scheme.ResponseTransactions)
+	resp := new([]string)
 	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // Transaction returns the state and status of a write transaction.
@@ -497,18 +429,13 @@ func (c *websocketClient) Transaction(id string) (*scheme.Transaction, error) {
 		},
 	}
 
-	resp := new(scheme.ResponseTransaction)
+	resp := new(scheme.Transaction)
 	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.verifyResponse(req.EventMeta, resp.EventMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp.Data, nil
+	return resp, nil
 }
 
 // GetOptions returns the current config options of the client.
@@ -525,29 +452,54 @@ func (c *websocketClient) addCounter() uint64 {
 // response back.
 // FIXME - refer to #22. Need to think more about how async will work in this case.
 func (c *websocketClient) makeRequest(req, resp interface{}) error {
+	// Write to the connection.
 	err := c.connection.WriteJSON(req)
 	if err != nil {
 		return errors.Wrap(err, "failed to write to connection")
 	}
 
-	err = c.connection.ReadJSON(resp)
+	// Read from the connection.
+	_, r, err := c.connection.NextReader()
 	if err != nil {
-		return errors.Wrap(err, "failed to read from connection")
+		return errors.Wrap(err, "failed to get the next data message")
 	}
 
-	return nil
-}
-
-// verifyResponse checks if the request/reponse metadata are matched.
-func (c *websocketClient) verifyResponse(reqMeta, respMeta scheme.EventMeta) error {
-	// FIXME - diable linting here since we want to use the pkg/errors instead
-	// of fmt.Errorf.
-	if reqMeta.ID != respMeta.ID {
-		return errors.New(fmt.Sprintf("%v did not match %v", reqMeta.ID, respMeta.ID)) // nolint
+	// Decode the response into a proper scheme.
+	var re scheme.Response
+	err = json.NewDecoder(r).Decode(&re)
+	if err != nil {
+		return errors.Wrap(err, "failed to decode json message into a proper scheme")
 	}
 
-	if matchEvent(reqMeta.Event) != respMeta.Event {
-		return errors.New(fmt.Sprintf("%s did not match %s", reqMeta.Event, respMeta.Event)) //nolint
+	// Handle error response.
+	if re.Event == responseError {
+		var e scheme.Error
+
+		err = mapstructure.Decode(re.Data, &e)
+		if err != nil {
+			return errors.Wrap(err, "failed to decode map into a proper scheme")
+		}
+
+		return errors.Errorf(
+			"got a %v error response from synse server at %v, saying %v, with context: %v",
+			e.HTTPCode, e.Timestamp, e.Description, e.Context,
+		)
+	}
+
+	// Verify if the request and response metadata are matched.
+	v := reflect.ValueOf(req)
+	if v.FieldByName("ID").Uint() != re.ID {
+		return errors.Errorf("%v did not match %v", v.FieldByName("ID"), re.ID)
+	}
+
+	if matchEvent(v.FieldByName("Event").String()) != re.Event {
+		return errors.Errorf("%v did not match %v", v.FieldByName("Event"), re.Event)
+	}
+
+	// Handle successful response.
+	err = mapstructure.Decode(re.Data, resp)
+	if err != nil {
+		return errors.Wrap(err, "failed to decode map into a proper scheme")
 	}
 
 	return nil
