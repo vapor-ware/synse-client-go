@@ -180,6 +180,9 @@ func TestWebSocketClientV3_Version_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_Config_200(t *testing.T) {
@@ -294,6 +297,9 @@ func TestWebSocketClientV3_Config_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_Plugins_200(t *testing.T) {
@@ -354,6 +360,9 @@ func TestWebSocketClientV3_Plugins_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_Plugin_200(t *testing.T) {
@@ -470,6 +479,9 @@ func TestWebSocketClientV3_Plugin_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_PluginHealth_200(t *testing.T) {
@@ -524,6 +536,9 @@ func TestWebSocketClientV3_PluginHealth_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_Scan_200(t *testing.T) {
@@ -599,6 +614,9 @@ func TestWebSocketClientV3_Scan_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_Tags_200(t *testing.T) {
@@ -636,6 +654,9 @@ func TestWebSocketClientV3_Tags_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_Info_200(t *testing.T) {
@@ -782,6 +803,9 @@ func TestWebSocketClientV3_Info_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_Read_200(t *testing.T) {
@@ -903,6 +927,9 @@ func TestWebSocketClientV3_Read_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_ReadDevice_200(t *testing.T) {
@@ -968,6 +995,9 @@ func TestWebSocketClientV3_ReadDevice_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_ReadCache_200(t *testing.T) {
@@ -1033,6 +1063,9 @@ func TestWebSocketClientV3_ReadCache_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_WriteAsync_200(t *testing.T) {
@@ -1102,6 +1135,9 @@ func TestWebSocketClientV3_WriteAsync_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_WriteSync_200(t *testing.T) {
@@ -1161,6 +1197,9 @@ func TestWebSocketClientV3_WriteSync_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_Transactions_200(t *testing.T) {
@@ -1253,6 +1292,9 @@ func TestWebSocketClientV3_Transaction_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_TLS(t *testing.T) {
@@ -1311,6 +1353,9 @@ func TestWebSocketClientV3_TLS(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_TLS_UnknownCA(t *testing.T) {
