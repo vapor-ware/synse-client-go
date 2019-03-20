@@ -117,7 +117,6 @@ func TestWebSocketClientV3_Status_500(t *testing.T) {
    "event":"response/error",
    "data":{
       "http_code":500,
-      "error_id":0,
       "description":"unknown error",
       "timestamp":"2019-01-24T14:36:53.166038Z",
       "context":"unknown error"
@@ -180,6 +179,44 @@ func TestWebSocketClientV3_Version_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
+}
+
+func TestWebSocketClientV3_Version_500(t *testing.T) {
+	in := `
+{
+   "id":1,
+   "event":"response/error",
+   "data":{
+      "http_code":500,
+      "description":"unknown error",
+      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "context":"unknown error"
+   }
+}`
+
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
+
+	server.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	resp, err := client.Version()
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_Config_200(t *testing.T) {
@@ -294,6 +331,44 @@ func TestWebSocketClientV3_Config_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
+}
+
+func TestWebSocketClientV3_Config_500(t *testing.T) {
+	in := `
+{
+   "id":1,
+   "event":"response/error",
+   "data":{
+      "http_code":500,
+      "description":"unknown error",
+      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "context":"unknown error"
+   }
+}`
+
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
+
+	server.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	resp, err := client.Config()
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_Plugins_200(t *testing.T) {
@@ -354,6 +429,44 @@ func TestWebSocketClientV3_Plugins_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
+}
+
+func TestWebSocketClientV3_Plugins_500(t *testing.T) {
+	in := `
+{
+   "id":1,
+   "event":"response/error",
+   "data":{
+      "http_code":500,
+      "description":"unknown error",
+      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "context":"unknown error"
+   }
+}`
+
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
+
+	server.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	resp, err := client.Plugins()
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_Plugin_200(t *testing.T) {
@@ -470,6 +583,44 @@ func TestWebSocketClientV3_Plugin_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
+}
+
+func TestWebSocketClientV3_Plugin_500(t *testing.T) {
+	in := `
+{
+   "id":1,
+   "event":"response/error",
+   "data":{
+      "http_code":500,
+      "description":"unknown error",
+      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "context":"unknown error"
+   }
+}`
+
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
+
+	server.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	resp, err := client.Plugin("12835beffd3e6c603aa4dd92127707b5")
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_PluginHealth_200(t *testing.T) {
@@ -524,6 +675,44 @@ func TestWebSocketClientV3_PluginHealth_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
+}
+
+func TestWebSocketClientV3_PluginHealth_500(t *testing.T) {
+	in := `
+{
+   "id":1,
+   "event":"response/error",
+   "data":{
+      "http_code":500,
+      "description":"unknown error",
+      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "context":"unknown error"
+   }
+}`
+
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
+
+	server.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	resp, err := client.PluginHealth()
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_Scan_200(t *testing.T) {
@@ -599,6 +788,45 @@ func TestWebSocketClientV3_Scan_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
+}
+
+func TestWebSocketClientV3_Scan_500(t *testing.T) {
+	in := `
+{
+   "id":1,
+   "event":"response/error",
+   "data":{
+      "http_code":500,
+      "description":"unknown error",
+      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "context":"unknown error"
+   }
+}`
+
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
+
+	server.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	opts := scheme.ScanOptions{}
+	resp, err := client.Scan(opts)
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_Tags_200(t *testing.T) {
@@ -636,6 +864,45 @@ func TestWebSocketClientV3_Tags_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
+}
+
+func TestWebSocketClientV3_Tags_500(t *testing.T) {
+	in := `
+{
+   "id":1,
+   "event":"response/error",
+   "data":{
+      "http_code":500,
+      "description":"unknown error",
+      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "context":"unknown error"
+   }
+}`
+
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
+
+	server.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	opts := scheme.TagsOptions{}
+	resp, err := client.Tags(opts)
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_Info_200(t *testing.T) {
@@ -782,6 +1049,44 @@ func TestWebSocketClientV3_Info_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
+}
+
+func TestWebSocketClientV3_Info_500(t *testing.T) {
+	in := `
+{
+   "id":1,
+   "event":"response/error",
+   "data":{
+      "http_code":500,
+      "description":"unknown error",
+      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "context":"unknown error"
+   }
+}`
+
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
+
+	server.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	resp, err := client.Info("34c226b1afadaae5f172a4e1763fd1a6")
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_Read_200(t *testing.T) {
@@ -903,6 +1208,45 @@ func TestWebSocketClientV3_Read_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
+}
+
+func TestWebSocketClientV3_Read_500(t *testing.T) {
+	in := `
+{
+   "id":1,
+   "event":"response/error",
+   "data":{
+      "http_code":500,
+      "description":"unknown error",
+      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "context":"unknown error"
+   }
+}`
+
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
+
+	server.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	opts := scheme.ReadOptions{}
+	resp, err := client.Read(opts)
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_ReadDevice_200(t *testing.T) {
@@ -968,6 +1312,45 @@ func TestWebSocketClientV3_ReadDevice_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
+}
+
+func TestWebSocketClientV3_ReadDevice_500(t *testing.T) {
+	in := `
+{
+   "id":1,
+   "event":"response/error",
+   "data":{
+      "http_code":500,
+      "description":"unknown error",
+      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "context":"unknown error"
+   }
+}`
+
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
+
+	server.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	opts := scheme.ReadOptions{}
+	resp, err := client.ReadDevice("12bb12c1f86a86e", opts)
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_ReadCache_200(t *testing.T) {
@@ -1033,6 +1416,45 @@ func TestWebSocketClientV3_ReadCache_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
+}
+
+func TestWebSocketClientV3_ReadCache_500(t *testing.T) {
+	in := `
+{
+   "id":1,
+   "event":"response/error",
+   "data":{
+      "http_code":500,
+      "description":"unknown error",
+      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "context":"unknown error"
+   }
+}`
+
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
+
+	server.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	opts := scheme.ReadCacheOptions{}
+	resp, err := client.ReadCache(opts)
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_WriteAsync_200(t *testing.T) {
@@ -1102,6 +1524,45 @@ func TestWebSocketClientV3_WriteAsync_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
+}
+
+func TestWebSocketClientV3_WriteAsync_500(t *testing.T) {
+	in := `
+{
+   "id":1,
+   "event":"response/error",
+   "data":{
+      "http_code":500,
+      "description":"unknown error",
+      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "context":"unknown error"
+   }
+}`
+
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
+
+	server.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	opts := []scheme.WriteData{}
+	resp, err := client.WriteAsync("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_WriteSync_200(t *testing.T) {
@@ -1161,6 +1622,45 @@ func TestWebSocketClientV3_WriteSync_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
+}
+
+func TestWebSocketClientV3_WriteSync_500(t *testing.T) {
+	in := `
+{
+   "id":1,
+   "event":"response/error",
+   "data":{
+      "http_code":500,
+      "description":"unknown error",
+      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "context":"unknown error"
+   }
+}`
+
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
+
+	server.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	opts := []scheme.WriteData{}
+	resp, err := client.WriteSync("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_Transactions_200(t *testing.T) {
@@ -1199,6 +1699,41 @@ func TestWebSocketClientV3_Transactions_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+}
+
+func TestWebSocketClientV3_Transactions_500(t *testing.T) {
+	in := `
+{
+   "id":1,
+   "event":"response/error",
+   "data":{
+      "http_code":500,
+      "description":"unknown error",
+      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "context":"unknown error"
+   }
+}`
+
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
+
+	server.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	resp, err := client.Transactions()
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_Transaction_200(t *testing.T) {
@@ -1253,6 +1788,44 @@ func TestWebSocketClientV3_Transaction_200(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
+}
+
+func TestWebSocketClientV3_Transaction_500(t *testing.T) {
+	in := `
+{
+   "id":1,
+   "event":"response/error",
+   "data":{
+      "http_code":500,
+      "description":"unknown error",
+      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "context":"unknown error"
+   }
+}`
+
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
+
+	server.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	resp, err := client.Transaction("56a32eba-1aa6-4868-84ee-fe01af8b2e6b")
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_TLS(t *testing.T) {
@@ -1311,6 +1884,9 @@ func TestWebSocketClientV3_TLS(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
+
+	err = client.Close()
+	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_TLS_UnknownCA(t *testing.T) {
