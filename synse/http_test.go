@@ -100,11 +100,11 @@ func TestHTTPClientV3_Unversioned_200(t *testing.T) {
 			`
 {
   "status":"ok",
-  "timestamp":"2019-01-24T14:34:24.926108Z"
+  "timestamp":"2019-03-20T08:44:07-04:00"
 }`,
 			&scheme.Status{
 				Status:    "ok",
-				Timestamp: "2019-01-24T14:34:24.926108Z",
+				Timestamp: "2019-03-20T08:44:07-04:00",
 			},
 		},
 		{
@@ -170,7 +170,7 @@ func TestHTTPClientV3_Unversioned_500(t *testing.T) {
 {
   "http_code":500,
   "description":"unknown error",
-  "timestamp":"2019-01-24T14:36:53.166038Z",
+  "timestamp":"2019-03-20T08:44:07-04:00",
   "context":"unknown error"
 }
 `
@@ -349,7 +349,7 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
       "address":"emulator-plugin:5001"
    },
    "health":{
-      "timestamp":"2018-06-15T20:04:33Z",
+      "timestamp":"2019-03-20T08:44:07-04:00",
       "status":"ok",
       "message":"",
       "checks":[
@@ -357,14 +357,14 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
             "name":"read buffer health",
             "status":"ok",
             "message":"",
-            "timestamp":"2018-06-15T20:04:06Z",
+            "timestamp":"2019-03-20T08:44:07-04:00",
             "type":"periodic"
          },
          {
             "name":"write buffer health",
             "status":"ok",
             "message":"",
-            "timestamp":"2018-06-15T20:04:06Z",
+            "timestamp":"2019-03-20T08:44:07-04:00",
             "type":"periodic"
          }
       ]
@@ -394,7 +394,7 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
 					Address:  "emulator-plugin:5001",
 				},
 				Health: scheme.HealthOptions{
-					Timestamp: "2018-06-15T20:04:33Z",
+					Timestamp: "2019-03-20T08:44:07-04:00",
 					Status:    "ok",
 					Message:   "",
 					Checks: []scheme.CheckOptions{
@@ -402,14 +402,14 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
 							Name:      "read buffer health",
 							Status:    "ok",
 							Message:   "",
-							Timestamp: "2018-06-15T20:04:06Z",
+							Timestamp: "2019-03-20T08:44:07-04:00",
 							Type:      "periodic",
 						},
 						scheme.CheckOptions{
 							Name:      "write buffer health",
 							Status:    "ok",
 							Message:   "",
-							Timestamp: "2018-06-15T20:04:06Z",
+							Timestamp: "2019-03-20T08:44:07-04:00",
 							Type:      "periodic",
 						},
 					},
@@ -510,7 +510,7 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
 			"/info/34c226b1afadaae5f172a4e1763fd1a6",
 			`
 {
-  "timestamp": "2018-06-18T13:30:15Z",
+  "timestamp": "2019-03-20T08:44:07-04:00",
   "id": "34c226b1afadaae5f172a4e1763fd1a6",
   "type": "humidity",
   "metadata": {
@@ -568,7 +568,7 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
   ]
 }`,
 			&scheme.Info{
-				Timestamp: "2018-06-18T13:30:15Z",
+				Timestamp: "2019-03-20T08:44:07-04:00",
 				ID:        "34c226b1afadaae5f172a4e1763fd1a6",
 				Type:      "humidity",
 				Metadata: scheme.MetadataOptions{
@@ -635,7 +635,7 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
       "device_type":"temperature",
       "type":"temperature",
       "value":20.3,
-      "timestamp":"2018-02-01T13:47:40Z",
+      "timestamp":"2019-03-20T08:44:07-04:00",
       "unit":{
          "system":"metric",
          "symbol":"C",
@@ -651,7 +651,7 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
       "device_type":"led",
       "type":"state",
       "value":"off",
-      "timestamp":"2018-02-01T13:47:40Z",
+      "timestamp":"2019-03-20T08:44:07-04:00",
       "unit":null
    },
    {
@@ -659,7 +659,7 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
       "device_type":"led",
       "type":"color",
       "value":"000000",
-      "timestamp":"2018-02-01T13:47:40Z",
+      "timestamp":"2019-03-20T08:44:07-04:00",
       "unit":null
    },
    {
@@ -667,7 +667,7 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
       "device_type":"door_lock",
       "type":"status",
       "value":"locked",
-      "timestamp":"2018-02-01T13:47:40Z",
+      "timestamp":"2019-03-20T08:44:07-04:00",
       "unit":null,
       "context":{
          "wedge":1,
@@ -681,7 +681,7 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
 					DeviceType: "temperature",
 					Type:       "temperature",
 					Value:      float64(20.3),
-					Timestamp:  "2018-02-01T13:47:40Z",
+					Timestamp:  "2019-03-20T08:44:07-04:00",
 					Unit: scheme.UnitOptions{
 						System: "metric",
 						Symbol: "C",
@@ -697,7 +697,7 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
 					DeviceType: "led",
 					Type:       "state",
 					Value:      "off",
-					Timestamp:  "2018-02-01T13:47:40Z",
+					Timestamp:  "2019-03-20T08:44:07-04:00",
 					Unit:       scheme.UnitOptions{},
 				},
 				scheme.Read{
@@ -705,7 +705,7 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
 					DeviceType: "led",
 					Type:       "color",
 					Value:      "000000",
-					Timestamp:  "2018-02-01T13:47:40Z",
+					Timestamp:  "2019-03-20T08:44:07-04:00",
 					Unit:       scheme.UnitOptions{},
 				},
 				scheme.Read{
@@ -713,7 +713,7 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
 					DeviceType: "door_lock",
 					Type:       "status",
 					Value:      "locked",
-					Timestamp:  "2018-02-01T13:47:40Z",
+					Timestamp:  "2019-03-20T08:44:07-04:00",
 					Unit:       scheme.UnitOptions{},
 					Context: map[string]interface{}{
 						"wedge": float64(1),
@@ -731,7 +731,7 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
     "device_type": "temperature",
     "type": "temperature",
     "value": 20.3,
-    "timestamp": "2018-02-01T13:47:40Z",
+    "timestamp": "2019-03-20T08:44:07-04:00",
     "unit": {
       "system": "metric",
       "symbol": "C",
@@ -749,7 +749,7 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
 					DeviceType: "temperature",
 					Type:       "temperature",
 					Value:      float64(20.3),
-					Timestamp:  "2018-02-01T13:47:40Z",
+					Timestamp:  "2019-03-20T08:44:07-04:00",
 					Unit: scheme.UnitOptions{
 						System: "metric",
 						Symbol: "C",
@@ -770,7 +770,7 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
   "device_type":"led",
   "type":"state",
   "value":"off",
-  "timestamp":"2018-02-01T13:47:40Z",
+  "timestamp":"2019-03-20T08:44:07-04:00",
   "unit":null
 }
 {
@@ -778,7 +778,7 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
   "device_type":"led",
   "type":"color",
   "value":"000000",
-  "timestamp":"2018-02-01T13:47:40Z",
+  "timestamp":"2019-03-20T08:44:07-04:00",
   "unit":null
 }`,
 			&[]scheme.Read{
@@ -787,7 +787,7 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
 					DeviceType: "led",
 					Type:       "state",
 					Value:      "off",
-					Timestamp:  "2018-02-01T13:47:40Z",
+					Timestamp:  "2019-03-20T08:44:07-04:00",
 					Unit:       scheme.UnitOptions{},
 				},
 				scheme.Read{
@@ -795,7 +795,7 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
 					DeviceType: "led",
 					Type:       "color",
 					Value:      "000000",
-					Timestamp:  "2018-02-01T13:47:40Z",
+					Timestamp:  "2019-03-20T08:44:07-04:00",
 					Unit:       scheme.UnitOptions{},
 				},
 			},
@@ -1016,7 +1016,7 @@ func TestHTTPClientV3_Versioned_500(t *testing.T) { // nolint
 {
   "http_code":500,
   "description":"unknown error",
-  "timestamp":"2019-01-24T14:36:53.166038Z",
+  "timestamp":"2019-03-20T08:44:07-04:00",
   "context":"unknown error"
 }
 `
@@ -1112,11 +1112,11 @@ func TestHTTPClientV3_TLS(t *testing.T) {
 			`
 {
   "status":"ok",
-  "timestamp":"2019-01-24T14:34:24.926108Z"
+  "timestamp":"2019-03-20T08:44:07-04:00"
 }`,
 			&scheme.Status{
 				Status:    "ok",
-				Timestamp: "2019-01-24T14:34:24.926108Z",
+				Timestamp: "2019-03-20T08:44:07-04:00",
 			},
 		},
 		{
@@ -1196,7 +1196,7 @@ func TestHTTPClientV3_TLS_UnknownCA(t *testing.T) {
 			`
 {
   "status":"ok",
-  "timestamp":"2019-01-24T14:34:24.926108Z"
+  "timestamp":"2019-03-20T08:44:07-04:00"
 }`,
 		},
 		{
