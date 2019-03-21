@@ -78,13 +78,13 @@ func TestWebSocketClientV3_Status_200(t *testing.T) {
   "event":"response/status",
   "data":{
     "status":"ok",
-	"timestamp":"2019-01-24T14:34:24.926108Z"
+    "timestamp":"2019-03-20T17:37:07Z"
   }
 }`
 
 	expected := &scheme.Status{
 		Status:    "ok",
-		Timestamp: "2019-01-24T14:34:24.926108Z",
+		Timestamp: "2019-03-20T17:37:07Z",
 	}
 
 	server := test.NewWebSocketServerV3()
@@ -118,7 +118,7 @@ func TestWebSocketClientV3_Status_500(t *testing.T) {
    "data":{
       "http_code":500,
       "description":"unknown error",
-      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "timestamp":"2019-03-20T17:37:07Z",
       "context":"unknown error"
    }
 }`
@@ -192,7 +192,7 @@ func TestWebSocketClientV3_Version_500(t *testing.T) {
    "data":{
       "http_code":500,
       "description":"unknown error",
-      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "timestamp":"2019-03-20T17:37:07Z",
       "context":"unknown error"
    }
 }`
@@ -344,7 +344,7 @@ func TestWebSocketClientV3_Config_500(t *testing.T) {
    "data":{
       "http_code":500,
       "description":"unknown error",
-      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "timestamp":"2019-03-20T17:37:07Z",
       "context":"unknown error"
    }
 }`
@@ -442,7 +442,7 @@ func TestWebSocketClientV3_Plugins_500(t *testing.T) {
    "data":{
       "http_code":500,
       "description":"unknown error",
-      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "timestamp":"2019-03-20T17:37:07Z",
       "context":"unknown error"
    }
 }`
@@ -496,7 +496,7 @@ func TestWebSocketClientV3_Plugin_200(t *testing.T) {
          "address":"emulator-plugin:5001"
       },
       "health":{
-         "timestamp":"2018-06-15T20:04:33Z",
+         "timestamp":"2019-03-20T17:37:07Z",
          "status":"ok",
          "message":"",
          "checks":[
@@ -504,14 +504,14 @@ func TestWebSocketClientV3_Plugin_200(t *testing.T) {
                "name":"read buffer health",
                "status":"ok",
                "message":"",
-               "timestamp":"2018-06-15T20:04:06Z",
+               "timestamp":"2019-03-20T17:37:07Z",
                "type":"periodic"
             },
             {
                "name":"write buffer health",
                "status":"ok",
                "message":"",
-               "timestamp":"2018-06-15T20:04:06Z",
+               "timestamp":"2019-03-20T17:37:07Z",
                "type":"periodic"
             }
          ]
@@ -543,7 +543,7 @@ func TestWebSocketClientV3_Plugin_200(t *testing.T) {
 			Address:  "emulator-plugin:5001",
 		},
 		Health: scheme.HealthOptions{
-			Timestamp: "2018-06-15T20:04:33Z",
+			Timestamp: "2019-03-20T17:37:07Z",
 			Status:    "ok",
 			Message:   "",
 			Checks: []scheme.CheckOptions{
@@ -551,14 +551,14 @@ func TestWebSocketClientV3_Plugin_200(t *testing.T) {
 					Name:      "read buffer health",
 					Status:    "ok",
 					Message:   "",
-					Timestamp: "2018-06-15T20:04:06Z",
+					Timestamp: "2019-03-20T17:37:07Z",
 					Type:      "periodic",
 				},
 				scheme.CheckOptions{
 					Name:      "write buffer health",
 					Status:    "ok",
 					Message:   "",
-					Timestamp: "2018-06-15T20:04:06Z",
+					Timestamp: "2019-03-20T17:37:07Z",
 					Type:      "periodic",
 				},
 			},
@@ -596,7 +596,7 @@ func TestWebSocketClientV3_Plugin_500(t *testing.T) {
    "data":{
       "http_code":500,
       "description":"unknown error",
-      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "timestamp":"2019-03-20T17:37:07Z",
       "context":"unknown error"
    }
 }`
@@ -688,7 +688,7 @@ func TestWebSocketClientV3_PluginHealth_500(t *testing.T) {
    "data":{
       "http_code":500,
       "description":"unknown error",
-      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "timestamp":"2019-03-20T17:37:07Z",
       "context":"unknown error"
    }
 }`
@@ -801,7 +801,7 @@ func TestWebSocketClientV3_Scan_500(t *testing.T) {
    "data":{
       "http_code":500,
       "description":"unknown error",
-      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "timestamp":"2019-03-20T17:37:07Z",
       "context":"unknown error"
    }
 }`
@@ -877,7 +877,7 @@ func TestWebSocketClientV3_Tags_500(t *testing.T) {
    "data":{
       "http_code":500,
       "description":"unknown error",
-      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "timestamp":"2019-03-20T17:37:07Z",
       "context":"unknown error"
    }
 }`
@@ -911,7 +911,7 @@ func TestWebSocketClientV3_Info_200(t *testing.T) {
    "id":1,
    "event":"response/device",
    "data":{
-      "timestamp":"2018-06-18T13:30:15Z",
+      "timestamp":"2019-03-20T17:37:07Z",
       "id":"34c226b1afadaae5f172a4e1763fd1a6",
       "type":"humidity",
       "metadata":{
@@ -973,7 +973,7 @@ func TestWebSocketClientV3_Info_200(t *testing.T) {
 }`
 
 	expected := &scheme.Info{
-		Timestamp: "2018-06-18T13:30:15Z",
+		Timestamp: "2019-03-20T17:37:07Z",
 		ID:        "34c226b1afadaae5f172a4e1763fd1a6",
 		Type:      "humidity",
 		Metadata: scheme.MetadataOptions{
@@ -1062,7 +1062,7 @@ func TestWebSocketClientV3_Info_500(t *testing.T) {
    "data":{
       "http_code":500,
       "description":"unknown error",
-      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "timestamp":"2019-03-20T17:37:07Z",
       "context":"unknown error"
    }
 }`
@@ -1100,7 +1100,7 @@ func TestWebSocketClientV3_Read_200(t *testing.T) {
          "device_type":"temperature",
          "type":"temperature",
          "value":20.3,
-         "timestamp":"2018-02-01T13:47:40Z",
+         "timestamp":"2019-03-20T17:37:07Z",
          "unit":{
             "system":"metric",
             "symbol":"C",
@@ -1116,7 +1116,7 @@ func TestWebSocketClientV3_Read_200(t *testing.T) {
          "device_type":"led",
          "type":"state",
          "value":"off",
-         "timestamp":"2018-02-01T13:47:40Z",
+         "timestamp":"2019-03-20T17:37:07Z",
          "unit":null
       },
       {
@@ -1124,7 +1124,7 @@ func TestWebSocketClientV3_Read_200(t *testing.T) {
          "device_type":"led",
          "type":"color",
          "value":"000000",
-         "timestamp":"2018-02-01T13:47:40Z",
+         "timestamp":"2019-03-20T17:37:07Z",
          "unit":null
       },
       {
@@ -1132,7 +1132,7 @@ func TestWebSocketClientV3_Read_200(t *testing.T) {
          "device_type":"door_lock",
          "type":"status",
          "value":"locked",
-         "timestamp":"2018-02-01T13:47:40Z",
+         "timestamp":"2019-03-20T17:37:07Z",
          "unit":null,
          "context":{
             "wedge":1,
@@ -1148,7 +1148,7 @@ func TestWebSocketClientV3_Read_200(t *testing.T) {
 			DeviceType: "temperature",
 			Type:       "temperature",
 			Value:      float64(20.3),
-			Timestamp:  "2018-02-01T13:47:40Z",
+			Timestamp:  "2019-03-20T17:37:07Z",
 			Unit: scheme.UnitOptions{
 				System: "metric",
 				Symbol: "C",
@@ -1164,7 +1164,7 @@ func TestWebSocketClientV3_Read_200(t *testing.T) {
 			DeviceType: "led",
 			Type:       "state",
 			Value:      "off",
-			Timestamp:  "2018-02-01T13:47:40Z",
+			Timestamp:  "2019-03-20T17:37:07Z",
 			Unit:       scheme.UnitOptions{},
 		},
 		scheme.Read{
@@ -1172,7 +1172,7 @@ func TestWebSocketClientV3_Read_200(t *testing.T) {
 			DeviceType: "led",
 			Type:       "color",
 			Value:      "000000",
-			Timestamp:  "2018-02-01T13:47:40Z",
+			Timestamp:  "2019-03-20T17:37:07Z",
 			Unit:       scheme.UnitOptions{},
 		},
 		scheme.Read{
@@ -1180,7 +1180,7 @@ func TestWebSocketClientV3_Read_200(t *testing.T) {
 			DeviceType: "door_lock",
 			Type:       "status",
 			Value:      "locked",
-			Timestamp:  "2018-02-01T13:47:40Z",
+			Timestamp:  "2019-03-20T17:37:07Z",
 			Unit:       scheme.UnitOptions{},
 			Context: map[string]interface{}{
 				"wedge": float64(1),
@@ -1221,7 +1221,7 @@ func TestWebSocketClientV3_Read_500(t *testing.T) {
    "data":{
       "http_code":500,
       "description":"unknown error",
-      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "timestamp":"2019-03-20T17:37:07Z",
       "context":"unknown error"
    }
 }`
@@ -1260,7 +1260,7 @@ func TestWebSocketClientV3_ReadDevice_200(t *testing.T) {
          "device_type":"temperature",
          "type":"temperature",
          "value":20.3,
-         "timestamp":"2018-02-01T13:47:40Z",
+         "timestamp":"2019-03-20T17:37:07Z",
          "unit":{
             "system":"metric",
             "symbol":"C",
@@ -1280,7 +1280,7 @@ func TestWebSocketClientV3_ReadDevice_200(t *testing.T) {
 			DeviceType: "temperature",
 			Type:       "temperature",
 			Value:      float64(20.3),
-			Timestamp:  "2018-02-01T13:47:40Z",
+			Timestamp:  "2019-03-20T17:37:07Z",
 			Unit: scheme.UnitOptions{
 				System: "metric",
 				Symbol: "C",
@@ -1325,7 +1325,7 @@ func TestWebSocketClientV3_ReadDevice_500(t *testing.T) {
    "data":{
       "http_code":500,
       "description":"unknown error",
-      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "timestamp":"2019-03-20T17:37:07Z",
       "context":"unknown error"
    }
 }`
@@ -1364,7 +1364,7 @@ func TestWebSocketClientV3_ReadCache_200(t *testing.T) {
          "device_type":"led",
          "type":"state",
          "value":"off",
-         "timestamp":"2018-02-01T13:47:40Z",
+         "timestamp":"2019-03-20T17:37:07Z",
          "unit":null
       },
       {
@@ -1372,7 +1372,7 @@ func TestWebSocketClientV3_ReadCache_200(t *testing.T) {
          "device_type":"led",
          "type":"color",
          "value":"000000",
-         "timestamp":"2018-02-01T13:47:40Z",
+         "timestamp":"2019-03-20T17:37:07Z",
          "unit":null
       }
    ]
@@ -1384,7 +1384,7 @@ func TestWebSocketClientV3_ReadCache_200(t *testing.T) {
 			DeviceType: "led",
 			Type:       "state",
 			Value:      "off",
-			Timestamp:  "2018-02-01T13:47:40Z",
+			Timestamp:  "2019-03-20T17:37:07Z",
 			Unit:       scheme.UnitOptions{},
 		},
 		scheme.Read{
@@ -1392,7 +1392,7 @@ func TestWebSocketClientV3_ReadCache_200(t *testing.T) {
 			DeviceType: "led",
 			Type:       "color",
 			Value:      "000000",
-			Timestamp:  "2018-02-01T13:47:40Z",
+			Timestamp:  "2019-03-20T17:37:07Z",
 			Unit:       scheme.UnitOptions{},
 		},
 	}
@@ -1429,7 +1429,7 @@ func TestWebSocketClientV3_ReadCache_500(t *testing.T) {
    "data":{
       "http_code":500,
       "description":"unknown error",
-      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "timestamp":"2019-03-20T17:37:07Z",
       "context":"unknown error"
    }
 }`
@@ -1537,7 +1537,7 @@ func TestWebSocketClientV3_WriteAsync_500(t *testing.T) {
    "data":{
       "http_code":500,
       "description":"unknown error",
-      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "timestamp":"2019-03-20T17:37:07Z",
       "context":"unknown error"
    }
 }`
@@ -1635,7 +1635,7 @@ func TestWebSocketClientV3_WriteSync_500(t *testing.T) {
    "data":{
       "http_code":500,
       "description":"unknown error",
-      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "timestamp":"2019-03-20T17:37:07Z",
       "context":"unknown error"
    }
 }`
@@ -1709,7 +1709,7 @@ func TestWebSocketClientV3_Transactions_500(t *testing.T) {
    "data":{
       "http_code":500,
       "description":"unknown error",
-      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "timestamp":"2019-03-20T17:37:07Z",
       "context":"unknown error"
    }
 }`
@@ -1801,7 +1801,7 @@ func TestWebSocketClientV3_Transaction_500(t *testing.T) {
    "data":{
       "http_code":500,
       "description":"unknown error",
-      "timestamp":"2019-01-24T14:36:53.166038Z",
+      "timestamp":"2019-03-20T17:37:07Z",
       "context":"unknown error"
    }
 }`
@@ -1866,13 +1866,13 @@ func TestWebSocketClientV3_TLS(t *testing.T) {
   "event":"response/status",
   "data":{
     "status":"ok",
-	"timestamp":"2019-01-24T14:34:24.926108Z"
+    "timestamp":"2019-03-20T17:37:07Z"
   }
 }`
 
 	expected := &scheme.Status{
 		Status:    "ok",
-		Timestamp: "2019-01-24T14:34:24.926108Z",
+		Timestamp: "2019-03-20T17:37:07Z",
 	}
 
 	server.Serve(in)
