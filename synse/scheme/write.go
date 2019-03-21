@@ -9,7 +9,7 @@ type Write struct {
 }
 
 // WriteData describes an unit in the POST body for the `/write` endpoint. This
-// can also be used with in a websocket request event.
+// can also be used in a websocket request event payload.
 type WriteData struct {
 	Transaction string      `json:"transaction"`
 	Action      string      `json:"action"`
