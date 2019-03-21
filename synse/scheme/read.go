@@ -15,5 +15,4 @@ type Read struct {
 type ReadOptions struct {
 	NS   string   `json:"ns" mapstructure:"ns"`
 	Tags []string `json:"tags" mapstructure:"tags"`
-	SOM  string   `json:"som" mapstructure:"som"`
 }
