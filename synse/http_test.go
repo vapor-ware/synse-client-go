@@ -611,15 +611,8 @@ func TestHTTPClientV3_PluginHealth_500(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
-	tests := []struct {
-		path     string
-		in       string
-		expected interface{}
-	}{
-		{
-			"/scan",
-			`
+func TestHTTPClientV3_Scan_200(t *testing.T) {
+	in := `
 [
   {
     "id": "0fe8f06229aa9a01ef6032d1ddaf18a5",
@@ -642,31 +635,82 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
       "led"
     ]
   }
-]`,
-			&[]scheme.Scan{
-				scheme.Scan{
-					ID:     "0fe8f06229aa9a01ef6032d1ddaf18a5",
-					Info:   "Synse Temperature Sensor",
-					Type:   "temperature",
-					Plugin: "12835beffd3e6c603aa4dd92127707b5",
-					Tags: []string{
-						"type:temperature",
-						"temperature",
-						"vio/fan-sensor",
-					},
-				},
-				scheme.Scan{
-					ID:     "12ea5644d052c6bf1bca3c9864fd8a44",
-					Info:   "Synse LED",
-					Type:   "led",
-					Plugin: "12835beffd3e6c603aa4dd92127707b5",
-					Tags: []string{
-						"type:led",
-						"led",
-					},
-				},
+]`
+
+	expected := &[]scheme.Scan{
+		scheme.Scan{
+			ID:     "0fe8f06229aa9a01ef6032d1ddaf18a5",
+			Info:   "Synse Temperature Sensor",
+			Type:   "temperature",
+			Plugin: "12835beffd3e6c603aa4dd92127707b5",
+			Tags: []string{
+				"type:temperature",
+				"temperature",
+				"vio/fan-sensor",
 			},
 		},
+		scheme.Scan{
+			ID:     "12ea5644d052c6bf1bca3c9864fd8a44",
+			Info:   "Synse LED",
+			Type:   "led",
+			Plugin: "12835beffd3e6c603aa4dd92127707b5",
+			Tags: []string{
+				"type:led",
+				"led",
+			},
+		},
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/scan", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := scheme.ScanOptions{}
+	resp, err := client.Scan(opts)
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_Scan_500(t *testing.T) {
+	in := `
+{
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
+}`
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/scan", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := scheme.ScanOptions{}
+	resp, err := client.Scan(opts)
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
+func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
+	tests := []struct {
+		path     string
+		in       string
+		expected interface{}
+	}{
 		{
 			"/tags",
 			`
