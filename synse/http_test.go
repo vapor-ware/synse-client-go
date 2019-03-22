@@ -197,6 +197,138 @@ func TestHTTPClientV3_Version_500(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestHTTPClientV3_Config_200(t *testing.T) {
+	in := `
+{
+   "logging":"info",
+   "pretty_json":true,
+   "locale":"en_US",
+   "cache":{
+      "device":{
+         "ttl":20
+      },
+      "transaction":{
+         "ttl":300
+      }
+   },
+   "grpc":{
+      "timeout":3,
+      "tls":{
+         "cert":"/tmp/ssl/synse.crt"
+      }
+   },
+   "metrics":{
+      "enabled":false
+   },
+   "transport":{
+      "http":true,
+      "websocket":true
+   },
+   "plugin":{
+      "tcp":[
+         "emulator-plugin:5001"
+      ],
+      "unix":[
+         "/tmp/synse/plugin/foo.sock"
+      ],
+      "discover":{
+         "kubernetes":{
+            "namespace":"vapor",
+            "endpoints":{
+               "labels":{
+                  "app":"synse",
+                  "component":"server"
+               }
+            }
+         }
+      }
+   }
+}`
+
+	expected := &scheme.Config{
+		Logging:    "info",
+		PrettyJSON: true,
+		Locale:     "en_US",
+		Cache: scheme.CacheOptions{
+			Device: scheme.DeviceOptions{
+				TTL: int(20),
+			},
+			Transaction: scheme.TransactionOptions{
+				TTL: int(300),
+			},
+		},
+		GRPC: scheme.GRPCOptions{
+			Timeout: int(3),
+			TLS: scheme.TLSOptions{
+				Cert: "/tmp/ssl/synse.crt",
+			},
+		},
+		Metrics: scheme.MetricsOptions{
+			Enabled: false,
+		},
+		Transport: scheme.TransportOptions{
+			HTTP:      true,
+			WebSocket: true,
+		},
+		Plugin: scheme.PluginOptions{
+			TCP:  []string{"emulator-plugin:5001"},
+			Unix: []string{"/tmp/synse/plugin/foo.sock"},
+			Discover: scheme.DiscoveryOptions{
+				Kubernetes: scheme.KubernetesOptions{
+					Namespace: "vapor",
+					Endpoints: scheme.EndpointsOptions{
+						Labels: map[string]string{
+							"app":       "synse",
+							"component": "server",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/config", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Config()
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_Config_500(t *testing.T) {
+	in := `
+{
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
+}`
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/config", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Config()
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
 func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
 	tests := []struct {
 		path     string
