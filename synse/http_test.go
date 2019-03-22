@@ -1229,15 +1229,8 @@ func TestHTTPClientV3_ReadCache_500(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
-	tests := []struct {
-		path     string
-		in       string
-		expected interface{}
-	}{
-		{
-			"/write/0fe8f06229aa9a01ef6032d1ddaf18a2",
-			`
+func TestHTTPClientV3_WriteAsync_200(t *testing.T) {
+	in := `
 [
   {
     "context": {
@@ -1257,31 +1250,75 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
     "transaction": "56a32eba-1aa6-4868-84ee-fe01af8b2e6e",
     "timeout": "10s"
   }
-]`,
-			&[]scheme.Write{
-				scheme.Write{
-					Context: scheme.WriteData{
-						Action: "color",
-						Data:   "f38ac2",
-					},
-					Device:      "0fe8f06229aa9a01ef6032d1ddaf18a2",
-					Transaction: "56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
-					Timeout:     "10s",
-				},
-				scheme.Write{
-					Context: scheme.WriteData{
-						Action: "state",
-						Data:   "blink",
-					},
-					Device:      "0fe8f06229aa9a01ef6032d1ddaf18a2",
-					Transaction: "56a32eba-1aa6-4868-84ee-fe01af8b2e6e",
-					Timeout:     "10s",
-				},
+]`
+
+	expected := &[]scheme.Write{
+		scheme.Write{
+			Context: scheme.WriteData{
+				Action: "color",
+				Data:   "f38ac2",
 			},
+			Device:      "0fe8f06229aa9a01ef6032d1ddaf18a2",
+			Transaction: "56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
+			Timeout:     "10s",
 		},
-		{
-			"/write/wait/0fe8f06229aa9a01ef6032d1ddaf18a5",
-			`
+		scheme.Write{
+			Context: scheme.WriteData{
+				Action: "state",
+				Data:   "blink",
+			},
+			Device:      "0fe8f06229aa9a01ef6032d1ddaf18a2",
+			Transaction: "56a32eba-1aa6-4868-84ee-fe01af8b2e6e",
+			Timeout:     "10s",
+		},
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/write/0fe8f06229aa9a01ef6032d1ddaf18a2", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := []scheme.WriteData{}
+	resp, err := client.WriteAsync("0fe8f06229aa9a01ef6032d1ddaf18a2", opts)
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_WriteAsync_500(t *testing.T) {
+	in := `
+{
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
+}`
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/write/0fe8f06229aa9a01ef6032d1ddaf18a2", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := []scheme.WriteData{}
+	resp, err := client.WriteAsync("0fe8f06229aa9a01ef6032d1ddaf18a2", opts)
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
+func TestHTTPClientV3_WriteSync_200(t *testing.T) {
+	in := `
 [
  {
    "id": "56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
@@ -1296,40 +1333,126 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
    "updated": "2018-02-01T15:00:51Z",
    "message": ""
  }
-]`,
-			&[]scheme.Transaction{
-				scheme.Transaction{
-					ID:      "56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
-					Timeout: "10s",
-					Device:  "0fe8f06229aa9a01ef6032d1ddaf18a5",
-					Context: scheme.WriteData{
-						Action: "color",
-						Data:   "f38ac2",
-					},
-					Status:  "done",
-					Created: "2018-02-01T15:00:51Z",
-					Updated: "2018-02-01T15:00:51Z",
-					Message: "",
-				},
+]`
+
+	expected := &[]scheme.Transaction{
+		scheme.Transaction{
+			ID:      "56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
+			Timeout: "10s",
+			Device:  "0fe8f06229aa9a01ef6032d1ddaf18a5",
+			Context: scheme.WriteData{
+				Action: "color",
+				Data:   "f38ac2",
 			},
+			Status:  "done",
+			Created: "2018-02-01T15:00:51Z",
+			Updated: "2018-02-01T15:00:51Z",
+			Message: "",
 		},
-		{
-			"/transaction",
-			`
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/write/wait/0fe8f06229aa9a01ef6032d1ddaf18a5", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := []scheme.WriteData{}
+	resp, err := client.WriteSync("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_WriteSync_500(t *testing.T) {
+	in := `
+{
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
+}`
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/write/wait/0fe8f06229aa9a01ef6032d1ddaf18a5", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := []scheme.WriteData{}
+	resp, err := client.WriteSync("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
+func TestHTTPClientV3_Transactions_200(t *testing.T) {
+	in := `
 [
   "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
   "56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
   "56a32eba-1aa6-4868-84ee-fe01af8b2e6d"
-]`,
-			&[]string{
-				"56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
-				"56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
-				"56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
-			},
-		},
-		{
-			"/transaction/56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
-			`
+]`
+
+	expected := &[]string{
+		"56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
+		"56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
+		"56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/transaction", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Transactions()
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_Transactions_500(t *testing.T) {
+	in := `
+{
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
+}`
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/transaction", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Transactions()
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
+func TestHTTPClientV3_Transaction_200(t *testing.T) {
+	in := `
 {
   "id": "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
   "timeout": "10s",
@@ -1342,25 +1465,26 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
   "created": "2018-02-01T15:00:51Z",
   "updated": "2018-02-01T15:00:51Z",
   "message": ""
-}`,
-			&scheme.Transaction{
-				ID:      "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
-				Timeout: "10s",
-				Device:  "0fe8f06229aa9a01ef6032d1ddaf18a5",
-				Context: scheme.WriteData{
-					Action: "color",
-					Data:   "f38ac2",
-				},
-				Status:  "done",
-				Created: "2018-02-01T15:00:51Z",
-				Updated: "2018-02-01T15:00:51Z",
-				Message: "",
-			},
+}`
+
+	expected := &scheme.Transaction{
+		ID:      "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
+		Timeout: "10s",
+		Device:  "0fe8f06229aa9a01ef6032d1ddaf18a5",
+		Context: scheme.WriteData{
+			Action: "color",
+			Data:   "f38ac2",
 		},
+		Status:  "done",
+		Created: "2018-02-01T15:00:51Z",
+		Updated: "2018-02-01T15:00:51Z",
+		Message: "",
 	}
 
 	server := test.NewHTTPServerV3()
 	defer server.Close()
+
+	server.ServeVersioned(t, "/transaction/56a32eba-1aa6-4868-84ee-fe01af8b2e6b", 200, in)
 
 	client, err := NewHTTPClientV3(&Options{
 		Address: server.URL,
@@ -1368,140 +1492,35 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
 
-	for _, tt := range tests {
-		server.ServeVersioned(t, tt.path, 200, tt.in)
-
-		var (
-			resp interface{}
-			err  error
-		)
-		switch tt.path {
-		case "/config":
-			resp, err = client.Config()
-		case "/plugin":
-			resp, err = client.Plugins()
-		case "/plugin/12835beffd3e6c603aa4dd92127707b5":
-			resp, err = client.Plugin("12835beffd3e6c603aa4dd92127707b5")
-		case "/plugin/health":
-			resp, err = client.PluginHealth()
-		case "/scan":
-			opts := scheme.ScanOptions{}
-			resp, err = client.Scan(opts)
-		case "/tags":
-			opts := scheme.TagsOptions{}
-			resp, err = client.Tags(opts)
-		case "/info/34c226b1afadaae5f172a4e1763fd1a6":
-			resp, err = client.Info("34c226b1afadaae5f172a4e1763fd1a6")
-		case "/read":
-			opts := scheme.ReadOptions{}
-			resp, err = client.Read(opts)
-		case "/read/12bb12c1f86a86e":
-			opts := scheme.ReadOptions{}
-			resp, err = client.ReadDevice("12bb12c1f86a86e", opts)
-		case "/readcache":
-			opts := scheme.ReadCacheOptions{}
-			resp, err = client.ReadCache(opts)
-		case "/write/0fe8f06229aa9a01ef6032d1ddaf18a2":
-			opts := []scheme.WriteData{}
-			resp, err = client.WriteAsync("0fe8f06229aa9a01ef6032d1ddaf18a2", opts)
-		case "/write/wait/0fe8f06229aa9a01ef6032d1ddaf18a5":
-			opts := []scheme.WriteData{}
-			resp, err = client.WriteSync("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
-		case "/transaction":
-			resp, err = client.Transactions()
-		case "/transaction/56a32eba-1aa6-4868-84ee-fe01af8b2e6b":
-			resp, err = client.Transaction("56a32eba-1aa6-4868-84ee-fe01af8b2e6b")
-		}
-		assert.NotNil(t, resp)
-		assert.NoError(t, err)
-		assert.Equal(t, tt.expected, resp)
-	}
+	resp, err := client.Transaction("56a32eba-1aa6-4868-84ee-fe01af8b2e6b")
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
 }
 
-func TestHTTPClientV3_Versioned_500(t *testing.T) { // nolint
-	tests := []struct {
-		path string
-	}{
-		{"/config"},
-		{"/plugin"},
-		{"/plugin/12835beffd3e6c603aa4dd92127707b5"},
-		{"/plugin/health"},
-		{"/scan"},
-		{"/tags"},
-		{"/info/34c226b1afadaae5f172a4e1763fd1a6"},
-		{"/read"},
-		{"/read/12bb12c1f86a86e"},
-		{"/readcache"},
-		{"/write/0fe8f06229aa9a01ef6032d1ddaf18a2"},
-		{"/write/wait/0fe8f06229aa9a01ef6032d1ddaf18a5"},
-		{"/transaction"},
-		{"/transaction/56a32eba-1aa6-4868-84ee-fe01af8b2e6b"},
-	}
-
-	server := test.NewHTTPServerV3()
-	defer server.Close()
-
-	client, err := NewHTTPClientV3(&Options{
-		Address: server.URL,
-	})
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
-
+func TestHTTPClientV3_Transaction_500(t *testing.T) {
 	in := `
 {
   "http_code":500,
   "description":"unknown error",
   "timestamp":"2019-03-20T17:37:07Z",
   "context":"unknown error"
-}
-`
-	for _, tt := range tests {
-		server.ServeVersioned(t, tt.path, 500, in)
+}`
 
-		var (
-			resp interface{}
-			err  error
-		)
-		switch tt.path {
-		case "/config":
-			resp, err = client.Config()
-		case "/plugin":
-			resp, err = client.Plugins()
-		case "/plugin/12835beffd3e6c603aa4dd92127707b5":
-			resp, err = client.Plugin("12835beffd3e6c603aa4dd92127707b5")
-		case "/plugin/health":
-			resp, err = client.PluginHealth()
-		case "/scan":
-			opts := scheme.ScanOptions{}
-			resp, err = client.Scan(opts)
-		case "/tags":
-			opts := scheme.TagsOptions{}
-			resp, err = client.Tags(opts)
-		case "/info/34c226b1afadaae5f172a4e1763fd1a6":
-			resp, err = client.Info("34c226b1afadaae5f172a4e1763fd1a6")
-		case "/read":
-			opts := scheme.ReadOptions{}
-			resp, err = client.Read(opts)
-		case "/read/12bb12c1f86a86e":
-			opts := scheme.ReadOptions{}
-			resp, err = client.ReadDevice("12bb12c1f86a86e", opts)
-		case "/readcache":
-			opts := scheme.ReadCacheOptions{}
-			resp, err = client.ReadCache(opts)
-		case "/write/0fe8f06229aa9a01ef6032d1ddaf18a2":
-			opts := []scheme.WriteData{}
-			resp, err = client.WriteAsync("0fe8f06229aa9a01ef6032d1ddaf18a2", opts)
-		case "/write/wait/0fe8f06229aa9a01ef6032d1ddaf18a5":
-			opts := []scheme.WriteData{}
-			resp, err = client.WriteSync("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
-		case "/transaction":
-			resp, err = client.Transactions()
-		case "/transaction/56a32eba-1aa6-4868-84ee-fe01af8b2e6b":
-			resp, err = client.Transaction("56a32eba-1aa6-4868-84ee-fe01af8b2e6b")
-		}
-		assert.Nil(t, resp)
-		assert.Error(t, err)
-	}
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/transaction/56a32eba-1aa6-4868-84ee-fe01af8b2e6b", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Transaction("56a32eba-1aa6-4868-84ee-fe01af8b2e6b")
+	assert.Nil(t, resp)
+	assert.Error(t, err)
 }
 
 func TestHTTPClientV3_TLS(t *testing.T) {
