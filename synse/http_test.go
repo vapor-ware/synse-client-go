@@ -1063,15 +1063,8 @@ func TestHTTPClientV3_Read_500(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
-	tests := []struct {
-		path     string
-		in       string
-		expected interface{}
-	}{
-		{
-			"/read/12bb12c1f86a86e",
-			`
+func TestHTTPClientV3_ReadDevice_200(t *testing.T) {
+	in := `
 [
   {
     "device": "12bb12c1f86a86e",
@@ -1089,26 +1082,77 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
       "sample_rate": 8
     }
   }
-]`,
-			&[]scheme.Read{
-				scheme.Read{
-					Device:     "12bb12c1f86a86e",
-					DeviceType: "temperature",
-					Type:       "temperature",
-					Value:      float64(20.3),
-					Timestamp:  "2019-03-20T17:37:07Z",
-					Unit: scheme.UnitOptions{
-						System: "metric",
-						Symbol: "C",
-						Name:   "degrees celsius",
-					},
-					Context: map[string]interface{}{
-						"host":        "127.0.0.1",
-						"sample_rate": float64(8),
-					},
-				},
+]`
+
+	expected := &[]scheme.Read{
+		scheme.Read{
+			Device:     "12bb12c1f86a86e",
+			DeviceType: "temperature",
+			Type:       "temperature",
+			Value:      float64(20.3),
+			Timestamp:  "2019-03-20T17:37:07Z",
+			Unit: scheme.UnitOptions{
+				System: "metric",
+				Symbol: "C",
+				Name:   "degrees celsius",
+			},
+			Context: map[string]interface{}{
+				"host":        "127.0.0.1",
+				"sample_rate": float64(8),
 			},
 		},
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/read/12bb12c1f86a86e", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := scheme.ReadOptions{}
+	resp, err := client.ReadDevice("12bb12c1f86a86e", opts)
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_ReadDevice_500(t *testing.T) {
+	in := `
+{
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
+}`
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/read/12bb12c1f86a86e", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := scheme.ReadOptions{}
+	resp, err := client.ReadDevice("12bb12c1f86a86e", opts)
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
+func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
+	tests := []struct {
+		path     string
+		in       string
+		expected interface{}
+	}{
 		{
 			"/readcache",
 			`
