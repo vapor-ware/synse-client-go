@@ -705,24 +705,68 @@ func TestHTTPClientV3_Scan_500(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestHTTPClientV3_Tags_200(t *testing.T) {
+	in := `
+[
+  "default/tag1",
+  "default/type:temperature"
+]`
+
+	expected := &[]string{
+		"default/tag1",
+		"default/type:temperature",
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/tags", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := scheme.TagsOptions{}
+	resp, err := client.Tags(opts)
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_Tags_500(t *testing.T) {
+	in := `
+{
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
+}`
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/tags", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := scheme.TagsOptions{}
+	resp, err := client.Tags(opts)
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
 func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
 	tests := []struct {
 		path     string
 		in       string
 		expected interface{}
 	}{
-		{
-			"/tags",
-			`
-[
-  "default/tag1",
-  "default/type:temperature"
-]`,
-			&[]string{
-				"default/tag1",
-				"default/type:temperature",
-			},
-		},
 		{
 			"/info/34c226b1afadaae5f172a4e1763fd1a6",
 			`
