@@ -1147,15 +1147,8 @@ func TestHTTPClientV3_ReadDevice_500(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
-	tests := []struct {
-		path     string
-		in       string
-		expected interface{}
-	}{
-		{
-			"/readcache",
-			`
+func TestHTTPClientV3_ReadCache_200(t *testing.T) {
+	in := `
 {
   "device":"929b923de65a811",
   "device_type":"led",
@@ -1171,26 +1164,77 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
   "value":"000000",
   "timestamp":"2019-03-20T17:37:07Z",
   "unit":null
-}`,
-			&[]scheme.Read{
-				scheme.Read{
-					Device:     "929b923de65a811",
-					DeviceType: "led",
-					Type:       "state",
-					Value:      "off",
-					Timestamp:  "2019-03-20T17:37:07Z",
-					Unit:       scheme.UnitOptions{},
-				},
-				scheme.Read{
-					Device:     "929b923de65a811",
-					DeviceType: "led",
-					Type:       "color",
-					Value:      "000000",
-					Timestamp:  "2019-03-20T17:37:07Z",
-					Unit:       scheme.UnitOptions{},
-				},
-			},
+}`
+
+	expected := &[]scheme.Read{
+		scheme.Read{
+			Device:     "929b923de65a811",
+			DeviceType: "led",
+			Type:       "state",
+			Value:      "off",
+			Timestamp:  "2019-03-20T17:37:07Z",
+			Unit:       scheme.UnitOptions{},
 		},
+		scheme.Read{
+			Device:     "929b923de65a811",
+			DeviceType: "led",
+			Type:       "color",
+			Value:      "000000",
+			Timestamp:  "2019-03-20T17:37:07Z",
+			Unit:       scheme.UnitOptions{},
+		},
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/readcache", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := scheme.ReadCacheOptions{}
+	resp, err := client.ReadCache(opts)
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_ReadCache_500(t *testing.T) {
+	in := `
+{
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
+}`
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/readcache", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := scheme.ReadCacheOptions{}
+	resp, err := client.ReadCache(opts)
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
+func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
+	tests := []struct {
+		path     string
+		in       string
+		expected interface{}
+	}{
 		{
 			"/write/0fe8f06229aa9a01ef6032d1ddaf18a2",
 			`
