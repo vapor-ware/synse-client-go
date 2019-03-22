@@ -89,6 +89,64 @@ func TestNewHTTPClientV3_ValidRetry(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestHTTPClientV3_Status_200(t *testing.T) {
+	in := `
+{
+  "status":"ok",
+  "timestamp":"2019-03-20T17:37:07Z"
+}`
+
+	expected := &scheme.Status{
+		Status:    "ok",
+		Timestamp: "2019-03-20T17:37:07Z",
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeUnversioned(t, "/test", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Status()
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_Status_500(t *testing.T) {
+	in := `
+{
+  "status":"ok",
+  "timestamp":"2019-03-20T17:37:07Z"
+}`
+
+	expected := &scheme.Status{
+		Status:    "ok",
+		Timestamp: "2019-03-20T17:37:07Z",
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeUnversioned(t, "/test", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Status()
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
 func TestHTTPClientV3_Unversioned_200(t *testing.T) {
 	tests := []struct {
 		path     string
