@@ -541,15 +541,8 @@ func TestHTTPClientV3_Plugin_500(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
-	tests := []struct {
-		path     string
-		in       string
-		expected interface{}
-	}{
-		{
-			"/plugin/health",
-			`
+func TestHTTPClientV3_PluginHealth_200(t *testing.T) {
+	in := `
 {
   "status": "healthy",
   "updated": "2018-06-15T20:04:33Z",
@@ -561,20 +554,69 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
   "unhealthy": [],
   "active": 3,
   "inactive": 0
-}`,
-			&scheme.PluginHealth{
-				Status:  "healthy",
-				Updated: "2018-06-15T20:04:33Z",
-				Healthy: []string{
-					"12835beffd3e6c603aa4dd92127707b5",
-					"12835beffd3e6c603aa4dd92127707b6",
-					"12835beffd3e6c603aa4dd92127707b7",
-				},
-				Unhealthy: []string{},
-				Active:    int(3),
-				Inactive:  int(0),
-			},
+}`
+
+	expected := &scheme.PluginHealth{
+		Status:  "healthy",
+		Updated: "2018-06-15T20:04:33Z",
+		Healthy: []string{
+			"12835beffd3e6c603aa4dd92127707b5",
+			"12835beffd3e6c603aa4dd92127707b6",
+			"12835beffd3e6c603aa4dd92127707b7",
 		},
+		Unhealthy: []string{},
+		Active:    int(3),
+		Inactive:  int(0),
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/plugin/health", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.PluginHealth()
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_PluginHealth_500(t *testing.T) {
+	in := `
+{
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
+}`
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/plugin/health", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.PluginHealth()
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
+func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
+	tests := []struct {
+		path     string
+		in       string
+		expected interface{}
+	}{
 		{
 			"/scan",
 			`
