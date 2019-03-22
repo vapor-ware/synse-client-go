@@ -923,15 +923,8 @@ func TestHTTPClientV3_Info_500(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
-	tests := []struct {
-		path     string
-		in       string
-		expected interface{}
-	}{
-		{
-			"/read",
-			`
+func TestHTTPClientV3_Read_200(t *testing.T) {
+	in := `
 [
    {
       "device":"a72cs6519ee675b",
@@ -977,54 +970,105 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
          "zone":"6B"
       }
    }
-]`,
-			&[]scheme.Read{
-				scheme.Read{
-					Device:     "a72cs6519ee675b",
-					DeviceType: "temperature",
-					Type:       "temperature",
-					Value:      float64(20.3),
-					Timestamp:  "2019-03-20T17:37:07Z",
-					Unit: scheme.UnitOptions{
-						System: "metric",
-						Symbol: "C",
-						Name:   "degrees celsius",
-					},
-					Context: map[string]interface{}{
-						"host":        "127.0.0.1",
-						"sample_rate": float64(8),
-					},
-				},
-				scheme.Read{
-					Device:     "929b923de65a811",
-					DeviceType: "led",
-					Type:       "state",
-					Value:      "off",
-					Timestamp:  "2019-03-20T17:37:07Z",
-					Unit:       scheme.UnitOptions{},
-				},
-				scheme.Read{
-					Device:     "929b923de65a811",
-					DeviceType: "led",
-					Type:       "color",
-					Value:      "000000",
-					Timestamp:  "2019-03-20T17:37:07Z",
-					Unit:       scheme.UnitOptions{},
-				},
-				scheme.Read{
-					Device:     "12bb12c1f86a86e",
-					DeviceType: "door_lock",
-					Type:       "status",
-					Value:      "locked",
-					Timestamp:  "2019-03-20T17:37:07Z",
-					Unit:       scheme.UnitOptions{},
-					Context: map[string]interface{}{
-						"wedge": float64(1),
-						"zone":  "6B",
-					},
-				},
+]`
+
+	expected := &[]scheme.Read{
+		scheme.Read{
+			Device:     "a72cs6519ee675b",
+			DeviceType: "temperature",
+			Type:       "temperature",
+			Value:      float64(20.3),
+			Timestamp:  "2019-03-20T17:37:07Z",
+			Unit: scheme.UnitOptions{
+				System: "metric",
+				Symbol: "C",
+				Name:   "degrees celsius",
+			},
+			Context: map[string]interface{}{
+				"host":        "127.0.0.1",
+				"sample_rate": float64(8),
 			},
 		},
+		scheme.Read{
+			Device:     "929b923de65a811",
+			DeviceType: "led",
+			Type:       "state",
+			Value:      "off",
+			Timestamp:  "2019-03-20T17:37:07Z",
+			Unit:       scheme.UnitOptions{},
+		},
+		scheme.Read{
+			Device:     "929b923de65a811",
+			DeviceType: "led",
+			Type:       "color",
+			Value:      "000000",
+			Timestamp:  "2019-03-20T17:37:07Z",
+			Unit:       scheme.UnitOptions{},
+		},
+		scheme.Read{
+			Device:     "12bb12c1f86a86e",
+			DeviceType: "door_lock",
+			Type:       "status",
+			Value:      "locked",
+			Timestamp:  "2019-03-20T17:37:07Z",
+			Unit:       scheme.UnitOptions{},
+			Context: map[string]interface{}{
+				"wedge": float64(1),
+				"zone":  "6B",
+			},
+		},
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/read", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := scheme.ReadOptions{}
+	resp, err := client.Read(opts)
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_Read_500(t *testing.T) {
+	in := `
+{
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
+}`
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/read", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := scheme.ReadOptions{}
+	resp, err := client.Read(opts)
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
+func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
+	tests := []struct {
+		path     string
+		in       string
+		expected interface{}
+	}{
 		{
 			"/read/12bb12c1f86a86e",
 			`
