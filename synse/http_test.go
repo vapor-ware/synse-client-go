@@ -761,15 +761,8 @@ func TestHTTPClientV3_Tags_500(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
-	tests := []struct {
-		path     string
-		in       string
-		expected interface{}
-	}{
-		{
-			"/info/34c226b1afadaae5f172a4e1763fd1a6",
-			`
+func TestHTTPClientV3_Info_200(t *testing.T) {
+	in := `
 {
   "timestamp": "2019-03-20T17:37:07Z",
   "id": "34c226b1afadaae5f172a4e1763fd1a6",
@@ -827,66 +820,115 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
       ]
     }
   ]
-}`,
-			&scheme.Info{
-				Timestamp: "2019-03-20T17:37:07Z",
-				ID:        "34c226b1afadaae5f172a4e1763fd1a6",
-				Type:      "humidity",
-				Metadata: scheme.MetadataOptions{
-					Model: "emul8-humidity",
+}`
+
+	expected := &scheme.Info{
+		Timestamp: "2019-03-20T17:37:07Z",
+		ID:        "34c226b1afadaae5f172a4e1763fd1a6",
+		Type:      "humidity",
+		Metadata: scheme.MetadataOptions{
+			Model: "emul8-humidity",
+		},
+		Plugin: "12835beffd3e6c603aa4dd92127707b5",
+		Info:   "Synse Humidity Sensor",
+		Tags: []string{
+			"type:humidity",
+			"humidity",
+			"vio/fan-sensor",
+		},
+		Capabilities: scheme.CapabilitiesOptions{
+			Mode: "rw",
+			Read: map[string]string{},
+			Write: scheme.WriteOptions{
+				Actions: []string{
+					"color",
+					"state",
 				},
-				Plugin: "12835beffd3e6c603aa4dd92127707b5",
-				Info:   "Synse Humidity Sensor",
-				Tags: []string{
-					"type:humidity",
-					"humidity",
-					"vio/fan-sensor",
-				},
-				Capabilities: scheme.CapabilitiesOptions{
-					Mode: "rw",
-					Read: map[string]string{},
-					Write: scheme.WriteOptions{
-						Actions: []string{
-							"color",
-							"state",
-						},
+			},
+		},
+		Output: []scheme.OutputOptions{
+			scheme.OutputOptions{
+				Name:          "humidity",
+				Type:          "humidity",
+				Precision:     int(3),
+				ScalingFactor: float64(1.0),
+				Units: []scheme.UnitOptions{
+					scheme.UnitOptions{
+						System: "",
+						Name:   "percent humidity",
+						Symbol: "%",
 					},
 				},
-				Output: []scheme.OutputOptions{
-					scheme.OutputOptions{
-						Name:          "humidity",
-						Type:          "humidity",
-						Precision:     int(3),
-						ScalingFactor: float64(1.0),
-						Units: []scheme.UnitOptions{
-							scheme.UnitOptions{
-								System: "",
-								Name:   "percent humidity",
-								Symbol: "%",
-							},
-						},
+			},
+			scheme.OutputOptions{
+				Name:          "temperature",
+				Type:          "temperature",
+				Precision:     int(3),
+				ScalingFactor: float64(1.0),
+				Units: []scheme.UnitOptions{
+					scheme.UnitOptions{
+						System: "metric",
+						Name:   "celsius",
+						Symbol: "C",
 					},
-					scheme.OutputOptions{
-						Name:          "temperature",
-						Type:          "temperature",
-						Precision:     int(3),
-						ScalingFactor: float64(1.0),
-						Units: []scheme.UnitOptions{
-							scheme.UnitOptions{
-								System: "metric",
-								Name:   "celsius",
-								Symbol: "C",
-							},
-							scheme.UnitOptions{
-								System: "imperial",
-								Name:   "fahrenheit",
-								Symbol: "F",
-							},
-						},
+					scheme.UnitOptions{
+						System: "imperial",
+						Name:   "fahrenheit",
+						Symbol: "F",
 					},
 				},
 			},
 		},
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/info/34c226b1afadaae5f172a4e1763fd1a6", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Info("34c226b1afadaae5f172a4e1763fd1a6")
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_Info_500(t *testing.T) {
+	in := `
+{
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
+}`
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/info/34c226b1afadaae5f172a4e1763fd1a6", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Info("34c226b1afadaae5f172a4e1763fd1a6")
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
+func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
+	tests := []struct {
+		path     string
+		in       string
+		expected interface{}
+	}{
 		{
 			"/read",
 			`
