@@ -1556,56 +1556,23 @@ func TestHTTPClientV3_TLS(t *testing.T) {
 	// Only need to setup one arbitrary unversioned endpoint and another
 	// versioned one to make requests against since we already have tests for
 	// all the endpoints and the works there are pretty much same.
-	tests := []struct {
-		path     string
-		in       string
-		expected interface{}
-	}{
-		{
-			"/test",
-			`
+	in := `
 {
   "status":"ok",
   "timestamp":"2019-03-20T17:37:07Z"
-}`,
-			&scheme.Status{
-				Status:    "ok",
-				Timestamp: "2019-03-20T17:37:07Z",
-			},
-		},
-		{
-			"/transaction",
-			`
-[
-  "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
-  "56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
-  "56a32eba-1aa6-4868-84ee-fe01af8b2e6d"
-]`,
-			&[]string{
-				"56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
-				"56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
-				"56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
-			},
-		},
+}`
+
+	expected := &scheme.Status{
+		Status:    "ok",
+		Timestamp: "2019-03-20T17:37:07Z",
 	}
 
-	for _, tt := range tests {
-		var (
-			resp interface{}
-			err  error
-		)
-		switch tt.path {
-		case "/test":
-			server.ServeUnversioned(t, tt.path, 200, tt.in)
-			resp, err = client.Status()
-		case "/transaction":
-			server.ServeVersioned(t, tt.path, 200, tt.in)
-			resp, err = client.Transactions()
-		}
-		assert.NotNil(t, resp)
-		assert.NoError(t, err)
-		assert.Equal(t, tt.expected, resp)
-	}
+	server.ServeUnversioned(t, "/test", 200, in)
+
+	resp, err := client.Status()
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
 }
 
 func TestHTTPClientV3_TLS_UnknownCA(t *testing.T) {
@@ -1641,43 +1608,15 @@ func TestHTTPClientV3_TLS_UnknownCA(t *testing.T) {
 	// Only need to setup one arbitrary unversioned endpoint and another
 	// versioned one to make requests against since we already have tests for
 	// all the endpoints and the works there are pretty much same.
-	tests := []struct {
-		path string
-		in   string
-	}{
-		{
-			"/test",
-			`
+	in := `
 {
   "status":"ok",
   "timestamp":"2019-03-20T17:37:07Z"
-}`,
-		},
-		{
-			"/transaction",
-			`
-[
-  "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
-  "56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
-  "56a32eba-1aa6-4868-84ee-fe01af8b2e6d"
-]`,
-		},
-	}
+}`
 
-	for _, tt := range tests {
-		var (
-			resp interface{}
-			err  error
-		)
-		switch tt.path {
-		case "/test":
-			server.ServeUnversioned(t, tt.path, 200, tt.in)
-			resp, err = client.Status()
-		case "/transaction":
-			server.ServeVersioned(t, tt.path, 200, tt.in)
-			resp, err = client.Transactions()
-		}
-		assert.Nil(t, resp)
-		assert.Error(t, err)
-	}
+	server.ServeUnversioned(t, "/test", 200, in)
+
+	resp, err := client.Status()
+	assert.Nil(t, resp)
+	assert.Error(t, err)
 }
