@@ -407,15 +407,8 @@ func TestHTTPClientV3_Plugins_500(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
-	tests := []struct {
-		path     string
-		in       string
-		expected interface{}
-	}{
-		{
-			"/plugin/12835beffd3e6c603aa4dd92127707b5",
-			`
+func TestHTTPClientV3_Plugin_200(t *testing.T) {
+	in := `
 {
    "active":true,
    "id":"12835beffd3e6c603aa4dd92127707b5",
@@ -458,53 +451,102 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
          }
       ]
    }
-}`,
-			&scheme.Plugin{
-				PluginMeta: scheme.PluginMeta{
-					Active:      true,
-					ID:          "12835beffd3e6c603aa4dd92127707b5",
-					Tag:         "vaporio/emulator-plugin",
-					Name:        "emulator plugin",
-					Description: "A plugin with emulated devices and data",
-					Maintainer:  "vaporio",
-					VCS:         "github.com/vapor-ware/synse-emulator-plugin",
-					Version: scheme.VersionOptions{
-						PluginVersion: "2.0.0",
-						SDKVersion:    "1.0.0",
-						BuildDate:     "2018-06-14T16:24:09",
-						GitCommit:     "13e6478",
-						GitTag:        "1.0.2-5-g13e6478",
-						Arch:          "amd64",
-						OS:            "linux",
-					},
-				},
-				Network: scheme.NetworkOptions{
-					Protocol: "tcp",
-					Address:  "emulator-plugin:5001",
-				},
-				Health: scheme.HealthOptions{
-					Timestamp: "2019-03-20T17:37:07Z",
+}`
+
+	expected := &scheme.Plugin{
+		PluginMeta: scheme.PluginMeta{
+			Active:      true,
+			ID:          "12835beffd3e6c603aa4dd92127707b5",
+			Tag:         "vaporio/emulator-plugin",
+			Name:        "emulator plugin",
+			Description: "A plugin with emulated devices and data",
+			Maintainer:  "vaporio",
+			VCS:         "github.com/vapor-ware/synse-emulator-plugin",
+			Version: scheme.VersionOptions{
+				PluginVersion: "2.0.0",
+				SDKVersion:    "1.0.0",
+				BuildDate:     "2018-06-14T16:24:09",
+				GitCommit:     "13e6478",
+				GitTag:        "1.0.2-5-g13e6478",
+				Arch:          "amd64",
+				OS:            "linux",
+			},
+		},
+		Network: scheme.NetworkOptions{
+			Protocol: "tcp",
+			Address:  "emulator-plugin:5001",
+		},
+		Health: scheme.HealthOptions{
+			Timestamp: "2019-03-20T17:37:07Z",
+			Status:    "ok",
+			Message:   "",
+			Checks: []scheme.CheckOptions{
+				scheme.CheckOptions{
+					Name:      "read buffer health",
 					Status:    "ok",
 					Message:   "",
-					Checks: []scheme.CheckOptions{
-						scheme.CheckOptions{
-							Name:      "read buffer health",
-							Status:    "ok",
-							Message:   "",
-							Timestamp: "2019-03-20T17:37:07Z",
-							Type:      "periodic",
-						},
-						scheme.CheckOptions{
-							Name:      "write buffer health",
-							Status:    "ok",
-							Message:   "",
-							Timestamp: "2019-03-20T17:37:07Z",
-							Type:      "periodic",
-						},
-					},
+					Timestamp: "2019-03-20T17:37:07Z",
+					Type:      "periodic",
+				},
+				scheme.CheckOptions{
+					Name:      "write buffer health",
+					Status:    "ok",
+					Message:   "",
+					Timestamp: "2019-03-20T17:37:07Z",
+					Type:      "periodic",
 				},
 			},
 		},
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/plugin/12835beffd3e6c603aa4dd92127707b5", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Plugin("12835beffd3e6c603aa4dd92127707b5")
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_Plugin_500(t *testing.T) {
+	in := `
+{
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
+}`
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/plugin/12835beffd3e6c603aa4dd92127707b5", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Plugin("12835beffd3e6c603aa4dd92127707b5")
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
+func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
+	tests := []struct {
+		path     string
+		in       string
+		expected interface{}
+	}{
 		{
 			"/plugin/health",
 			`
