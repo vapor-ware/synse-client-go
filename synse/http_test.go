@@ -121,19 +121,16 @@ func TestHTTPClientV3_Status_200(t *testing.T) {
 func TestHTTPClientV3_Status_500(t *testing.T) {
 	in := `
 {
-  "status":"ok",
-  "timestamp":"2019-03-20T17:37:07Z"
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
 }`
-
-	expected := &scheme.Status{
-		Status:    "ok",
-		Timestamp: "2019-03-20T17:37:07Z",
-	}
 
 	server := test.NewHTTPServerV3()
 	defer server.Close()
 
-	server.ServeUnversioned(t, "/test", 200, in)
+	server.ServeUnversioned(t, "/test", 500, in)
 
 	client, err := NewHTTPClientV3(&Options{
 		Address: server.URL,
@@ -142,112 +139,62 @@ func TestHTTPClientV3_Status_500(t *testing.T) {
 	assert.NoError(t, err)
 
 	resp, err := client.Status()
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
+func TestHTTPClientV3_Version_200(t *testing.T) {
+	in := `
+{
+  "version":"3.0.0",
+  "api_version":"v3"
+}`
+
+	expected := &scheme.Version{
+		Version:    "3.0.0",
+		APIVersion: "v3",
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeUnversioned(t, "/version", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Version()
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
 }
 
-func TestHTTPClientV3_Unversioned_200(t *testing.T) {
-	tests := []struct {
-		path     string
-		in       string
-		expected interface{}
-	}{
-		{
-			"/test",
-			`
-{
-  "status":"ok",
-  "timestamp":"2019-03-20T17:37:07Z"
-}`,
-			&scheme.Status{
-				Status:    "ok",
-				Timestamp: "2019-03-20T17:37:07Z",
-			},
-		},
-		{
-			"/version",
-			`
-{
-  "version":"3.0.0",
-  "api_version":"v3"
-}`,
-			&scheme.Version{
-				Version:    "3.0.0",
-				APIVersion: "v3",
-			},
-		},
-	}
-
-	server := test.NewHTTPServerV3()
-	defer server.Close()
-
-	client, err := NewHTTPClientV3(&Options{
-		Address: server.URL,
-	})
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
-
-	for _, tt := range tests {
-		server.ServeUnversioned(t, tt.path, 200, tt.in)
-
-		var (
-			resp interface{}
-			err  error
-		)
-		switch tt.path {
-		case "/test":
-			resp, err = client.Status()
-		case "/version":
-			resp, err = client.Version()
-		}
-		assert.NotNil(t, resp)
-		assert.NoError(t, err)
-		assert.Equal(t, tt.expected, resp)
-	}
-}
-
-func TestHTTPClientV3_Unversioned_500(t *testing.T) {
-	tests := []struct {
-		path string
-	}{
-		{"/test"},
-		{"/version"},
-	}
-
-	server := test.NewHTTPServerV3()
-	defer server.Close()
-
-	client, err := NewHTTPClientV3(&Options{
-		Address: server.URL,
-	})
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
-
+func TestHTTPClientV3_Version_500(t *testing.T) {
 	in := `
 {
   "http_code":500,
   "description":"unknown error",
   "timestamp":"2019-03-20T17:37:07Z",
   "context":"unknown error"
-}
-`
-	for _, tt := range tests {
-		server.ServeUnversioned(t, tt.path, 500, in)
+}`
 
-		var (
-			resp interface{}
-			err  error
-		)
-		switch tt.path {
-		case "/test":
-			resp, err = client.Status()
-		case "/version":
-			resp, err = client.Version()
-		}
-		assert.Nil(t, resp)
-		assert.Error(t, err)
-	}
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeUnversioned(t, "/version", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Version()
+	assert.Nil(t, resp)
+	assert.Error(t, err)
 }
 
 func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
