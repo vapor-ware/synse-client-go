@@ -72,3 +72,6 @@ Other than these:
 | `GetOptions()` | Return the current config options of the client. |
 | `Open()` | Open the WebSocket connection between the client and Synse Server. *Not applicable for a HTTP client.* |
 | `Close()` | Close the WebSocket connection between the client and Synse Server. *Not applicable for a HTTP client.* |
+
+For more information about the response scheme, please refer to the
+[documentation](https://godoc.org/github.com/vapor-ware/synse-client-go/synse#Client).
