@@ -44,24 +44,26 @@ func main() {
 
 ### API
 
-Below are the map of HTTP and WebSocket API with their corresponding methods.
+Below are the map of all client methods with their corresponding HTTP and WebSocket API.
 
-| Name | HTTP endpoint | WebSocket request | Method |
-| ---- | ------------- | ----------------- | ------ |
-| Status | `/test` | `request/status` | `Status()` |
-| Version | `/version` | `request/version` | `Version()` |
-| Config | `/v3/config` | `request/config` | `Config()` |
-| Plugins | `/v3/plugin[/{plugin_id}]` | `request/plugin` | `Plugins()` or `Plugin(string)` |
-| Plugin Health | `/v3/plugin/health` | `request/plugin_health` | `PluginHealth()` |
-| Scan | `/v3/scan` | `request/scan` | `Scan(scheme.ScanOptions)` |
-| Tags | `/v3/tags` | `request/tags` | `Tags(scheme.TagsOptions)` |
-| Info | `/v3/info/{device_id}` | `request/info` | `Info(string)` |
-| Read | `/v3/read` | `request/read` | `Read(scheme.ReadOptions)` |
-| Read Device | `/v3/read/{device_id}` | `request/read_device` | `ReadDevice(string, scheme.ReadOptions)` |
-| Read Cache | `/v3/readcache` | `request/read_cache` | `ReadCache(scheme.ReadCacheOptions)` |
-| Write (Asynchronous) | `/v3/write/{device_id}` | `request/write_async` | `WriteAsync(string, []scheme.WriteData)` |
-| Write (Synchronous) | `/v3/write/wait/{device_id}` | `request/write_sync` | `WriteSync(string, []scheme.WriteData)` |
-| Transaction | `/v3/transaction[/{transaction_id}]` | `request/transaction` | `Transactions()` or `Transaction(string)` |
+| Method | HTTP endpoint | WebSocket request |
+| ------ | ------------- | ----------------- |
+| `Status()` | `/test` | `request/status` |
+| `Version()` | `/version` | `request/version` | `Version()` |
+| `Config()` | `/v3/config` | `request/config` | `Config()` |
+| `Plugins()` | `/v3/plugin` | `request/plugin` |
+| `Plugin(string)` | `/v3/plugin/{plugin_id}` | `request/plugin` |
+| `PluginHealth()` | `/v3/plugin/health` | `request/plugin_health` |
+| `Scan(scheme.ScanOptions)` | `/v3/scan` | `request/scan` |
+| `Tags(scheme.TagsOptions)` | `/v3/tags` | `request/tags` |
+| `Info(string)` | `/v3/info/{device_id}` | `request/info` |
+| `Read(scheme.ReadOptions)` | `/v3/read` | `request/read` |
+| `ReadDevice(string, scheme.ReadOptions)` | `/v3/read/{device_id}` | `request/read_device` |
+| `ReadCache(scheme.ReadCacheOptions)` | `/v3/readcache` | `request/read_cache` |
+| `WriteAsync(string, []scheme.WriteData)` | `/v3/write/{device_id}` | `request/write_async` |
+| `WriteSync(string, []scheme.WriteData)` | `/v3/write/wait/{device_id}` | `request/write_sync` |
+| `Transactions()` | `/v3/transaction` | `request/transaction` |
+| `Transaction(string)` | `/v3/transaction/{transaction_id}` | `request/transaction` |
 
 Other than these,
 
