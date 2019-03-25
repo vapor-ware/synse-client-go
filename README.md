@@ -25,30 +25,48 @@ $ make setup
 ### Initializing
 
 For both HTTP client and WebSocket client, in order to initialize their
-instances, we need to pass in the configuration
-[options](https://godoc.org/github.com/vapor-ware/synse-client-go/synse#Options),
+instances, we need to pass in the [configuration
+options](https://godoc.org/github.com/vapor-ware/synse-client-go/synse#Options),
 namely the Synse Server's address that we need to interface wish, other
-associated HTTP or WebSocket configs, and TLS communication configs if enabled.
-For example,
+associated HTTP or WebSocket configs, and TLS communication. For example:
 ```go
-import (
-	"github.com/vapor-ware/synse-client-go/synse"
-)
+import "github.com/vapor-ware/synse-client-go/synse"
 
 func main() {
-	opts := &synse.Options{
-		Address: "localhost",
-	}
+  opts := &synse.Options{
+    Address: "localhost",
+  }
 
-	client, err := NewHTTPClientV3(opts) // or NewWebSocketClientV3(opts)
+  client, err := NewHTTPClientV3(opts)
+  // or client, err := NewWebSocketClientV3(opts)
 }
 ```
 
 ### API
 
-Below are the map of HTTP and WebSocket API with its corresponding methods.
+Below are the map of HTTP and WebSocket API with their corresponding methods.
 
-| HTTP endpoint | WebSocket request | Client method |
-| ------------- | ----------------- | ------ |
-| `/test` | `request/status` | `Status()` |
-| `/version` | `request/version` | `Version()` |
+| Name | HTTP endpoint | WebSocket request | Method |
+| ---- | ------------- | ----------------- | ------ |
+| Status | `/test` | `request/status` | `Status()` |
+| Version | `/version` | `request/version` | `Version()` |
+| Config | `/v3/config` | `request/config` | `Config()` |
+| Plugins | `/v3/plugin[/{plugin_id}]` | `request/plugin` | `Plugins()` or `Plugin(string)` |
+| Plugin Health | `/v3/plugin/health` | `request/plugin_health` | `PluginHealth()` |
+| Scan | `/v3/scan` | `request/scan` | `Scan(scheme.ScanOptions)` |
+| Tags | `/v3/tags` | `request/tags` | `Tags(scheme.TagsOptions)` |
+| Info | `/v3/info/{device_id}` | `request/info` | `Info(string)` |
+| Read | `/v3/read` | `request/read` | `Read(scheme.ReadOptions)` |
+| Read Device | `/v3/read/{device_id}` | `request/read_device` | `ReadDevice(string, scheme.ReadOptions)` |
+| Read Cache | `/v3/readcache` | `request/read_cache` | `ReadCache(scheme.ReadCacheOptions)` |
+| Write (Asynchronous) | `/v3/write/{device_id}` | `request/write_async` | `WriteAsync(string, []scheme.WriteData)` |
+| Write (Synchronous) | `/v3/write/wait/{device_id}` | `request/write_sync` | `WriteSync(string, []scheme.WriteData)` |
+| Transaction | `/v3/transaction[/{transaction_id}]` | `request/transaction` | `Transactions()` or `Transaction(string)` |
+
+Other than these,
+
+| Method | Description |
+| ------ | ----------- |
+| `GetOptions()` | Return the current config options of the client |
+| `Open()` | Open the WebSocket connection between the client and Synse Server. This is not applicable for a HTTP client |
+| `Close()` | Close the WebSocket connection between the client and Synse Server. This is not applicable for a HTTP client |
