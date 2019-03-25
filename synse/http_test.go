@@ -89,40 +89,22 @@ func TestNewHTTPClientV3_ValidRetry(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestHTTPClientV3_Unversioned_200(t *testing.T) {
-	tests := []struct {
-		path     string
-		in       string
-		expected interface{}
-	}{
-		{
-			"/test",
-			`
+func TestHTTPClientV3_Status_200(t *testing.T) {
+	in := `
 {
   "status":"ok",
   "timestamp":"2019-03-20T17:37:07Z"
-}`,
-			&scheme.Status{
-				Status:    "ok",
-				Timestamp: "2019-03-20T17:37:07Z",
-			},
-		},
-		{
-			"/version",
-			`
-{
-  "version":"3.0.0",
-  "api_version":"v3"
-}`,
-			&scheme.Version{
-				Version:    "3.0.0",
-				APIVersion: "v3",
-			},
-		},
+}`
+
+	expected := &scheme.Status{
+		Status:    "ok",
+		Timestamp: "2019-03-20T17:37:07Z",
 	}
 
 	server := test.NewHTTPServerV3()
 	defer server.Close()
+
+	server.ServeUnversioned(t, "/test", 200, in)
 
 	client, err := NewHTTPClientV3(&Options{
 		Address: server.URL,
@@ -130,77 +112,93 @@ func TestHTTPClientV3_Unversioned_200(t *testing.T) {
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
 
-	for _, tt := range tests {
-		server.ServeUnversioned(t, tt.path, 200, tt.in)
-
-		var (
-			resp interface{}
-			err  error
-		)
-		switch tt.path {
-		case "/test":
-			resp, err = client.Status()
-		case "/version":
-			resp, err = client.Version()
-		}
-		assert.NotNil(t, resp)
-		assert.NoError(t, err)
-		assert.Equal(t, tt.expected, resp)
-	}
+	resp, err := client.Status()
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
 }
 
-func TestHTTPClientV3_Unversioned_500(t *testing.T) {
-	tests := []struct {
-		path string
-	}{
-		{"/test"},
-		{"/version"},
-	}
-
-	server := test.NewHTTPServerV3()
-	defer server.Close()
-
-	client, err := NewHTTPClientV3(&Options{
-		Address: server.URL,
-	})
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
-
+func TestHTTPClientV3_Status_500(t *testing.T) {
 	in := `
 {
   "http_code":500,
   "description":"unknown error",
   "timestamp":"2019-03-20T17:37:07Z",
   "context":"unknown error"
-}
-`
-	for _, tt := range tests {
-		server.ServeUnversioned(t, tt.path, 500, in)
+}`
 
-		var (
-			resp interface{}
-			err  error
-		)
-		switch tt.path {
-		case "/test":
-			resp, err = client.Status()
-		case "/version":
-			resp, err = client.Version()
-		}
-		assert.Nil(t, resp)
-		assert.Error(t, err)
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeUnversioned(t, "/test", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Status()
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
+func TestHTTPClientV3_Version_200(t *testing.T) {
+	in := `
+{
+  "version":"3.0.0",
+  "api_version":"v3"
+}`
+
+	expected := &scheme.Version{
+		Version:    "3.0.0",
+		APIVersion: "v3",
 	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeUnversioned(t, "/version", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Version()
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
 }
 
-func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
-	tests := []struct {
-		path     string
-		in       string
-		expected interface{}
-	}{
-		{
-			"/config",
-			`
+func TestHTTPClientV3_Version_500(t *testing.T) {
+	in := `
+{
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
+}`
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeUnversioned(t, "/version", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Version()
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
+func TestHTTPClientV3_Config_200(t *testing.T) {
+	in := `
 {
    "logging":"info",
    "pretty_json":true,
@@ -245,52 +243,94 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
          }
       }
    }
-}`,
-			&scheme.Config{
-				Logging:    "info",
-				PrettyJSON: true,
-				Locale:     "en_US",
-				Cache: scheme.CacheOptions{
-					Device: scheme.DeviceOptions{
-						TTL: int(20),
-					},
-					Transaction: scheme.TransactionOptions{
-						TTL: int(300),
-					},
-				},
-				GRPC: scheme.GRPCOptions{
-					Timeout: int(3),
-					TLS: scheme.TLSOptions{
-						Cert: "/tmp/ssl/synse.crt",
-					},
-				},
-				Metrics: scheme.MetricsOptions{
-					Enabled: false,
-				},
-				Transport: scheme.TransportOptions{
-					HTTP:      true,
-					WebSocket: true,
-				},
-				Plugin: scheme.PluginOptions{
-					TCP:  []string{"emulator-plugin:5001"},
-					Unix: []string{"/tmp/synse/plugin/foo.sock"},
-					Discover: scheme.DiscoveryOptions{
-						Kubernetes: scheme.KubernetesOptions{
-							Namespace: "vapor",
-							Endpoints: scheme.EndpointsOptions{
-								Labels: map[string]string{
-									"app":       "synse",
-									"component": "server",
-								},
-							},
+}`
+
+	expected := &scheme.Config{
+		Logging:    "info",
+		PrettyJSON: true,
+		Locale:     "en_US",
+		Cache: scheme.CacheOptions{
+			Device: scheme.DeviceOptions{
+				TTL: int(20),
+			},
+			Transaction: scheme.TransactionOptions{
+				TTL: int(300),
+			},
+		},
+		GRPC: scheme.GRPCOptions{
+			Timeout: int(3),
+			TLS: scheme.TLSOptions{
+				Cert: "/tmp/ssl/synse.crt",
+			},
+		},
+		Metrics: scheme.MetricsOptions{
+			Enabled: false,
+		},
+		Transport: scheme.TransportOptions{
+			HTTP:      true,
+			WebSocket: true,
+		},
+		Plugin: scheme.PluginOptions{
+			TCP:  []string{"emulator-plugin:5001"},
+			Unix: []string{"/tmp/synse/plugin/foo.sock"},
+			Discover: scheme.DiscoveryOptions{
+				Kubernetes: scheme.KubernetesOptions{
+					Namespace: "vapor",
+					Endpoints: scheme.EndpointsOptions{
+						Labels: map[string]string{
+							"app":       "synse",
+							"component": "server",
 						},
 					},
 				},
 			},
 		},
-		{
-			"/plugin",
-			`
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/config", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Config()
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_Config_500(t *testing.T) {
+	in := `
+{
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
+}`
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/config", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Config()
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
+func TestHTTPClientV3_Plugins_200(t *testing.T) {
+	in := `
 [
   {
     "description": "a plugin with emulated devices and data",
@@ -306,27 +346,69 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
     "maintainer": "third-party",
     "active": true
   }
-]`,
-			&[]scheme.PluginMeta{
-				scheme.PluginMeta{
-					Description: "a plugin with emulated devices and data",
-					ID:          "12835beffd3e6c603aa4dd92127707b5",
-					Name:        "emulator plugin",
-					Maintainer:  "vapor io",
-					Active:      true,
-				},
-				scheme.PluginMeta{
-					Description: "a custom third party plugin",
-					ID:          "12835beffd3e6c603aa4dd92127707b6",
-					Name:        "custom-plugin",
-					Maintainer:  "third-party",
-					Active:      true,
-				},
-			},
+]`
+
+	expected := &[]scheme.PluginMeta{
+		scheme.PluginMeta{
+			Description: "a plugin with emulated devices and data",
+			ID:          "12835beffd3e6c603aa4dd92127707b5",
+			Name:        "emulator plugin",
+			Maintainer:  "vapor io",
+			Active:      true,
 		},
-		{
-			"/plugin/12835beffd3e6c603aa4dd92127707b5",
-			`
+		scheme.PluginMeta{
+			Description: "a custom third party plugin",
+			ID:          "12835beffd3e6c603aa4dd92127707b6",
+			Name:        "custom-plugin",
+			Maintainer:  "third-party",
+			Active:      true,
+		},
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/plugin", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Plugins()
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_Plugins_500(t *testing.T) {
+	in := `
+{
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
+}`
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/plugin", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Plugins()
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
+func TestHTTPClientV3_Plugin_200(t *testing.T) {
+	in := `
 {
    "active":true,
    "id":"12835beffd3e6c603aa4dd92127707b5",
@@ -369,56 +451,98 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
          }
       ]
    }
-}`,
-			&scheme.Plugin{
-				PluginMeta: scheme.PluginMeta{
-					Active:      true,
-					ID:          "12835beffd3e6c603aa4dd92127707b5",
-					Tag:         "vaporio/emulator-plugin",
-					Name:        "emulator plugin",
-					Description: "A plugin with emulated devices and data",
-					Maintainer:  "vaporio",
-					VCS:         "github.com/vapor-ware/synse-emulator-plugin",
-					Version: scheme.VersionOptions{
-						PluginVersion: "2.0.0",
-						SDKVersion:    "1.0.0",
-						BuildDate:     "2018-06-14T16:24:09",
-						GitCommit:     "13e6478",
-						GitTag:        "1.0.2-5-g13e6478",
-						Arch:          "amd64",
-						OS:            "linux",
-					},
-				},
-				Network: scheme.NetworkOptions{
-					Protocol: "tcp",
-					Address:  "emulator-plugin:5001",
-				},
-				Health: scheme.HealthOptions{
-					Timestamp: "2019-03-20T17:37:07Z",
+}`
+
+	expected := &scheme.Plugin{
+		PluginMeta: scheme.PluginMeta{
+			Active:      true,
+			ID:          "12835beffd3e6c603aa4dd92127707b5",
+			Tag:         "vaporio/emulator-plugin",
+			Name:        "emulator plugin",
+			Description: "A plugin with emulated devices and data",
+			Maintainer:  "vaporio",
+			VCS:         "github.com/vapor-ware/synse-emulator-plugin",
+			Version: scheme.VersionOptions{
+				PluginVersion: "2.0.0",
+				SDKVersion:    "1.0.0",
+				BuildDate:     "2018-06-14T16:24:09",
+				GitCommit:     "13e6478",
+				GitTag:        "1.0.2-5-g13e6478",
+				Arch:          "amd64",
+				OS:            "linux",
+			},
+		},
+		Network: scheme.NetworkOptions{
+			Protocol: "tcp",
+			Address:  "emulator-plugin:5001",
+		},
+		Health: scheme.HealthOptions{
+			Timestamp: "2019-03-20T17:37:07Z",
+			Status:    "ok",
+			Message:   "",
+			Checks: []scheme.CheckOptions{
+				scheme.CheckOptions{
+					Name:      "read buffer health",
 					Status:    "ok",
 					Message:   "",
-					Checks: []scheme.CheckOptions{
-						scheme.CheckOptions{
-							Name:      "read buffer health",
-							Status:    "ok",
-							Message:   "",
-							Timestamp: "2019-03-20T17:37:07Z",
-							Type:      "periodic",
-						},
-						scheme.CheckOptions{
-							Name:      "write buffer health",
-							Status:    "ok",
-							Message:   "",
-							Timestamp: "2019-03-20T17:37:07Z",
-							Type:      "periodic",
-						},
-					},
+					Timestamp: "2019-03-20T17:37:07Z",
+					Type:      "periodic",
+				},
+				scheme.CheckOptions{
+					Name:      "write buffer health",
+					Status:    "ok",
+					Message:   "",
+					Timestamp: "2019-03-20T17:37:07Z",
+					Type:      "periodic",
 				},
 			},
 		},
-		{
-			"/plugin/health",
-			`
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/plugin/12835beffd3e6c603aa4dd92127707b5", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Plugin("12835beffd3e6c603aa4dd92127707b5")
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_Plugin_500(t *testing.T) {
+	in := `
+{
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
+}`
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/plugin/12835beffd3e6c603aa4dd92127707b5", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Plugin("12835beffd3e6c603aa4dd92127707b5")
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
+func TestHTTPClientV3_PluginHealth_200(t *testing.T) {
+	in := `
 {
   "status": "healthy",
   "updated": "2018-06-15T20:04:33Z",
@@ -430,23 +554,65 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
   "unhealthy": [],
   "active": 3,
   "inactive": 0
-}`,
-			&scheme.PluginHealth{
-				Status:  "healthy",
-				Updated: "2018-06-15T20:04:33Z",
-				Healthy: []string{
-					"12835beffd3e6c603aa4dd92127707b5",
-					"12835beffd3e6c603aa4dd92127707b6",
-					"12835beffd3e6c603aa4dd92127707b7",
-				},
-				Unhealthy: []string{},
-				Active:    int(3),
-				Inactive:  int(0),
-			},
+}`
+
+	expected := &scheme.PluginHealth{
+		Status:  "healthy",
+		Updated: "2018-06-15T20:04:33Z",
+		Healthy: []string{
+			"12835beffd3e6c603aa4dd92127707b5",
+			"12835beffd3e6c603aa4dd92127707b6",
+			"12835beffd3e6c603aa4dd92127707b7",
 		},
-		{
-			"/scan",
-			`
+		Unhealthy: []string{},
+		Active:    int(3),
+		Inactive:  int(0),
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/plugin/health", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.PluginHealth()
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_PluginHealth_500(t *testing.T) {
+	in := `
+{
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
+}`
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/plugin/health", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.PluginHealth()
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
+func TestHTTPClientV3_Scan_200(t *testing.T) {
+	in := `
 [
   {
     "id": "0fe8f06229aa9a01ef6032d1ddaf18a5",
@@ -469,46 +635,134 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
       "led"
     ]
   }
-]`,
-			&[]scheme.Scan{
-				scheme.Scan{
-					ID:     "0fe8f06229aa9a01ef6032d1ddaf18a5",
-					Info:   "Synse Temperature Sensor",
-					Type:   "temperature",
-					Plugin: "12835beffd3e6c603aa4dd92127707b5",
-					Tags: []string{
-						"type:temperature",
-						"temperature",
-						"vio/fan-sensor",
-					},
-				},
-				scheme.Scan{
-					ID:     "12ea5644d052c6bf1bca3c9864fd8a44",
-					Info:   "Synse LED",
-					Type:   "led",
-					Plugin: "12835beffd3e6c603aa4dd92127707b5",
-					Tags: []string{
-						"type:led",
-						"led",
-					},
-				},
+]`
+
+	expected := &[]scheme.Scan{
+		scheme.Scan{
+			ID:     "0fe8f06229aa9a01ef6032d1ddaf18a5",
+			Info:   "Synse Temperature Sensor",
+			Type:   "temperature",
+			Plugin: "12835beffd3e6c603aa4dd92127707b5",
+			Tags: []string{
+				"type:temperature",
+				"temperature",
+				"vio/fan-sensor",
 			},
 		},
-		{
-			"/tags",
-			`
+		scheme.Scan{
+			ID:     "12ea5644d052c6bf1bca3c9864fd8a44",
+			Info:   "Synse LED",
+			Type:   "led",
+			Plugin: "12835beffd3e6c603aa4dd92127707b5",
+			Tags: []string{
+				"type:led",
+				"led",
+			},
+		},
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/scan", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := scheme.ScanOptions{}
+	resp, err := client.Scan(opts)
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_Scan_500(t *testing.T) {
+	in := `
+{
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
+}`
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/scan", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := scheme.ScanOptions{}
+	resp, err := client.Scan(opts)
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
+func TestHTTPClientV3_Tags_200(t *testing.T) {
+	in := `
 [
   "default/tag1",
   "default/type:temperature"
-]`,
-			&[]string{
-				"default/tag1",
-				"default/type:temperature",
-			},
-		},
-		{
-			"/info/34c226b1afadaae5f172a4e1763fd1a6",
-			`
+]`
+
+	expected := &[]string{
+		"default/tag1",
+		"default/type:temperature",
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/tags", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := scheme.TagsOptions{}
+	resp, err := client.Tags(opts)
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_Tags_500(t *testing.T) {
+	in := `
+{
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
+}`
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/tags", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := scheme.TagsOptions{}
+	resp, err := client.Tags(opts)
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
+func TestHTTPClientV3_Info_200(t *testing.T) {
+	in := `
 {
   "timestamp": "2019-03-20T17:37:07Z",
   "id": "34c226b1afadaae5f172a4e1763fd1a6",
@@ -566,69 +820,111 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
       ]
     }
   ]
-}`,
-			&scheme.Info{
-				Timestamp: "2019-03-20T17:37:07Z",
-				ID:        "34c226b1afadaae5f172a4e1763fd1a6",
-				Type:      "humidity",
-				Metadata: scheme.MetadataOptions{
-					Model: "emul8-humidity",
+}`
+
+	expected := &scheme.Info{
+		Timestamp: "2019-03-20T17:37:07Z",
+		ID:        "34c226b1afadaae5f172a4e1763fd1a6",
+		Type:      "humidity",
+		Metadata: scheme.MetadataOptions{
+			Model: "emul8-humidity",
+		},
+		Plugin: "12835beffd3e6c603aa4dd92127707b5",
+		Info:   "Synse Humidity Sensor",
+		Tags: []string{
+			"type:humidity",
+			"humidity",
+			"vio/fan-sensor",
+		},
+		Capabilities: scheme.CapabilitiesOptions{
+			Mode: "rw",
+			Read: map[string]string{},
+			Write: scheme.WriteOptions{
+				Actions: []string{
+					"color",
+					"state",
 				},
-				Plugin: "12835beffd3e6c603aa4dd92127707b5",
-				Info:   "Synse Humidity Sensor",
-				Tags: []string{
-					"type:humidity",
-					"humidity",
-					"vio/fan-sensor",
-				},
-				Capabilities: scheme.CapabilitiesOptions{
-					Mode: "rw",
-					Read: map[string]string{},
-					Write: scheme.WriteOptions{
-						Actions: []string{
-							"color",
-							"state",
-						},
+			},
+		},
+		Output: []scheme.OutputOptions{
+			scheme.OutputOptions{
+				Name:          "humidity",
+				Type:          "humidity",
+				Precision:     int(3),
+				ScalingFactor: float64(1.0),
+				Units: []scheme.UnitOptions{
+					scheme.UnitOptions{
+						System: "",
+						Name:   "percent humidity",
+						Symbol: "%",
 					},
 				},
-				Output: []scheme.OutputOptions{
-					scheme.OutputOptions{
-						Name:          "humidity",
-						Type:          "humidity",
-						Precision:     int(3),
-						ScalingFactor: float64(1.0),
-						Units: []scheme.UnitOptions{
-							scheme.UnitOptions{
-								System: "",
-								Name:   "percent humidity",
-								Symbol: "%",
-							},
-						},
+			},
+			scheme.OutputOptions{
+				Name:          "temperature",
+				Type:          "temperature",
+				Precision:     int(3),
+				ScalingFactor: float64(1.0),
+				Units: []scheme.UnitOptions{
+					scheme.UnitOptions{
+						System: "metric",
+						Name:   "celsius",
+						Symbol: "C",
 					},
-					scheme.OutputOptions{
-						Name:          "temperature",
-						Type:          "temperature",
-						Precision:     int(3),
-						ScalingFactor: float64(1.0),
-						Units: []scheme.UnitOptions{
-							scheme.UnitOptions{
-								System: "metric",
-								Name:   "celsius",
-								Symbol: "C",
-							},
-							scheme.UnitOptions{
-								System: "imperial",
-								Name:   "fahrenheit",
-								Symbol: "F",
-							},
-						},
+					scheme.UnitOptions{
+						System: "imperial",
+						Name:   "fahrenheit",
+						Symbol: "F",
 					},
 				},
 			},
 		},
-		{
-			"/read",
-			`
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/info/34c226b1afadaae5f172a4e1763fd1a6", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Info("34c226b1afadaae5f172a4e1763fd1a6")
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_Info_500(t *testing.T) {
+	in := `
+{
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
+}`
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/info/34c226b1afadaae5f172a4e1763fd1a6", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Info("34c226b1afadaae5f172a4e1763fd1a6")
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
+func TestHTTPClientV3_Read_200(t *testing.T) {
+	in := `
 [
    {
       "device":"a72cs6519ee675b",
@@ -674,57 +970,101 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
          "zone":"6B"
       }
    }
-]`,
-			&[]scheme.Read{
-				scheme.Read{
-					Device:     "a72cs6519ee675b",
-					DeviceType: "temperature",
-					Type:       "temperature",
-					Value:      float64(20.3),
-					Timestamp:  "2019-03-20T17:37:07Z",
-					Unit: scheme.UnitOptions{
-						System: "metric",
-						Symbol: "C",
-						Name:   "degrees celsius",
-					},
-					Context: map[string]interface{}{
-						"host":        "127.0.0.1",
-						"sample_rate": float64(8),
-					},
-				},
-				scheme.Read{
-					Device:     "929b923de65a811",
-					DeviceType: "led",
-					Type:       "state",
-					Value:      "off",
-					Timestamp:  "2019-03-20T17:37:07Z",
-					Unit:       scheme.UnitOptions{},
-				},
-				scheme.Read{
-					Device:     "929b923de65a811",
-					DeviceType: "led",
-					Type:       "color",
-					Value:      "000000",
-					Timestamp:  "2019-03-20T17:37:07Z",
-					Unit:       scheme.UnitOptions{},
-				},
-				scheme.Read{
-					Device:     "12bb12c1f86a86e",
-					DeviceType: "door_lock",
-					Type:       "status",
-					Value:      "locked",
-					Timestamp:  "2019-03-20T17:37:07Z",
-					Unit:       scheme.UnitOptions{},
-					Context: map[string]interface{}{
-						"wedge": float64(1),
-						"zone":  "6B",
-					},
-				},
+]`
+
+	expected := &[]scheme.Read{
+		scheme.Read{
+			Device:     "a72cs6519ee675b",
+			DeviceType: "temperature",
+			Type:       "temperature",
+			Value:      float64(20.3),
+			Timestamp:  "2019-03-20T17:37:07Z",
+			Unit: scheme.UnitOptions{
+				System: "metric",
+				Symbol: "C",
+				Name:   "degrees celsius",
+			},
+			Context: map[string]interface{}{
+				"host":        "127.0.0.1",
+				"sample_rate": float64(8),
 			},
 		},
-		{
-			"/read/12bb12c1f86a86e",
-			`
+		scheme.Read{
+			Device:     "929b923de65a811",
+			DeviceType: "led",
+			Type:       "state",
+			Value:      "off",
+			Timestamp:  "2019-03-20T17:37:07Z",
+			Unit:       scheme.UnitOptions{},
+		},
+		scheme.Read{
+			Device:     "929b923de65a811",
+			DeviceType: "led",
+			Type:       "color",
+			Value:      "000000",
+			Timestamp:  "2019-03-20T17:37:07Z",
+			Unit:       scheme.UnitOptions{},
+		},
+		scheme.Read{
+			Device:     "12bb12c1f86a86e",
+			DeviceType: "door_lock",
+			Type:       "status",
+			Value:      "locked",
+			Timestamp:  "2019-03-20T17:37:07Z",
+			Unit:       scheme.UnitOptions{},
+			Context: map[string]interface{}{
+				"wedge": float64(1),
+				"zone":  "6B",
+			},
+		},
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/read", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := scheme.ReadOptions{}
+	resp, err := client.Read(opts)
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_Read_500(t *testing.T) {
+	in := `
+{
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
+}`
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/read", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := scheme.ReadOptions{}
+	resp, err := client.Read(opts)
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
+func TestHTTPClientV3_ReadDevice_200(t *testing.T) {
+	in := `
 [
   {
     "device": "12bb12c1f86a86e",
@@ -742,29 +1082,73 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
       "sample_rate": 8
     }
   }
-]`,
-			&[]scheme.Read{
-				scheme.Read{
-					Device:     "12bb12c1f86a86e",
-					DeviceType: "temperature",
-					Type:       "temperature",
-					Value:      float64(20.3),
-					Timestamp:  "2019-03-20T17:37:07Z",
-					Unit: scheme.UnitOptions{
-						System: "metric",
-						Symbol: "C",
-						Name:   "degrees celsius",
-					},
-					Context: map[string]interface{}{
-						"host":        "127.0.0.1",
-						"sample_rate": float64(8),
-					},
-				},
+]`
+
+	expected := &[]scheme.Read{
+		scheme.Read{
+			Device:     "12bb12c1f86a86e",
+			DeviceType: "temperature",
+			Type:       "temperature",
+			Value:      float64(20.3),
+			Timestamp:  "2019-03-20T17:37:07Z",
+			Unit: scheme.UnitOptions{
+				System: "metric",
+				Symbol: "C",
+				Name:   "degrees celsius",
+			},
+			Context: map[string]interface{}{
+				"host":        "127.0.0.1",
+				"sample_rate": float64(8),
 			},
 		},
-		{
-			"/readcache",
-			`
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/read/12bb12c1f86a86e", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := scheme.ReadOptions{}
+	resp, err := client.ReadDevice("12bb12c1f86a86e", opts)
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_ReadDevice_500(t *testing.T) {
+	in := `
+{
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
+}`
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/read/12bb12c1f86a86e", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := scheme.ReadOptions{}
+	resp, err := client.ReadDevice("12bb12c1f86a86e", opts)
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
+func TestHTTPClientV3_ReadCache_200(t *testing.T) {
+	in := `
 {
   "device":"929b923de65a811",
   "device_type":"led",
@@ -780,29 +1164,73 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
   "value":"000000",
   "timestamp":"2019-03-20T17:37:07Z",
   "unit":null
-}`,
-			&[]scheme.Read{
-				scheme.Read{
-					Device:     "929b923de65a811",
-					DeviceType: "led",
-					Type:       "state",
-					Value:      "off",
-					Timestamp:  "2019-03-20T17:37:07Z",
-					Unit:       scheme.UnitOptions{},
-				},
-				scheme.Read{
-					Device:     "929b923de65a811",
-					DeviceType: "led",
-					Type:       "color",
-					Value:      "000000",
-					Timestamp:  "2019-03-20T17:37:07Z",
-					Unit:       scheme.UnitOptions{},
-				},
-			},
+}`
+
+	expected := &[]scheme.Read{
+		scheme.Read{
+			Device:     "929b923de65a811",
+			DeviceType: "led",
+			Type:       "state",
+			Value:      "off",
+			Timestamp:  "2019-03-20T17:37:07Z",
+			Unit:       scheme.UnitOptions{},
 		},
-		{
-			"/write/0fe8f06229aa9a01ef6032d1ddaf18a2",
-			`
+		scheme.Read{
+			Device:     "929b923de65a811",
+			DeviceType: "led",
+			Type:       "color",
+			Value:      "000000",
+			Timestamp:  "2019-03-20T17:37:07Z",
+			Unit:       scheme.UnitOptions{},
+		},
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/readcache", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := scheme.ReadCacheOptions{}
+	resp, err := client.ReadCache(opts)
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_ReadCache_500(t *testing.T) {
+	in := `
+{
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
+}`
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/readcache", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := scheme.ReadCacheOptions{}
+	resp, err := client.ReadCache(opts)
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
+func TestHTTPClientV3_WriteAsync_200(t *testing.T) {
+	in := `
 [
   {
     "context": {
@@ -822,31 +1250,75 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
     "transaction": "56a32eba-1aa6-4868-84ee-fe01af8b2e6e",
     "timeout": "10s"
   }
-]`,
-			&[]scheme.Write{
-				scheme.Write{
-					Context: scheme.WriteData{
-						Action: "color",
-						Data:   "f38ac2",
-					},
-					Device:      "0fe8f06229aa9a01ef6032d1ddaf18a2",
-					Transaction: "56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
-					Timeout:     "10s",
-				},
-				scheme.Write{
-					Context: scheme.WriteData{
-						Action: "state",
-						Data:   "blink",
-					},
-					Device:      "0fe8f06229aa9a01ef6032d1ddaf18a2",
-					Transaction: "56a32eba-1aa6-4868-84ee-fe01af8b2e6e",
-					Timeout:     "10s",
-				},
+]`
+
+	expected := &[]scheme.Write{
+		scheme.Write{
+			Context: scheme.WriteData{
+				Action: "color",
+				Data:   "f38ac2",
 			},
+			Device:      "0fe8f06229aa9a01ef6032d1ddaf18a2",
+			Transaction: "56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
+			Timeout:     "10s",
 		},
-		{
-			"/write/wait/0fe8f06229aa9a01ef6032d1ddaf18a5",
-			`
+		scheme.Write{
+			Context: scheme.WriteData{
+				Action: "state",
+				Data:   "blink",
+			},
+			Device:      "0fe8f06229aa9a01ef6032d1ddaf18a2",
+			Transaction: "56a32eba-1aa6-4868-84ee-fe01af8b2e6e",
+			Timeout:     "10s",
+		},
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/write/0fe8f06229aa9a01ef6032d1ddaf18a2", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := []scheme.WriteData{}
+	resp, err := client.WriteAsync("0fe8f06229aa9a01ef6032d1ddaf18a2", opts)
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_WriteAsync_500(t *testing.T) {
+	in := `
+{
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
+}`
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/write/0fe8f06229aa9a01ef6032d1ddaf18a2", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := []scheme.WriteData{}
+	resp, err := client.WriteAsync("0fe8f06229aa9a01ef6032d1ddaf18a2", opts)
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
+func TestHTTPClientV3_WriteSync_200(t *testing.T) {
+	in := `
 [
  {
    "id": "56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
@@ -861,40 +1333,126 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
    "updated": "2018-02-01T15:00:51Z",
    "message": ""
  }
-]`,
-			&[]scheme.Transaction{
-				scheme.Transaction{
-					ID:      "56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
-					Timeout: "10s",
-					Device:  "0fe8f06229aa9a01ef6032d1ddaf18a5",
-					Context: scheme.WriteData{
-						Action: "color",
-						Data:   "f38ac2",
-					},
-					Status:  "done",
-					Created: "2018-02-01T15:00:51Z",
-					Updated: "2018-02-01T15:00:51Z",
-					Message: "",
-				},
+]`
+
+	expected := &[]scheme.Transaction{
+		scheme.Transaction{
+			ID:      "56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
+			Timeout: "10s",
+			Device:  "0fe8f06229aa9a01ef6032d1ddaf18a5",
+			Context: scheme.WriteData{
+				Action: "color",
+				Data:   "f38ac2",
 			},
+			Status:  "done",
+			Created: "2018-02-01T15:00:51Z",
+			Updated: "2018-02-01T15:00:51Z",
+			Message: "",
 		},
-		{
-			"/transaction",
-			`
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/write/wait/0fe8f06229aa9a01ef6032d1ddaf18a5", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := []scheme.WriteData{}
+	resp, err := client.WriteSync("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_WriteSync_500(t *testing.T) {
+	in := `
+{
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
+}`
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/write/wait/0fe8f06229aa9a01ef6032d1ddaf18a5", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := []scheme.WriteData{}
+	resp, err := client.WriteSync("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
+func TestHTTPClientV3_Transactions_200(t *testing.T) {
+	in := `
 [
   "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
   "56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
   "56a32eba-1aa6-4868-84ee-fe01af8b2e6d"
-]`,
-			&[]string{
-				"56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
-				"56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
-				"56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
-			},
-		},
-		{
-			"/transaction/56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
-			`
+]`
+
+	expected := &[]string{
+		"56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
+		"56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
+		"56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
+	}
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/transaction", 200, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Transactions()
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
+}
+
+func TestHTTPClientV3_Transactions_500(t *testing.T) {
+	in := `
+{
+  "http_code":500,
+  "description":"unknown error",
+  "timestamp":"2019-03-20T17:37:07Z",
+  "context":"unknown error"
+}`
+
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/transaction", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Transactions()
+	assert.Nil(t, resp)
+	assert.Error(t, err)
+}
+
+func TestHTTPClientV3_Transaction_200(t *testing.T) {
+	in := `
 {
   "id": "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
   "timeout": "10s",
@@ -907,25 +1465,26 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
   "created": "2018-02-01T15:00:51Z",
   "updated": "2018-02-01T15:00:51Z",
   "message": ""
-}`,
-			&scheme.Transaction{
-				ID:      "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
-				Timeout: "10s",
-				Device:  "0fe8f06229aa9a01ef6032d1ddaf18a5",
-				Context: scheme.WriteData{
-					Action: "color",
-					Data:   "f38ac2",
-				},
-				Status:  "done",
-				Created: "2018-02-01T15:00:51Z",
-				Updated: "2018-02-01T15:00:51Z",
-				Message: "",
-			},
+}`
+
+	expected := &scheme.Transaction{
+		ID:      "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
+		Timeout: "10s",
+		Device:  "0fe8f06229aa9a01ef6032d1ddaf18a5",
+		Context: scheme.WriteData{
+			Action: "color",
+			Data:   "f38ac2",
 		},
+		Status:  "done",
+		Created: "2018-02-01T15:00:51Z",
+		Updated: "2018-02-01T15:00:51Z",
+		Message: "",
 	}
 
 	server := test.NewHTTPServerV3()
 	defer server.Close()
+
+	server.ServeVersioned(t, "/transaction/56a32eba-1aa6-4868-84ee-fe01af8b2e6b", 200, in)
 
 	client, err := NewHTTPClientV3(&Options{
 		Address: server.URL,
@@ -933,140 +1492,35 @@ func TestHTTPClientV3_Versioned_200(t *testing.T) { // nolint
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
 
-	for _, tt := range tests {
-		server.ServeVersioned(t, tt.path, 200, tt.in)
-
-		var (
-			resp interface{}
-			err  error
-		)
-		switch tt.path {
-		case "/config":
-			resp, err = client.Config()
-		case "/plugin":
-			resp, err = client.Plugins()
-		case "/plugin/12835beffd3e6c603aa4dd92127707b5":
-			resp, err = client.Plugin("12835beffd3e6c603aa4dd92127707b5")
-		case "/plugin/health":
-			resp, err = client.PluginHealth()
-		case "/scan":
-			opts := scheme.ScanOptions{}
-			resp, err = client.Scan(opts)
-		case "/tags":
-			opts := scheme.TagsOptions{}
-			resp, err = client.Tags(opts)
-		case "/info/34c226b1afadaae5f172a4e1763fd1a6":
-			resp, err = client.Info("34c226b1afadaae5f172a4e1763fd1a6")
-		case "/read":
-			opts := scheme.ReadOptions{}
-			resp, err = client.Read(opts)
-		case "/read/12bb12c1f86a86e":
-			opts := scheme.ReadOptions{}
-			resp, err = client.ReadDevice("12bb12c1f86a86e", opts)
-		case "/readcache":
-			opts := scheme.ReadCacheOptions{}
-			resp, err = client.ReadCache(opts)
-		case "/write/0fe8f06229aa9a01ef6032d1ddaf18a2":
-			opts := []scheme.WriteData{}
-			resp, err = client.WriteAsync("0fe8f06229aa9a01ef6032d1ddaf18a2", opts)
-		case "/write/wait/0fe8f06229aa9a01ef6032d1ddaf18a5":
-			opts := []scheme.WriteData{}
-			resp, err = client.WriteSync("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
-		case "/transaction":
-			resp, err = client.Transactions()
-		case "/transaction/56a32eba-1aa6-4868-84ee-fe01af8b2e6b":
-			resp, err = client.Transaction("56a32eba-1aa6-4868-84ee-fe01af8b2e6b")
-		}
-		assert.NotNil(t, resp)
-		assert.NoError(t, err)
-		assert.Equal(t, tt.expected, resp)
-	}
+	resp, err := client.Transaction("56a32eba-1aa6-4868-84ee-fe01af8b2e6b")
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
 }
 
-func TestHTTPClientV3_Versioned_500(t *testing.T) { // nolint
-	tests := []struct {
-		path string
-	}{
-		{"/config"},
-		{"/plugin"},
-		{"/plugin/12835beffd3e6c603aa4dd92127707b5"},
-		{"/plugin/health"},
-		{"/scan"},
-		{"/tags"},
-		{"/info/34c226b1afadaae5f172a4e1763fd1a6"},
-		{"/read"},
-		{"/read/12bb12c1f86a86e"},
-		{"/readcache"},
-		{"/write/0fe8f06229aa9a01ef6032d1ddaf18a2"},
-		{"/write/wait/0fe8f06229aa9a01ef6032d1ddaf18a5"},
-		{"/transaction"},
-		{"/transaction/56a32eba-1aa6-4868-84ee-fe01af8b2e6b"},
-	}
-
-	server := test.NewHTTPServerV3()
-	defer server.Close()
-
-	client, err := NewHTTPClientV3(&Options{
-		Address: server.URL,
-	})
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
-
+func TestHTTPClientV3_Transaction_500(t *testing.T) {
 	in := `
 {
   "http_code":500,
   "description":"unknown error",
   "timestamp":"2019-03-20T17:37:07Z",
   "context":"unknown error"
-}
-`
-	for _, tt := range tests {
-		server.ServeVersioned(t, tt.path, 500, in)
+}`
 
-		var (
-			resp interface{}
-			err  error
-		)
-		switch tt.path {
-		case "/config":
-			resp, err = client.Config()
-		case "/plugin":
-			resp, err = client.Plugins()
-		case "/plugin/12835beffd3e6c603aa4dd92127707b5":
-			resp, err = client.Plugin("12835beffd3e6c603aa4dd92127707b5")
-		case "/plugin/health":
-			resp, err = client.PluginHealth()
-		case "/scan":
-			opts := scheme.ScanOptions{}
-			resp, err = client.Scan(opts)
-		case "/tags":
-			opts := scheme.TagsOptions{}
-			resp, err = client.Tags(opts)
-		case "/info/34c226b1afadaae5f172a4e1763fd1a6":
-			resp, err = client.Info("34c226b1afadaae5f172a4e1763fd1a6")
-		case "/read":
-			opts := scheme.ReadOptions{}
-			resp, err = client.Read(opts)
-		case "/read/12bb12c1f86a86e":
-			opts := scheme.ReadOptions{}
-			resp, err = client.ReadDevice("12bb12c1f86a86e", opts)
-		case "/readcache":
-			opts := scheme.ReadCacheOptions{}
-			resp, err = client.ReadCache(opts)
-		case "/write/0fe8f06229aa9a01ef6032d1ddaf18a2":
-			opts := []scheme.WriteData{}
-			resp, err = client.WriteAsync("0fe8f06229aa9a01ef6032d1ddaf18a2", opts)
-		case "/write/wait/0fe8f06229aa9a01ef6032d1ddaf18a5":
-			opts := []scheme.WriteData{}
-			resp, err = client.WriteSync("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
-		case "/transaction":
-			resp, err = client.Transactions()
-		case "/transaction/56a32eba-1aa6-4868-84ee-fe01af8b2e6b":
-			resp, err = client.Transaction("56a32eba-1aa6-4868-84ee-fe01af8b2e6b")
-		}
-		assert.Nil(t, resp)
-		assert.Error(t, err)
-	}
+	server := test.NewHTTPServerV3()
+	defer server.Close()
+
+	server.ServeVersioned(t, "/transaction/56a32eba-1aa6-4868-84ee-fe01af8b2e6b", 500, in)
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Transaction("56a32eba-1aa6-4868-84ee-fe01af8b2e6b")
+	assert.Nil(t, resp)
+	assert.Error(t, err)
 }
 
 func TestHTTPClientV3_TLS(t *testing.T) {
@@ -1102,56 +1556,23 @@ func TestHTTPClientV3_TLS(t *testing.T) {
 	// Only need to setup one arbitrary unversioned endpoint and another
 	// versioned one to make requests against since we already have tests for
 	// all the endpoints and the works there are pretty much same.
-	tests := []struct {
-		path     string
-		in       string
-		expected interface{}
-	}{
-		{
-			"/test",
-			`
+	in := `
 {
   "status":"ok",
   "timestamp":"2019-03-20T17:37:07Z"
-}`,
-			&scheme.Status{
-				Status:    "ok",
-				Timestamp: "2019-03-20T17:37:07Z",
-			},
-		},
-		{
-			"/transaction",
-			`
-[
-  "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
-  "56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
-  "56a32eba-1aa6-4868-84ee-fe01af8b2e6d"
-]`,
-			&[]string{
-				"56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
-				"56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
-				"56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
-			},
-		},
+}`
+
+	expected := &scheme.Status{
+		Status:    "ok",
+		Timestamp: "2019-03-20T17:37:07Z",
 	}
 
-	for _, tt := range tests {
-		var (
-			resp interface{}
-			err  error
-		)
-		switch tt.path {
-		case "/test":
-			server.ServeUnversioned(t, tt.path, 200, tt.in)
-			resp, err = client.Status()
-		case "/transaction":
-			server.ServeVersioned(t, tt.path, 200, tt.in)
-			resp, err = client.Transactions()
-		}
-		assert.NotNil(t, resp)
-		assert.NoError(t, err)
-		assert.Equal(t, tt.expected, resp)
-	}
+	server.ServeUnversioned(t, "/test", 200, in)
+
+	resp, err := client.Status()
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, resp)
 }
 
 func TestHTTPClientV3_TLS_UnknownCA(t *testing.T) {
@@ -1187,43 +1608,15 @@ func TestHTTPClientV3_TLS_UnknownCA(t *testing.T) {
 	// Only need to setup one arbitrary unversioned endpoint and another
 	// versioned one to make requests against since we already have tests for
 	// all the endpoints and the works there are pretty much same.
-	tests := []struct {
-		path string
-		in   string
-	}{
-		{
-			"/test",
-			`
+	in := `
 {
   "status":"ok",
   "timestamp":"2019-03-20T17:37:07Z"
-}`,
-		},
-		{
-			"/transaction",
-			`
-[
-  "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
-  "56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
-  "56a32eba-1aa6-4868-84ee-fe01af8b2e6d"
-]`,
-		},
-	}
+}`
 
-	for _, tt := range tests {
-		var (
-			resp interface{}
-			err  error
-		)
-		switch tt.path {
-		case "/test":
-			server.ServeUnversioned(t, tt.path, 200, tt.in)
-			resp, err = client.Status()
-		case "/transaction":
-			server.ServeVersioned(t, tt.path, 200, tt.in)
-			resp, err = client.Transactions()
-		}
-		assert.Nil(t, resp)
-		assert.Error(t, err)
-	}
+	server.ServeUnversioned(t, "/test", 200, in)
+
+	resp, err := client.Status()
+	assert.Nil(t, resp)
+	assert.Error(t, err)
 }
