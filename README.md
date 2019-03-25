@@ -44,7 +44,7 @@ func main() {
 
 ### API
 
-Below are the map of all client methods with their corresponding HTTP and WebSocket API.
+Below is the map of client methods with their corresponding HTTP and WebSocket API.
 
 | Method | HTTP endpoint | WebSocket request |
 | ------ | ------------- | ----------------- |
@@ -65,10 +65,10 @@ Below are the map of all client methods with their corresponding HTTP and WebSoc
 | `Transactions()` | `/v3/transaction` | `request/transaction` |
 | `Transaction(string)` | `/v3/transaction/{transaction_id}` | `request/transaction` |
 
-Other than these,
+Other than these:
 
 | Method | Description |
 | ------ | ----------- |
-| `GetOptions()` | Return the current config options of the client |
-| `Open()` | Open the WebSocket connection between the client and Synse Server. This is not applicable for a HTTP client |
-| `Close()` | Close the WebSocket connection between the client and Synse Server. This is not applicable for a HTTP client |
+| `GetOptions()` | Return the current config options of the client. |
+| `Open()` | Open the WebSocket connection between the client and Synse Server. *Not applicable for a HTTP client.* |
+| `Close()` | Close the WebSocket connection between the client and Synse Server. *Not applicable for a HTTP client.* |
