@@ -27,7 +27,7 @@ $ make setup
 For both HTTP client and WebSocket client, in order to initialize their
 instances, we need to pass in the [configuration
 options](https://godoc.org/github.com/vapor-ware/synse-client-go/synse#Options),
-namely the Synse Server's address that we need to interface wish, other
+namely the Synse Server's address that we need to interface with, other
 associated HTTP or WebSocket configs, and TLS communication. For example:
 ```go
 import "github.com/vapor-ware/synse-client-go/synse"
@@ -49,8 +49,8 @@ Below is the map of client methods with their corresponding HTTP and WebSocket A
 | Method | HTTP endpoint | WebSocket request |
 | ------ | ------------- | ----------------- |
 | `Status()` | `/test` | `request/status` |
-| `Version()` | `/version` | `request/version` | `Version()` |
-| `Config()` | `/v3/config` | `request/config` | `Config()` |
+| `Version()` | `/version` | `request/version` |
+| `Config()` | `/v3/config` | `request/config` |
 | `Plugins()` | `/v3/plugin` | `request/plugin` |
 | `Plugin(string)` | `/v3/plugin/{plugin_id}` | `request/plugin` |
 | `PluginHealth()` | `/v3/plugin/health` | `request/plugin_health` |
