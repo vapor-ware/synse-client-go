@@ -6,7 +6,6 @@ pipeline {
 
   environment {
     PROJ_PATH = '/go/src/github.com/vapor-ware/synse-client-go'
-    IMAGE_NAME = 'vaporio/synse-client-go'
   }
 
   stages {
