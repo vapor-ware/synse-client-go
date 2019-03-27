@@ -2,7 +2,7 @@
 # Golang Client for Synse Server HTTP API
 #
 
-VERSION := 0.0.1
+PKG_VERSION := 0.0.1
 
 HAS_LINT := $(shell which gometalinter)
 HAS_DEP  := $(shell which dep)
@@ -32,8 +32,8 @@ fmt:  ## Run goimports on all go source files
 
 .PHONY: github-tag
 github-tag:  ## Create and push a tag with the current client version
-	git tag -a ${VERSION} -m "Synse HTTP Go Client version ${VERSION}"
-	git push -u origin ${VERSION}
+	git tag -a ${PKG_VERSION} -m "Synse Go Client version ${PKG_VERSION}"
+	git push -u origin ${PKG_VERSION}
 
 .PHONY: lint
 lint:  ## Lint project source files
@@ -62,10 +62,19 @@ test:  ## Run all unit tests
 
 .PHONY: version
 version:  ## Print the version of the client
-	@echo "$(VERSION)"
+	@echo "$(PKG_VERSION)"
 
 .PHONY: help
 help:  ## Print usage information
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
 
 .DEFAULT_GOAL := help
+
+
+#
+# CI Targets
+#
+
+.PHONY: ci-check-version
+ci-check-version:
+	PKG_VERSION=$(PKG_VERSION) ./bin/ci/check_version.sh
