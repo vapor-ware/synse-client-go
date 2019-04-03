@@ -1,3 +1,4 @@
+[![Build Status](https://build.vio.sh/buildStatus/icon?job=vapor-ware/synse-client-go/master)](https://build.vio.sh/blue/organizations/jenkins/vapor-ware%2Fsynse-client-go/activity)
 [![Godoc](https://godoc.org/github.com/vapor-ware/synse-client-go/synse?status.svg)](https://godoc.org/github.com/vapor-ware/synse-client-go/synse)
 [![Go Report Card](https://goreportcard.com/badge/github.com/vapor-ware/synse-client-go)](https://goreportcard.com/report/github.com/vapor-ware/synse-client-go)
 
