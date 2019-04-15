@@ -795,7 +795,6 @@ func TestHTTPClientV3_Info_200(t *testing.T) {
       "scaling_factor": 1.0,
       "units": [
         {
-          "system": null,
           "name": "percent humidity",
           "symbol": "%"
         }
@@ -808,12 +807,10 @@ func TestHTTPClientV3_Info_200(t *testing.T) {
       "scaling_factor": 1.0,
       "units": [
         {
-          "system": "metric",
           "name": "celsius",
           "symbol": "C"
         },
         {
-          "system": "imperial",
           "name": "fahrenheit",
           "symbol": "F"
         }
@@ -854,7 +851,6 @@ func TestHTTPClientV3_Info_200(t *testing.T) {
 				ScalingFactor: float64(1.0),
 				Units: []scheme.UnitOptions{
 					scheme.UnitOptions{
-						System: "",
 						Name:   "percent humidity",
 						Symbol: "%",
 					},
@@ -867,12 +863,10 @@ func TestHTTPClientV3_Info_200(t *testing.T) {
 				ScalingFactor: float64(1.0),
 				Units: []scheme.UnitOptions{
 					scheme.UnitOptions{
-						System: "metric",
 						Name:   "celsius",
 						Symbol: "C",
 					},
 					scheme.UnitOptions{
-						System: "imperial",
 						Name:   "fahrenheit",
 						Symbol: "F",
 					},
@@ -933,7 +927,6 @@ func TestHTTPClientV3_Read_200(t *testing.T) {
       "value":20.3,
       "timestamp":"2019-03-20T17:37:07Z",
       "unit":{
-         "system":"metric",
          "symbol":"C",
          "name":"degrees celsius"
       },
@@ -980,7 +973,6 @@ func TestHTTPClientV3_Read_200(t *testing.T) {
 			Value:      float64(20.3),
 			Timestamp:  "2019-03-20T17:37:07Z",
 			Unit: scheme.UnitOptions{
-				System: "metric",
 				Symbol: "C",
 				Name:   "degrees celsius",
 			},
@@ -1073,7 +1065,6 @@ func TestHTTPClientV3_ReadDevice_200(t *testing.T) {
     "value": 20.3,
     "timestamp": "2019-03-20T17:37:07Z",
     "unit": {
-      "system": "metric",
       "symbol": "C",
       "name": "degrees celsius"
     },
@@ -1092,7 +1083,6 @@ func TestHTTPClientV3_ReadDevice_200(t *testing.T) {
 			Value:      float64(20.3),
 			Timestamp:  "2019-03-20T17:37:07Z",
 			Unit: scheme.UnitOptions{
-				System: "metric",
 				Symbol: "C",
 				Name:   "degrees celsius",
 			},
