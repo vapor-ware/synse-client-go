@@ -41,7 +41,6 @@ type OutputOptions struct {
 
 // UnitOptions holds the unit info.
 type UnitOptions struct {
-	System string `json:"system" mapstructure:"system"`
 	Name   string `json:"name" mapstructure:"name"`
 	Symbol string `json:"symbol" mapstructure:"symbol"`
 }
