@@ -46,7 +46,7 @@ type WebSocketOptions struct {
 // value.
 type RetryOptions struct {
 	// Count specifies the number of retry attempts. Zero value means no retry.
-	Count int `default:"3"`
+	Count uint `default:"3"`
 
 	// WaitTime specifies the wait time before retrying request. It is
 	// increased after each attempt.
