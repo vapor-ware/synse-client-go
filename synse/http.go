@@ -60,7 +60,7 @@ func createHTTPClient(opts *Options) (*resty.Client, error) {
 	client := resty.New()
 	client = client.
 		SetTimeout(opts.HTTP.Timeout).
-		SetRetryCount(opts.HTTP.Retry.Count).
+		SetRetryCount(int(opts.HTTP.Retry.Count)).
 		SetRetryWaitTime(opts.HTTP.Retry.WaitTime).
 		SetRetryMaxWaitTime(opts.HTTP.Retry.MaxWaitTime)
 

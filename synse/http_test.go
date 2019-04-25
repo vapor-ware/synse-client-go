@@ -46,7 +46,7 @@ func TestNewHTTPClientV3_defaults(t *testing.T) {
 
 	assert.Equal(t, "localhost:5000", client.GetOptions().Address)
 	assert.Equal(t, 2*time.Second, client.GetOptions().HTTP.Timeout)
-	assert.Equal(t, int(3), client.GetOptions().HTTP.Retry.Count)
+	assert.Equal(t, uint(3), client.GetOptions().HTTP.Retry.Count)
 	assert.Equal(t, 100*time.Millisecond, client.GetOptions().HTTP.Retry.WaitTime)
 	assert.Equal(t, 2*time.Second, client.GetOptions().HTTP.Retry.MaxWaitTime)
 	assert.Empty(t, client.GetOptions().TLS.CertFile)
