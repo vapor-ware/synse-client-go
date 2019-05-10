@@ -2,45 +2,45 @@ package scheme
 
 // Info describes a response from `/info` endpoint.
 type Info struct {
-	Timestamp    string              `json:"timestamp" mapstructure:"timestamp"`
-	ID           string              `json:"id" mapstructure:"id"`
-	Type         string              `json:"type" mapstructure:"type"`
-	Metadata     MetadataOptions     `json:"metadata" mapstructure:"metadata"`
-	Plugin       string              `json:"plugin" mapstructure:"plugin"`
-	Info         string              `json:"info" mapstructure:"info"`
-	Tags         []string            `json:"tags" mapstructure:"tags"`
-	Capabilities CapabilitiesOptions `json:"capabilities" mapstructure:"capabilities"`
-	Output       []OutputOptions     `json:"output" mapstructure:"output"`
+	Timestamp    string              `json:"timestamp" yaml:"timestamp" mapstructure:"timestamp"`
+	ID           string              `json:"id" yaml:"id" mapstructure:"id"`
+	Type         string              `json:"type" yaml:"type" mapstructure:"type"`
+	Metadata     MetadataOptions     `json:"metadata" yaml:"metadata" mapstructure:"metadata"`
+	Plugin       string              `json:"plugin" yaml:"plugin" mapstructure:"plugin"`
+	Info         string              `json:"info" yaml:"info" mapstructure:"info"`
+	Tags         []string            `json:"tags" yaml:"tags" mapstructure:"tags"`
+	Capabilities CapabilitiesOptions `json:"capabilities" yaml:"capabilities" mapstructure:"capabilities"`
+	Output       []OutputOptions     `json:"output" yaml:"output" mapstructure:"output"`
 }
 
 // MetadataOptions holds the metadata info.
 type MetadataOptions struct {
-	Model string `json:"model" mapstructure:"model"`
+	Model string `json:"model" yaml:"model" mapstructure:"model"`
 }
 
 // CapabilitiesOptions holds the capabilities info.
 type CapabilitiesOptions struct {
-	Mode  string            `json:"mode" mapstructure:"mode"`
-	Read  map[string]string `json:"read" mapstructure:"read"`
-	Write WriteOptions      `json:"write" mapstructure:"write"`
+	Mode  string            `json:"mode" yaml:"mode" mapstructure:"mode"`
+	Read  map[string]string `json:"read" yaml:"read" mapstructure:"read"`
+	Write WriteOptions      `json:"write" yaml:"write" mapstructure:"write"`
 }
 
 // WriteOptions holds the write info.
 type WriteOptions struct {
-	Actions []string `json:"actions" mapstructure:"actions"`
+	Actions []string `json:"actions" yaml:"actions" mapstructure:"actions"`
 }
 
 // OutputOptions holds the output info.
 type OutputOptions struct {
-	Name          string        `json:"name" mapstructure:"name"`
-	Type          string        `json:"type" mapstructure:"type"`
-	Precision     int           `json:"precision" mapstructure:"precision"`
-	ScalingFactor float64       `json:"scaling_factor" mapstructure:"scaling_factor"`
-	Units         []UnitOptions `json:"units" mapstructure:"units"`
+	Name          string        `json:"name" yaml:"name" mapstructure:"name"`
+	Type          string        `json:"type" yaml:"type" mapstructure:"type"`
+	Precision     int           `json:"precision" yaml:"precision" mapstructure:"precision"`
+	ScalingFactor float64       `json:"scaling_factor" yaml:"scaling_factor" mapstructure:"scaling_factor"`
+	Units         []UnitOptions `json:"units" yaml:"units" mapstructure:"units"`
 }
 
 // UnitOptions holds the unit info.
 type UnitOptions struct {
-	Name   string `json:"name" mapstructure:"name"`
-	Symbol string `json:"symbol" mapstructure:"symbol"`
+	Name   string `json:"name" yaml:"name" mapstructure:"name"`
+	Symbol string `json:"symbol" yaml:"symbol" mapstructure:"symbol"`
 }

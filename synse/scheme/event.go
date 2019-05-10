@@ -2,8 +2,8 @@ package scheme
 
 // EventMeta describes core elements in a event request/response scheme.
 type EventMeta struct {
-	ID    uint64 `json:"id"`
-	Event string `json:"event"`
+	ID    uint64 `json:"id" yaml:"id"`
+	Event string `json:"event" yaml:"event"`
 }
 
 // RequestStatus describes a scheme for request/status event.

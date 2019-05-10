@@ -13,3 +13,6 @@
 
 # Vendored dependencies
 vendor/**
+
+# Editors / IDEs
+.idea/
