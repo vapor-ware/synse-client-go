@@ -4,6 +4,8 @@ package scheme
 type Read struct {
 	Device     string                 `json:"device" yaml:"device" mapstructure:"device"`
 	DeviceType string                 `json:"device_type" yaml:"device_type" mapstructure:"device_type"`
+	Type       string                 `json:"type" yaml:"type" mapstructure:"type"`
+	Value      interface{}            `json:"value" yaml:"value" mapstructure:"value"`
 	Timestamp  string                 `json:"timestamp" yaml:"timestamp" mapstructure:"timestamp"`
 	Unit       UnitOptions            `json:"unit" yaml:"unit" mapstructure:"unit"`
 	Context    map[string]interface{} `json:"context" yaml:"context" mapstructure:"context"`
