@@ -348,15 +348,15 @@ func TestHTTPClientV3_Plugins_200(t *testing.T) {
   }
 ]`
 
-	expected := &[]scheme.PluginMeta{
-		scheme.PluginMeta{
+	expected := []*scheme.PluginMeta{
+		{
 			Description: "a plugin with emulated devices and data",
 			ID:          "12835beffd3e6c603aa4dd92127707b5",
 			Name:        "emulator plugin",
 			Maintainer:  "vapor io",
 			Active:      true,
 		},
-		scheme.PluginMeta{
+		{
 			Description: "a custom third party plugin",
 			ID:          "12835beffd3e6c603aa4dd92127707b6",
 			Name:        "custom-plugin",
@@ -481,14 +481,14 @@ func TestHTTPClientV3_Plugin_200(t *testing.T) {
 			Status:    "ok",
 			Message:   "",
 			Checks: []scheme.CheckOptions{
-				scheme.CheckOptions{
+				{
 					Name:      "read buffer health",
 					Status:    "ok",
 					Message:   "",
 					Timestamp: "2019-03-20T17:37:07Z",
 					Type:      "periodic",
 				},
-				scheme.CheckOptions{
+				{
 					Name:      "write buffer health",
 					Status:    "ok",
 					Message:   "",
@@ -637,8 +637,8 @@ func TestHTTPClientV3_Scan_200(t *testing.T) {
   }
 ]`
 
-	expected := &[]scheme.Scan{
-		scheme.Scan{
+	expected := []*scheme.Scan{
+		{
 			ID:     "0fe8f06229aa9a01ef6032d1ddaf18a5",
 			Info:   "Synse Temperature Sensor",
 			Type:   "temperature",
@@ -649,7 +649,7 @@ func TestHTTPClientV3_Scan_200(t *testing.T) {
 				"vio/fan-sensor",
 			},
 		},
-		scheme.Scan{
+		{
 			ID:     "12ea5644d052c6bf1bca3c9864fd8a44",
 			Info:   "Synse LED",
 			Type:   "led",
@@ -712,7 +712,7 @@ func TestHTTPClientV3_Tags_200(t *testing.T) {
   "default/type:temperature"
 ]`
 
-	expected := &[]string{
+	expected := []string{
 		"default/tag1",
 		"default/type:temperature",
 	}
@@ -844,29 +844,29 @@ func TestHTTPClientV3_Info_200(t *testing.T) {
 			},
 		},
 		Output: []scheme.OutputOptions{
-			scheme.OutputOptions{
+			{
 				Name:          "humidity",
 				Type:          "humidity",
 				Precision:     int(3),
 				ScalingFactor: float64(1.0),
 				Units: []scheme.UnitOptions{
-					scheme.UnitOptions{
+					{
 						Name:   "percent humidity",
 						Symbol: "%",
 					},
 				},
 			},
-			scheme.OutputOptions{
+			{
 				Name:          "temperature",
 				Type:          "temperature",
 				Precision:     int(3),
 				ScalingFactor: float64(1.0),
 				Units: []scheme.UnitOptions{
-					scheme.UnitOptions{
+					{
 						Name:   "celsius",
 						Symbol: "C",
 					},
-					scheme.UnitOptions{
+					{
 						Name:   "fahrenheit",
 						Symbol: "F",
 					},
@@ -965,8 +965,8 @@ func TestHTTPClientV3_Read_200(t *testing.T) {
    }
 ]`
 
-	expected := &[]scheme.Read{
-		scheme.Read{
+	expected := []*scheme.Read{
+		{
 			Device:     "a72cs6519ee675b",
 			DeviceType: "temperature",
 			Type:       "temperature",
@@ -981,7 +981,7 @@ func TestHTTPClientV3_Read_200(t *testing.T) {
 				"sample_rate": float64(8),
 			},
 		},
-		scheme.Read{
+		{
 			Device:     "929b923de65a811",
 			DeviceType: "led",
 			Type:       "state",
@@ -989,7 +989,7 @@ func TestHTTPClientV3_Read_200(t *testing.T) {
 			Timestamp:  "2019-03-20T17:37:07Z",
 			Unit:       scheme.UnitOptions{},
 		},
-		scheme.Read{
+		{
 			Device:     "929b923de65a811",
 			DeviceType: "led",
 			Type:       "color",
@@ -997,7 +997,7 @@ func TestHTTPClientV3_Read_200(t *testing.T) {
 			Timestamp:  "2019-03-20T17:37:07Z",
 			Unit:       scheme.UnitOptions{},
 		},
-		scheme.Read{
+		{
 			Device:     "12bb12c1f86a86e",
 			DeviceType: "door_lock",
 			Type:       "status",
@@ -1075,8 +1075,8 @@ func TestHTTPClientV3_ReadDevice_200(t *testing.T) {
   }
 ]`
 
-	expected := &[]scheme.Read{
-		scheme.Read{
+	expected := []*scheme.Read{
+		{
 			Device:     "12bb12c1f86a86e",
 			DeviceType: "temperature",
 			Type:       "temperature",
@@ -1156,8 +1156,8 @@ func TestHTTPClientV3_ReadCache_200(t *testing.T) {
   "unit":null
 }`
 
-	expected := &[]scheme.Read{
-		scheme.Read{
+	expected := []*scheme.Read{
+		{
 			Device:     "929b923de65a811",
 			DeviceType: "led",
 			Type:       "state",
@@ -1165,7 +1165,7 @@ func TestHTTPClientV3_ReadCache_200(t *testing.T) {
 			Timestamp:  "2019-03-20T17:37:07Z",
 			Unit:       scheme.UnitOptions{},
 		},
-		scheme.Read{
+		{
 			Device:     "929b923de65a811",
 			DeviceType: "led",
 			Type:       "color",
@@ -1242,8 +1242,8 @@ func TestHTTPClientV3_WriteAsync_200(t *testing.T) {
   }
 ]`
 
-	expected := &[]scheme.Write{
-		scheme.Write{
+	expected := []*scheme.Write{
+		{
 			Context: scheme.WriteData{
 				Action: "color",
 				Data:   "f38ac2",
@@ -1252,7 +1252,7 @@ func TestHTTPClientV3_WriteAsync_200(t *testing.T) {
 			Transaction: "56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
 			Timeout:     "10s",
 		},
-		scheme.Write{
+		{
 			Context: scheme.WriteData{
 				Action: "state",
 				Data:   "blink",
@@ -1325,8 +1325,8 @@ func TestHTTPClientV3_WriteSync_200(t *testing.T) {
  }
 ]`
 
-	expected := &[]scheme.Transaction{
-		scheme.Transaction{
+	expected := []*scheme.Transaction{
+		{
 			ID:      "56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
 			Timeout: "10s",
 			Device:  "0fe8f06229aa9a01ef6032d1ddaf18a5",
@@ -1393,7 +1393,7 @@ func TestHTTPClientV3_Transactions_200(t *testing.T) {
   "56a32eba-1aa6-4868-84ee-fe01af8b2e6d"
 ]`
 
-	expected := &[]string{
+	expected := []string{
 		"56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
 		"56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
 		"56a32eba-1aa6-4868-84ee-fe01af8b2e6d",

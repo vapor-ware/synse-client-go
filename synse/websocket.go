@@ -172,7 +172,7 @@ func (c *websocketClient) Config() (*scheme.Config, error) {
 
 // Plugins returns the summary of all plugins currently registered with
 // Synse Server.
-func (c *websocketClient) Plugins() (*[]scheme.PluginMeta, error) {
+func (c *websocketClient) Plugins() ([]*scheme.PluginMeta, error) {
 	req := scheme.RequestPlugins{
 		EventMeta: scheme.EventMeta{
 			ID:    c.addCounter(),
@@ -180,13 +180,13 @@ func (c *websocketClient) Plugins() (*[]scheme.PluginMeta, error) {
 		},
 	}
 
-	resp := new([]scheme.PluginMeta)
+	resp := new([]*scheme.PluginMeta)
 	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	return resp, nil
+	return *resp, nil
 }
 
 // Plugin returns data from a specific plugin.
@@ -232,7 +232,7 @@ func (c *websocketClient) PluginHealth() (*scheme.PluginHealth, error) {
 // from/write to via the configured plugins.
 // It can be filtered to show only those devices which match a set
 // of provided tags by using ScanOptions.
-func (c *websocketClient) Scan(opts scheme.ScanOptions) (*[]scheme.Scan, error) {
+func (c *websocketClient) Scan(opts scheme.ScanOptions) ([]*scheme.Scan, error) {
 	req := scheme.RequestScan{
 		EventMeta: scheme.EventMeta{
 			ID:    c.addCounter(),
@@ -241,18 +241,18 @@ func (c *websocketClient) Scan(opts scheme.ScanOptions) (*[]scheme.Scan, error) 
 		Data: opts,
 	}
 
-	resp := new([]scheme.Scan)
+	resp := new([]*scheme.Scan)
 	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	return resp, nil
+	return *resp, nil
 }
 
 // Tags returns the list of all tags currently associated with devices.
 // If no TagsOptions is specified, the default tag namespace will be used.
-func (c *websocketClient) Tags(opts scheme.TagsOptions) (*[]string, error) {
+func (c *websocketClient) Tags(opts scheme.TagsOptions) ([]string, error) {
 	req := scheme.RequestTags{
 		EventMeta: scheme.EventMeta{
 			ID:    c.addCounter(),
@@ -267,7 +267,7 @@ func (c *websocketClient) Tags(opts scheme.TagsOptions) (*[]string, error) {
 		return nil, err
 	}
 
-	return resp, nil
+	return *resp, nil
 }
 
 // Info returns the full set of meta info and capabilities for a specific
@@ -294,7 +294,7 @@ func (c *websocketClient) Info(id string) (*scheme.Info, error) {
 
 // Read returns data from devices which match the set of provided tags
 // using ReadOptions.
-func (c *websocketClient) Read(opts scheme.ReadOptions) (*[]scheme.Read, error) {
+func (c *websocketClient) Read(opts scheme.ReadOptions) ([]*scheme.Read, error) {
 	req := scheme.RequestRead{
 		EventMeta: scheme.EventMeta{
 			ID:    c.addCounter(),
@@ -303,19 +303,19 @@ func (c *websocketClient) Read(opts scheme.ReadOptions) (*[]scheme.Read, error) 
 		Data: opts,
 	}
 
-	resp := new([]scheme.Read)
+	resp := new([]*scheme.Read)
 	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	return resp, nil
+	return *resp, nil
 }
 
 // ReadDevice returns data from a specific device.
 // It is the same as Read() where the label matches the device id tag
 // specified in ReadOptions.
-func (c *websocketClient) ReadDevice(id string, opts scheme.ReadOptions) (*[]scheme.Read, error) {
+func (c *websocketClient) ReadDevice(id string, opts scheme.ReadOptions) ([]*scheme.Read, error) {
 	req := scheme.RequestReadDevice{
 		EventMeta: scheme.EventMeta{
 			ID:    c.addCounter(),
@@ -327,17 +327,17 @@ func (c *websocketClient) ReadDevice(id string, opts scheme.ReadOptions) (*[]sch
 		},
 	}
 
-	resp := new([]scheme.Read)
+	resp := new([]*scheme.Read)
 	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	return resp, nil
+	return *resp, nil
 }
 
 // ReadCache returns stream reading data from the registered plugins.
-func (c *websocketClient) ReadCache(opts scheme.ReadCacheOptions) (*[]scheme.Read, error) {
+func (c *websocketClient) ReadCache(opts scheme.ReadCacheOptions) ([]*scheme.Read, error) {
 	req := scheme.RequestReadCache{
 		EventMeta: scheme.EventMeta{
 			ID:    c.addCounter(),
@@ -346,17 +346,17 @@ func (c *websocketClient) ReadCache(opts scheme.ReadCacheOptions) (*[]scheme.Rea
 		Data: opts,
 	}
 
-	resp := new([]scheme.Read)
+	resp := new([]*scheme.Read)
 	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	return resp, nil
+	return *resp, nil
 }
 
 // WriteAsync writes data to a device, in an asynchronous manner.
-func (c *websocketClient) WriteAsync(id string, opts []scheme.WriteData) (*[]scheme.Write, error) {
+func (c *websocketClient) WriteAsync(id string, opts []scheme.WriteData) ([]*scheme.Write, error) {
 	req := scheme.RequestWrite{
 		EventMeta: scheme.EventMeta{
 			ID:    c.addCounter(),
@@ -368,17 +368,17 @@ func (c *websocketClient) WriteAsync(id string, opts []scheme.WriteData) (*[]sch
 		},
 	}
 
-	resp := new([]scheme.Write)
+	resp := new([]*scheme.Write)
 	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	return resp, nil
+	return *resp, nil
 }
 
 // WriteSync writes data to a device, waiting for the write to complete.
-func (c *websocketClient) WriteSync(id string, opts []scheme.WriteData) (*[]scheme.Transaction, error) {
+func (c *websocketClient) WriteSync(id string, opts []scheme.WriteData) ([]*scheme.Transaction, error) {
 	req := scheme.RequestWrite{
 		EventMeta: scheme.EventMeta{
 			ID:    c.addCounter(),
@@ -390,17 +390,17 @@ func (c *websocketClient) WriteSync(id string, opts []scheme.WriteData) (*[]sche
 		},
 	}
 
-	resp := new([]scheme.Transaction)
+	resp := new([]*scheme.Transaction)
 	err := c.makeRequest(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	return resp, nil
+	return *resp, nil
 }
 
 // Transactions returns the sorted list of all cached transaction IDs.
-func (c *websocketClient) Transactions() (*[]string, error) {
+func (c *websocketClient) Transactions() ([]string, error) {
 	req := scheme.RequestTransactions{
 		EventMeta: scheme.EventMeta{
 			ID:    c.addCounter(),
@@ -414,7 +414,7 @@ func (c *websocketClient) Transactions() (*[]string, error) {
 		return nil, err
 	}
 
-	return resp, nil
+	return *resp, nil
 }
 
 // Transaction returns the state and status of a write transaction.
