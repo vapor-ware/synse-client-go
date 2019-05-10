@@ -127,13 +127,13 @@ func (c *httpClient) Config() (*scheme.Config, error) {
 
 // Plugins returns the summary of all plugins currently registered with
 // Synse Server.
-func (c *httpClient) Plugins() (*[]scheme.PluginMeta, error) {
-	out := new([]scheme.PluginMeta)
+func (c *httpClient) Plugins() ([]*scheme.PluginMeta, error) {
+	out := new([]*scheme.PluginMeta)
 	if err := c.getVersioned(pluginURI, out); err != nil {
 		return nil, err
 	}
 
-	return out, nil
+	return *out, nil
 }
 
 // Plugin returns data from a specific plugin.
@@ -159,24 +159,24 @@ func (c *httpClient) PluginHealth() (*scheme.PluginHealth, error) {
 // Scan returns the list of devices that Synse knows about and can read
 // from/write to via the configured plugins. It can be filtered to show
 // only those devices which match a set of provided tags by using ScanOptions.
-func (c *httpClient) Scan(opts scheme.ScanOptions) (*[]scheme.Scan, error) {
-	out := new([]scheme.Scan)
+func (c *httpClient) Scan(opts scheme.ScanOptions) ([]*scheme.Scan, error) {
+	out := new([]*scheme.Scan)
 	if err := c.getVersionedQueryParams(scanURI, opts, out); err != nil {
 		return nil, err
 	}
 
-	return out, nil
+	return *out, nil
 }
 
 // Tags returns the list of all tags currently associated with devices.
 // If no TagsOptions is specified, the default tag namespace will be used.
-func (c *httpClient) Tags(opts scheme.TagsOptions) (*[]string, error) {
+func (c *httpClient) Tags(opts scheme.TagsOptions) ([]string, error) {
 	out := new([]string)
 	if err := c.getVersionedQueryParams(tagsURI, opts, out); err != nil {
 		return nil, err
 	}
 
-	return out, nil
+	return *out, nil
 }
 
 // Info returns the full set of meta info and capabilities for a specific
@@ -192,29 +192,29 @@ func (c *httpClient) Info(id string) (*scheme.Info, error) {
 
 // Read returns data from devices which match the set of provided tags
 // using ReadOptions.
-func (c *httpClient) Read(opts scheme.ReadOptions) (*[]scheme.Read, error) {
-	out := new([]scheme.Read)
+func (c *httpClient) Read(opts scheme.ReadOptions) ([]*scheme.Read, error) {
+	out := new([]*scheme.Read)
 	if err := c.getVersionedQueryParams(readURI, opts, out); err != nil {
 		return nil, err
 	}
 
-	return out, nil
+	return *out, nil
 }
 
 // ReadDevice returns data from a specific device. It is the same as Read()
 // where the label matches the device id tag specified in ReadOptions.
-func (c *httpClient) ReadDevice(id string, opts scheme.ReadOptions) (*[]scheme.Read, error) {
-	out := new([]scheme.Read)
+func (c *httpClient) ReadDevice(id string, opts scheme.ReadOptions) ([]*scheme.Read, error) {
+	out := new([]*scheme.Read)
 	if err := c.getVersionedQueryParams(makePath(readURI, id), opts, out); err != nil {
 		return nil, err
 	}
 
-	return out, nil
+	return *out, nil
 }
 
 // ReadCache returns stream reading data from the registered plugins.
-func (c *httpClient) ReadCache(opts scheme.ReadCacheOptions) (*[]scheme.Read, error) {
-	var out []scheme.Read
+func (c *httpClient) ReadCache(opts scheme.ReadCacheOptions) ([]*scheme.Read, error) {
+	var out []*scheme.Read
 	errScheme := new(scheme.Error)
 
 	resp, err := c.setVersioned().R().SetDoNotParseResponse(true).SetQueryParams(structToMapString(opts)).SetError(errScheme).Get(readcacheURI)
@@ -230,40 +230,40 @@ func (c *httpClient) ReadCache(opts scheme.ReadCacheOptions) (*[]scheme.Read, er
 			return nil, errors.Wrap(err, "failed to decode a JSON response into an appropriate struct")
 		}
 
-		out = append(out, read)
+		out = append(out, &read)
 	}
 
-	return &out, nil
+	return out, nil
 }
 
 // WriteAsync writes data to a device, in an asynchronous manner.
-func (c *httpClient) WriteAsync(id string, opts []scheme.WriteData) (*[]scheme.Write, error) {
-	out := new([]scheme.Write)
+func (c *httpClient) WriteAsync(id string, opts []scheme.WriteData) ([]*scheme.Write, error) {
+	out := new([]*scheme.Write)
 	if err := c.postVersioned(makePath(writeURI, id), opts, out); err != nil {
 		return nil, err
 	}
 
-	return out, nil
+	return *out, nil
 }
 
 // WriteSync writes data to a device, waiting for the write to complete.
-func (c *httpClient) WriteSync(id string, opts []scheme.WriteData) (*[]scheme.Transaction, error) {
-	out := new([]scheme.Transaction)
+func (c *httpClient) WriteSync(id string, opts []scheme.WriteData) ([]*scheme.Transaction, error) {
+	out := new([]*scheme.Transaction)
 	if err := c.postVersioned(makePath(writeWaitURI, id), opts, out); err != nil {
 		return nil, err
 	}
 
-	return out, nil
+	return *out, nil
 }
 
 // Transactions returns the sorted list of all cached transaction IDs.
-func (c *httpClient) Transactions() (*[]string, error) {
+func (c *httpClient) Transactions() ([]string, error) {
 	out := new([]string)
 	if err := c.getVersioned(transactionURI, out); err != nil {
 		return nil, err
 	}
 
-	return out, nil
+	return *out, nil
 }
 
 // Transaction returns the state and status of a write transaction.
