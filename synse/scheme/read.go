@@ -13,6 +13,6 @@ type Read struct {
 
 // ReadOptions describes the query parameters for `/read` endpoint.
 type ReadOptions struct {
-	NS   string   `json:"ns" yaml:"ns"`
-	Tags []string `json:"tags" yaml:"tags"`
+	NS   string   `json:"ns" yaml:"ns" mapstructure:"ns"`
+	Tags []string `json:"tags" yaml:"tags" mapstructure:"tags"`
 }
