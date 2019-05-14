@@ -5,17 +5,12 @@ type Info struct {
 	Timestamp    string              `json:"timestamp" yaml:"timestamp" mapstructure:"timestamp"`
 	ID           string              `json:"id" yaml:"id" mapstructure:"id"`
 	Type         string              `json:"type" yaml:"type" mapstructure:"type"`
-	Metadata     MetadataOptions     `json:"metadata" yaml:"metadata" mapstructure:"metadata"`
+	Metadata     map[string]string   `json:"metadata" yaml:"metadata" mapstructure:"metadata"`
 	Plugin       string              `json:"plugin" yaml:"plugin" mapstructure:"plugin"`
 	Info         string              `json:"info" yaml:"info" mapstructure:"info"`
 	Tags         []string            `json:"tags" yaml:"tags" mapstructure:"tags"`
 	Capabilities CapabilitiesOptions `json:"capabilities" yaml:"capabilities" mapstructure:"capabilities"`
 	Output       []OutputOptions     `json:"output" yaml:"output" mapstructure:"output"`
-}
-
-// MetadataOptions holds the metadata info.
-type MetadataOptions struct {
-	Model string `json:"model" yaml:"model" mapstructure:"model"`
 }
 
 // CapabilitiesOptions holds the capabilities info.

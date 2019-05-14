@@ -823,8 +823,8 @@ func TestHTTPClientV3_Info_200(t *testing.T) {
 		Timestamp: "2019-03-20T17:37:07Z",
 		ID:        "34c226b1afadaae5f172a4e1763fd1a6",
 		Type:      "humidity",
-		Metadata: scheme.MetadataOptions{
-			Model: "emul8-humidity",
+		Metadata: map[string]string{
+			"model": "emul8-humidity",
 		},
 		Plugin: "12835beffd3e6c603aa4dd92127707b5",
 		Info:   "Synse Humidity Sensor",
