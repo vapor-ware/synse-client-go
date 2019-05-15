@@ -379,14 +379,14 @@ func TestWebSocketClientV3_Plugins_200(t *testing.T) {
    "data":[
       {
          "description":"a plugin with emulated devices and data",
-         "id":"12835beffd3e6c603aa4dd92127707b5",
+         "id":"1b714cf2-cc56-5c36-9741-fd6a483b5f10",
          "name":"emulator plugin",
          "maintainer":"vapor io",
          "active":true
       },
       {
          "description":"a custom third party plugin",
-         "id":"12835beffd3e6c603aa4dd92127707b6",
+         "id":"1b714cf2-cc56-5c36-9741-fd6a483b5f11",
          "name":"custom-plugin",
          "maintainer":"third-party",
          "active":true
@@ -397,14 +397,14 @@ func TestWebSocketClientV3_Plugins_200(t *testing.T) {
 	expected := []*scheme.PluginMeta{
 		{
 			Description: "a plugin with emulated devices and data",
-			ID:          "12835beffd3e6c603aa4dd92127707b5",
+			ID:          "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
 			Name:        "emulator plugin",
 			Maintainer:  "vapor io",
 			Active:      true,
 		},
 		{
 			Description: "a custom third party plugin",
-			ID:          "12835beffd3e6c603aa4dd92127707b6",
+			ID:          "1b714cf2-cc56-5c36-9741-fd6a483b5f11",
 			Name:        "custom-plugin",
 			Maintainer:  "third-party",
 			Active:      true,
@@ -476,7 +476,7 @@ func TestWebSocketClientV3_Plugin_200(t *testing.T) {
    "event":"response/plugin",
    "data":{
       "active":true,
-      "id":"12835beffd3e6c603aa4dd92127707b5",
+      "id":"1b714cf2-cc56-5c36-9741-fd6a483b5f10",
       "tag":"vaporio\/emulator-plugin",
       "name":"emulator plugin",
       "description":"A plugin with emulated devices and data",
@@ -522,7 +522,7 @@ func TestWebSocketClientV3_Plugin_200(t *testing.T) {
 	expected := &scheme.Plugin{
 		PluginMeta: scheme.PluginMeta{
 			Active:      true,
-			ID:          "12835beffd3e6c603aa4dd92127707b5",
+			ID:          "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
 			Tag:         "vaporio/emulator-plugin",
 			Name:        "emulator plugin",
 			Description: "A plugin with emulated devices and data",
@@ -579,7 +579,7 @@ func TestWebSocketClientV3_Plugin_200(t *testing.T) {
 	err = client.Open()
 	assert.NoError(t, err)
 
-	resp, err := client.Plugin("12835beffd3e6c603aa4dd92127707b5")
+	resp, err := client.Plugin("1b714cf2-cc56-5c36-9741-fd6a483b5f10")
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
@@ -615,7 +615,7 @@ func TestWebSocketClientV3_Plugin_500(t *testing.T) {
 	err = client.Open()
 	assert.NoError(t, err)
 
-	resp, err := client.Plugin("12835beffd3e6c603aa4dd92127707b5")
+	resp, err := client.Plugin("1b714cf2-cc56-5c36-9741-fd6a483b5f10")
 	assert.Nil(t, resp)
 	assert.Error(t, err)
 
@@ -632,9 +632,9 @@ func TestWebSocketClientV3_PluginHealth_200(t *testing.T) {
       "status":"healthy",
       "updated":"2018-06-15T20:04:33Z",
       "healthy":[
-         "12835beffd3e6c603aa4dd92127707b5",
-         "12835beffd3e6c603aa4dd92127707b6",
-         "12835beffd3e6c603aa4dd92127707b7"
+         "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
+         "1b714cf2-cc56-5c36-9741-fd6a483b5f11",
+         "1b714cf2-cc56-5c36-9741-fd6a483b5f12"
       ],
       "unhealthy":[
 
@@ -648,9 +648,9 @@ func TestWebSocketClientV3_PluginHealth_200(t *testing.T) {
 		Status:  "healthy",
 		Updated: "2018-06-15T20:04:33Z",
 		Healthy: []string{
-			"12835beffd3e6c603aa4dd92127707b5",
-			"12835beffd3e6c603aa4dd92127707b6",
-			"12835beffd3e6c603aa4dd92127707b7",
+			"1b714cf2-cc56-5c36-9741-fd6a483b5f10",
+			"1b714cf2-cc56-5c36-9741-fd6a483b5f11",
+			"1b714cf2-cc56-5c36-9741-fd6a483b5f12",
 		},
 		Unhealthy: []string(nil),
 		Active:    int(3),
@@ -722,10 +722,10 @@ func TestWebSocketClientV3_Scan_200(t *testing.T) {
    "event":"response/device_summary",
    "data":[
       {
-         "id":"0fe8f06229aa9a01ef6032d1ddaf18a5",
+         "id":"1b714cf2-cc56-5c36-9741-fd6a483b5f10",
          "info":"Synse Temperature Sensor",
          "type":"temperature",
-         "plugin":"12835beffd3e6c603aa4dd92127707b5",
+         "plugin":"1b714cf2-cc56-5c36-9741-fd6a483b5f11",
          "tags":[
             "type:temperature",
             "temperature",
@@ -733,10 +733,10 @@ func TestWebSocketClientV3_Scan_200(t *testing.T) {
          ]
       },
       {
-         "id":"12ea5644d052c6bf1bca3c9864fd8a44",
+         "id":"1b714cf2-cc56-5c36-9741-fd6a483b5f12",
          "info":"Synse LED",
          "type":"led",
-         "plugin":"12835beffd3e6c603aa4dd92127707b5",
+         "plugin":"1b714cf2-cc56-5c36-9741-fd6a483b5f13",
          "tags":[
             "type:led",
             "led"
@@ -747,10 +747,10 @@ func TestWebSocketClientV3_Scan_200(t *testing.T) {
 
 	expected := []*scheme.Scan{
 		{
-			ID:     "0fe8f06229aa9a01ef6032d1ddaf18a5",
+			ID:     "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
 			Info:   "Synse Temperature Sensor",
 			Type:   "temperature",
-			Plugin: "12835beffd3e6c603aa4dd92127707b5",
+			Plugin: "1b714cf2-cc56-5c36-9741-fd6a483b5f11",
 			Tags: []string{
 				"type:temperature",
 				"temperature",
@@ -758,10 +758,10 @@ func TestWebSocketClientV3_Scan_200(t *testing.T) {
 			},
 		},
 		{
-			ID:     "12ea5644d052c6bf1bca3c9864fd8a44",
+			ID:     "1b714cf2-cc56-5c36-9741-fd6a483b5f12",
 			Info:   "Synse LED",
 			Type:   "led",
-			Plugin: "12835beffd3e6c603aa4dd92127707b5",
+			Plugin: "1b714cf2-cc56-5c36-9741-fd6a483b5f13",
 			Tags: []string{
 				"type:led",
 				"led",
@@ -912,12 +912,12 @@ func TestWebSocketClientV3_Info_200(t *testing.T) {
    "event":"response/device",
    "data":{
       "timestamp":"2019-03-20T17:37:07Z",
-      "id":"34c226b1afadaae5f172a4e1763fd1a6",
+      "id":"1b714cf2-cc56-5c36-9741-fd6a483b5f10",
       "type":"humidity",
       "metadata":{
          "model":"emul8-humidity"
       },
-      "plugin":"12835beffd3e6c603aa4dd92127707b5",
+      "plugin":"1b714cf2-cc56-5c36-9741-fd6a483b5f11",
       "info":"Synse Humidity Sensor",
       "tags":[
          "type:humidity",
@@ -971,12 +971,12 @@ func TestWebSocketClientV3_Info_200(t *testing.T) {
 
 	expected := &scheme.Info{
 		Timestamp: "2019-03-20T17:37:07Z",
-		ID:        "34c226b1afadaae5f172a4e1763fd1a6",
+		ID:        "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
 		Type:      "humidity",
 		Metadata: map[string]string{
 			"model": "emul8-humidity",
 		},
-		Plugin: "12835beffd3e6c603aa4dd92127707b5",
+		Plugin: "1b714cf2-cc56-5c36-9741-fd6a483b5f11",
 		Info:   "Synse Humidity Sensor",
 		Tags: []string{
 			"type:humidity",
@@ -1039,7 +1039,7 @@ func TestWebSocketClientV3_Info_200(t *testing.T) {
 	err = client.Open()
 	assert.NoError(t, err)
 
-	resp, err := client.Info("34c226b1afadaae5f172a4e1763fd1a6")
+	resp, err := client.Info("1b714cf2-cc56-5c36-9741-fd6a483b5f10")
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
@@ -1075,7 +1075,7 @@ func TestWebSocketClientV3_Info_500(t *testing.T) {
 	err = client.Open()
 	assert.NoError(t, err)
 
-	resp, err := client.Info("34c226b1afadaae5f172a4e1763fd1a6")
+	resp, err := client.Info("1b714cf2-cc56-5c36-9741-fd6a483b5f10")
 	assert.Nil(t, resp)
 	assert.Error(t, err)
 
@@ -1090,7 +1090,7 @@ func TestWebSocketClientV3_Read_200(t *testing.T) {
    "event":"response/reading",
    "data":[
       {
-         "device":"a72cs6519ee675b",
+         "device":"1b714cf2-cc56-5c36-9741-fd6a483b5f10",
          "device_type":"temperature",
          "type":"temperature",
          "value":20.3,
@@ -1105,7 +1105,7 @@ func TestWebSocketClientV3_Read_200(t *testing.T) {
          }
       },
       {
-         "device":"929b923de65a811",
+         "device":"1b714cf2-cc56-5c36-9741-fd6a483b5f11",
          "device_type":"led",
          "type":"state",
          "value":"off",
@@ -1113,7 +1113,7 @@ func TestWebSocketClientV3_Read_200(t *testing.T) {
          "unit":null
       },
       {
-         "device":"929b923de65a811",
+         "device":"1b714cf2-cc56-5c36-9741-fd6a483b5f12",
          "device_type":"led",
          "type":"color",
          "value":"000000",
@@ -1121,7 +1121,7 @@ func TestWebSocketClientV3_Read_200(t *testing.T) {
          "unit":null
       },
       {
-         "device":"12bb12c1f86a86e",
+         "device":"1b714cf2-cc56-5c36-9741-fd6a483b5f13",
          "device_type":"door_lock",
          "type":"status",
          "value":"locked",
@@ -1137,7 +1137,7 @@ func TestWebSocketClientV3_Read_200(t *testing.T) {
 
 	expected := []*scheme.Read{
 		{
-			Device:     "a72cs6519ee675b",
+			Device:     "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
 			DeviceType: "temperature",
 			Type:       "temperature",
 			Value:      float64(20.3),
@@ -1152,7 +1152,7 @@ func TestWebSocketClientV3_Read_200(t *testing.T) {
 			},
 		},
 		{
-			Device:     "929b923de65a811",
+			Device:     "1b714cf2-cc56-5c36-9741-fd6a483b5f11",
 			DeviceType: "led",
 			Type:       "state",
 			Value:      "off",
@@ -1160,7 +1160,7 @@ func TestWebSocketClientV3_Read_200(t *testing.T) {
 			Unit:       scheme.UnitOptions{},
 		},
 		{
-			Device:     "929b923de65a811",
+			Device:     "1b714cf2-cc56-5c36-9741-fd6a483b5f12",
 			DeviceType: "led",
 			Type:       "color",
 			Value:      "000000",
@@ -1168,7 +1168,7 @@ func TestWebSocketClientV3_Read_200(t *testing.T) {
 			Unit:       scheme.UnitOptions{},
 		},
 		{
-			Device:     "12bb12c1f86a86e",
+			Device:     "1b714cf2-cc56-5c36-9741-fd6a483b5f13",
 			DeviceType: "door_lock",
 			Type:       "status",
 			Value:      "locked",
@@ -1248,7 +1248,7 @@ func TestWebSocketClientV3_ReadDevice_200(t *testing.T) {
    "event":"response/reading",
    "data":[
       {
-         "device":"12bb12c1f86a86e",
+         "device":"1b714cf2-cc56-5c36-9741-fd6a483b5f10",
          "device_type":"temperature",
          "type":"temperature",
          "value":20.3,
@@ -1267,7 +1267,7 @@ func TestWebSocketClientV3_ReadDevice_200(t *testing.T) {
 
 	expected := []*scheme.Read{
 		{
-			Device:     "12bb12c1f86a86e",
+			Device:     "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
 			DeviceType: "temperature",
 			Type:       "temperature",
 			Value:      float64(20.3),
@@ -1298,7 +1298,7 @@ func TestWebSocketClientV3_ReadDevice_200(t *testing.T) {
 	assert.NoError(t, err)
 
 	opts := scheme.ReadOptions{}
-	resp, err := client.ReadDevice("12bb12c1f86a86e", opts)
+	resp, err := client.ReadDevice("1b714cf2-cc56-5c36-9741-fd6a483b5f10", opts)
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
@@ -1335,7 +1335,7 @@ func TestWebSocketClientV3_ReadDevice_500(t *testing.T) {
 	assert.NoError(t, err)
 
 	opts := scheme.ReadOptions{}
-	resp, err := client.ReadDevice("12bb12c1f86a86e", opts)
+	resp, err := client.ReadDevice("1b714cf2-cc56-5c36-9741-fd6a483b5f10", opts)
 	assert.Nil(t, resp)
 	assert.Error(t, err)
 
@@ -1350,7 +1350,7 @@ func TestWebSocketClientV3_ReadCache_200(t *testing.T) {
    "event":"response/reading",
    "data":[
       {
-         "device":"929b923de65a811",
+         "device":"1b714cf2-cc56-5c36-9741-fd6a483b5f10",
          "device_type":"led",
          "type":"state",
          "value":"off",
@@ -1358,7 +1358,7 @@ func TestWebSocketClientV3_ReadCache_200(t *testing.T) {
          "unit":null
       },
       {
-         "device":"929b923de65a811",
+         "device":"1b714cf2-cc56-5c36-9741-fd6a483b5f11",
          "device_type":"led",
          "type":"color",
          "value":"000000",
@@ -1370,7 +1370,7 @@ func TestWebSocketClientV3_ReadCache_200(t *testing.T) {
 
 	expected := []*scheme.Read{
 		{
-			Device:     "929b923de65a811",
+			Device:     "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
 			DeviceType: "led",
 			Type:       "state",
 			Value:      "off",
@@ -1378,7 +1378,7 @@ func TestWebSocketClientV3_ReadCache_200(t *testing.T) {
 			Unit:       scheme.UnitOptions{},
 		},
 		{
-			Device:     "929b923de65a811",
+			Device:     "1b714cf2-cc56-5c36-9741-fd6a483b5f11",
 			DeviceType: "led",
 			Type:       "color",
 			Value:      "000000",
@@ -1458,7 +1458,7 @@ func TestWebSocketClientV3_WriteAsync_200(t *testing.T) {
             "action":"color",
             "data":"f38ac2"
          },
-         "device":"0fe8f06229aa9a01ef6032d1ddaf18a2",
+         "device":"1b714cf2-cc56-5c36-9741-fd6a483b5f10",
          "transaction":"56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
          "timeout":"10s"
       },
@@ -1467,7 +1467,7 @@ func TestWebSocketClientV3_WriteAsync_200(t *testing.T) {
             "action":"state",
             "data":"blink"
          },
-         "device":"0fe8f06229aa9a01ef6032d1ddaf18a2",
+         "device":"1b714cf2-cc56-5c36-9741-fd6a483b5f10",
          "transaction":"56a32eba-1aa6-4868-84ee-fe01af8b2e6e",
          "timeout":"10s"
       }
@@ -1480,7 +1480,7 @@ func TestWebSocketClientV3_WriteAsync_200(t *testing.T) {
 				Action: "color",
 				Data:   "f38ac2",
 			},
-			Device:      "0fe8f06229aa9a01ef6032d1ddaf18a2",
+			Device:      "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
 			Transaction: "56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
 			Timeout:     "10s",
 		},
@@ -1489,7 +1489,7 @@ func TestWebSocketClientV3_WriteAsync_200(t *testing.T) {
 				Action: "state",
 				Data:   "blink",
 			},
-			Device:      "0fe8f06229aa9a01ef6032d1ddaf18a2",
+			Device:      "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
 			Transaction: "56a32eba-1aa6-4868-84ee-fe01af8b2e6e",
 			Timeout:     "10s",
 		},
@@ -1510,7 +1510,7 @@ func TestWebSocketClientV3_WriteAsync_200(t *testing.T) {
 	assert.NoError(t, err)
 
 	opts := []scheme.WriteData{}
-	resp, err := client.WriteAsync("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
+	resp, err := client.WriteAsync("1b714cf2-cc56-5c36-9741-fd6a483b5f10", opts)
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
@@ -1547,7 +1547,7 @@ func TestWebSocketClientV3_WriteAsync_500(t *testing.T) {
 	assert.NoError(t, err)
 
 	opts := []scheme.WriteData{}
-	resp, err := client.WriteAsync("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
+	resp, err := client.WriteAsync("1b714cf2-cc56-5c36-9741-fd6a483b5f10", opts)
 	assert.Nil(t, resp)
 	assert.Error(t, err)
 
@@ -1564,7 +1564,7 @@ func TestWebSocketClientV3_WriteSync_200(t *testing.T) {
       {
          "id":"56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
          "timeout":"10s",
-         "device":"0fe8f06229aa9a01ef6032d1ddaf18a5",
+         "device":"1b714cf2-cc56-5c36-9741-fd6a483b5f10",
          "context":{
             "action":"color",
             "data":"f38ac2"
@@ -1581,7 +1581,7 @@ func TestWebSocketClientV3_WriteSync_200(t *testing.T) {
 		{
 			ID:      "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
 			Timeout: "10s",
-			Device:  "0fe8f06229aa9a01ef6032d1ddaf18a5",
+			Device:  "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
 			Context: scheme.WriteData{
 				Action: "color",
 				Data:   "f38ac2",
@@ -1608,7 +1608,7 @@ func TestWebSocketClientV3_WriteSync_200(t *testing.T) {
 	assert.NoError(t, err)
 
 	opts := []scheme.WriteData{}
-	resp, err := client.WriteSync("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
+	resp, err := client.WriteSync("1b714cf2-cc56-5c36-9741-fd6a483b5f10", opts)
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
@@ -1645,7 +1645,7 @@ func TestWebSocketClientV3_WriteSync_500(t *testing.T) {
 	assert.NoError(t, err)
 
 	opts := []scheme.WriteData{}
-	resp, err := client.WriteSync("0fe8f06229aa9a01ef6032d1ddaf18a5", opts)
+	resp, err := client.WriteSync("1b714cf2-cc56-5c36-9741-fd6a483b5f10", opts)
 	assert.Nil(t, resp)
 	assert.Error(t, err)
 
@@ -1734,7 +1734,7 @@ func TestWebSocketClientV3_Transaction_200(t *testing.T) {
    "data":{
       "id":"56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
       "timeout":"10s",
-      "device":"0fe8f06229aa9a01ef6032d1ddaf18a5",
+      "device":"1b714cf2-cc56-5c36-9741-fd6a483b5f10",
       "context":{
          "action":"color",
          "data":"f38ac2"
@@ -1749,7 +1749,7 @@ func TestWebSocketClientV3_Transaction_200(t *testing.T) {
 	expected := &scheme.Transaction{
 		ID:      "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
 		Timeout: "10s",
-		Device:  "0fe8f06229aa9a01ef6032d1ddaf18a5",
+		Device:  "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
 		Context: scheme.WriteData{
 			Action: "color",
 			Data:   "f38ac2",
