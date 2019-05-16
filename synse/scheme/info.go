@@ -4,6 +4,7 @@ package scheme
 type Info struct {
 	Timestamp    string              `json:"timestamp" yaml:"timestamp" mapstructure:"timestamp"`
 	ID           string              `json:"id" yaml:"id" mapstructure:"id"`
+	Alias        string              `json:"alias" yaml:"alias" mapstructure:"alias"`
 	Type         string              `json:"type" yaml:"type" mapstructure:"type"`
 	Metadata     map[string]string   `json:"metadata" yaml:"metadata" mapstructure:"metadata"`
 	Plugin       string              `json:"plugin" yaml:"plugin" mapstructure:"plugin"`
