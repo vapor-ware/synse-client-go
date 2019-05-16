@@ -1223,43 +1223,43 @@ func TestHTTPClientV3_WriteAsync_200(t *testing.T) {
 	in := `
 [
   {
+    "id": "56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
+    "device": "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
     "context": {
       "action": "color",
       "data": "f38ac2"
     },
-    "device": "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
-    "transaction": "56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
     "timeout": "10s"
   },
   {
+    "id": "56a32eba-1aa6-4868-84ee-fe01af8b2e6e",
+    "device": "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
     "context": {
       "action": "state",
       "data": "blink"
     },
-    "device": "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
-    "transaction": "56a32eba-1aa6-4868-84ee-fe01af8b2e6e",
     "timeout": "10s"
   }
 ]`
 
 	expected := []*scheme.Write{
 		{
+			ID:     "56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
+			Device: "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
 			Context: scheme.WriteData{
 				Action: "color",
 				Data:   "f38ac2",
 			},
-			Device:      "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
-			Transaction: "56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
-			Timeout:     "10s",
+			Timeout: "10s",
 		},
 		{
+			ID:     "56a32eba-1aa6-4868-84ee-fe01af8b2e6e",
+			Device: "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
 			Context: scheme.WriteData{
 				Action: "state",
 				Data:   "blink",
 			},
-			Device:      "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
-			Transaction: "56a32eba-1aa6-4868-84ee-fe01af8b2e6e",
-			Timeout:     "10s",
+			Timeout: "10s",
 		},
 	}
 
