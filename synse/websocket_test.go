@@ -723,6 +723,7 @@ func TestWebSocketClientV3_Scan_200(t *testing.T) {
    "data":[
       {
          "id":"1b714cf2-cc56-5c36-9741-fd6a483b5f10",
+         "alias":"",
          "info":"Synse Temperature Sensor",
          "type":"temperature",
          "plugin":"1b714cf2-cc56-5c36-9741-fd6a483b5f11",
@@ -734,6 +735,7 @@ func TestWebSocketClientV3_Scan_200(t *testing.T) {
       },
       {
          "id":"1b714cf2-cc56-5c36-9741-fd6a483b5f12",
+         "alias":"",
          "info":"Synse LED",
          "type":"led",
          "plugin":"1b714cf2-cc56-5c36-9741-fd6a483b5f13",
@@ -913,6 +915,7 @@ func TestWebSocketClientV3_Info_200(t *testing.T) {
    "data":{
       "timestamp":"2019-03-20T17:37:07Z",
       "id":"1b714cf2-cc56-5c36-9741-fd6a483b5f10",
+      "alias":"",
       "type":"humidity",
       "metadata":{
          "model":"emul8-humidity"
@@ -972,6 +975,7 @@ func TestWebSocketClientV3_Info_200(t *testing.T) {
 	expected := &scheme.Info{
 		Timestamp: "2019-03-20T17:37:07Z",
 		ID:        "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
+		Alias:     "",
 		Type:      "humidity",
 		Metadata: map[string]string{
 			"model": "emul8-humidity",

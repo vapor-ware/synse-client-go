@@ -616,6 +616,7 @@ func TestHTTPClientV3_Scan_200(t *testing.T) {
 [
   {
     "id": "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
+    "alias": "",
     "info": "Synse Temperature Sensor",
     "type": "temperature",
     "plugin": "1b714cf2-cc56-5c36-9741-fd6a483b5f11",
@@ -627,6 +628,7 @@ func TestHTTPClientV3_Scan_200(t *testing.T) {
   },
   {
     "id": "1b714cf2-cc56-5c36-9741-fd6a483b5f12",
+    "alias": "",
     "info": "Synse LED",
     "type": "led",
     "plugin": "1b714cf2-cc56-5c36-9741-fd6a483b5f13",
@@ -640,6 +642,7 @@ func TestHTTPClientV3_Scan_200(t *testing.T) {
 	expected := []*scheme.Scan{
 		{
 			ID:     "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
+			Alias:  "",
 			Info:   "Synse Temperature Sensor",
 			Type:   "temperature",
 			Plugin: "1b714cf2-cc56-5c36-9741-fd6a483b5f11",
@@ -651,6 +654,7 @@ func TestHTTPClientV3_Scan_200(t *testing.T) {
 		},
 		{
 			ID:     "1b714cf2-cc56-5c36-9741-fd6a483b5f12",
+			Alias:  "",
 			Info:   "Synse LED",
 			Type:   "led",
 			Plugin: "1b714cf2-cc56-5c36-9741-fd6a483b5f13",
@@ -766,6 +770,7 @@ func TestHTTPClientV3_Info_200(t *testing.T) {
 {
   "timestamp": "2019-03-20T17:37:07Z",
   "id": "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
+  "alias": "",
   "type": "humidity",
   "metadata": {
     "model": "emul8-humidity"
@@ -822,6 +827,7 @@ func TestHTTPClientV3_Info_200(t *testing.T) {
 	expected := &scheme.Info{
 		Timestamp: "2019-03-20T17:37:07Z",
 		ID:        "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
+		Alias:     "",
 		Type:      "humidity",
 		Metadata: map[string]string{
 			"model": "emul8-humidity",
