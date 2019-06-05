@@ -98,7 +98,7 @@ func (c *httpClient) Status() (*scheme.Status, error) {
 	out := new(scheme.Status)
 	err := c.getUnversioned(testURI, out)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to request `/status` endpoint")
+		return nil, errors.Wrap(err, "failed to request `/test` endpoint")
 	}
 
 	return out, nil
