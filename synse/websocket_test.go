@@ -5,10 +5,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/vapor-ware/synse-client-go/internal/test"
 	"github.com/vapor-ware/synse-client-go/synse/scheme"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestNewWebSocketClientV3_NilConfig(t *testing.T) {
@@ -1406,10 +1405,35 @@ func TestWebSocketClientV3_ReadCache_200(t *testing.T) {
 	assert.NoError(t, err)
 
 	opts := scheme.ReadCacheOptions{}
-	resp, err := client.ReadCache(opts)
-	assert.NotNil(t, resp)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, resp)
+	readings := make(chan *scheme.Read, 1)
+
+	go func() {
+		err := client.ReadCache(opts, readings)
+		assert.NoError(t, err)
+	}()
+
+	var results []*scheme.Read
+
+	for {
+		var done bool
+		select {
+		case r, open := <-readings:
+			if !open {
+				done = true
+				break
+			}
+			results = append(results, r)
+
+		case <-time.After(2 * time.Second):
+			// If the test does not complete after 2s, error.
+			t.Fatal("timeout: failed getting readcache data from channel")
+		}
+
+		if done {
+			break
+		}
+	}
+	assert.Equal(t, expected, results)
 
 	err = client.Close()
 	assert.NoError(t, err)
@@ -1443,9 +1467,35 @@ func TestWebSocketClientV3_ReadCache_500(t *testing.T) {
 	assert.NoError(t, err)
 
 	opts := scheme.ReadCacheOptions{}
-	resp, err := client.ReadCache(opts)
-	assert.Nil(t, resp)
-	assert.Error(t, err)
+	readings := make(chan *scheme.Read, 1)
+
+	go func() {
+		err := client.ReadCache(opts, readings)
+		assert.Error(t, err)
+	}()
+
+	var results []*scheme.Read
+
+	for {
+		var done bool
+		select {
+		case r, open := <-readings:
+			if !open {
+				done = true
+				break
+			}
+			results = append(results, r)
+
+		case <-time.After(2 * time.Second):
+			// If the test does not complete after 2s, error.
+			t.Fatal("timeout: failed getting readcache data from channel")
+		}
+
+		if done {
+			break
+		}
+	}
+	assert.Empty(t, results)
 
 	err = client.Close()
 	assert.NoError(t, err)
@@ -1513,7 +1563,7 @@ func TestWebSocketClientV3_WriteAsync_200(t *testing.T) {
 	err = client.Open()
 	assert.NoError(t, err)
 
-	opts := []scheme.WriteData{}
+	var opts []scheme.WriteData
 	resp, err := client.WriteAsync("1b714cf2-cc56-5c36-9741-fd6a483b5f10", opts)
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
@@ -1550,7 +1600,7 @@ func TestWebSocketClientV3_WriteAsync_500(t *testing.T) {
 	err = client.Open()
 	assert.NoError(t, err)
 
-	opts := []scheme.WriteData{}
+	var opts []scheme.WriteData
 	resp, err := client.WriteAsync("1b714cf2-cc56-5c36-9741-fd6a483b5f10", opts)
 	assert.Nil(t, resp)
 	assert.Error(t, err)
@@ -1611,7 +1661,7 @@ func TestWebSocketClientV3_WriteSync_200(t *testing.T) {
 	err = client.Open()
 	assert.NoError(t, err)
 
-	opts := []scheme.WriteData{}
+	var opts []scheme.WriteData
 	resp, err := client.WriteSync("1b714cf2-cc56-5c36-9741-fd6a483b5f10", opts)
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
@@ -1648,7 +1698,7 @@ func TestWebSocketClientV3_WriteSync_500(t *testing.T) {
 	err = client.Open()
 	assert.NoError(t, err)
 
-	opts := []scheme.WriteData{}
+	var opts []scheme.WriteData
 	resp, err := client.WriteSync("1b714cf2-cc56-5c36-9741-fd6a483b5f10", opts)
 	assert.Nil(t, resp)
 	assert.Error(t, err)

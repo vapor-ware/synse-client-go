@@ -6,9 +6,8 @@ import (
 	"crypto/tls"
 	"encoding/json"
 
-	"github.com/vapor-ware/synse-client-go/synse/scheme"
-
 	"github.com/pkg/errors"
+	"github.com/vapor-ware/synse-client-go/synse/scheme"
 	"gopkg.in/resty.v1"
 )
 
@@ -213,27 +212,24 @@ func (c *httpClient) ReadDevice(id string, opts scheme.ReadOptions) ([]*scheme.R
 }
 
 // ReadCache returns stream reading data from the registered plugins.
-func (c *httpClient) ReadCache(opts scheme.ReadCacheOptions) ([]*scheme.Read, error) {
-	var out []*scheme.Read
+func (c *httpClient) ReadCache(opts scheme.ReadCacheOptions, out chan<- *scheme.Read) error {
+	defer close(out)
 	errScheme := new(scheme.Error)
 
 	resp, err := c.setVersioned().R().SetDoNotParseResponse(true).SetQueryParams(structToMapString(opts)).SetError(errScheme).Get(readcacheURI)
 	if err = check(err, errScheme); err != nil {
-		return nil, err
+		return err
 	}
 
 	dec := json.NewDecoder(resp.RawBody())
 	for dec.More() {
-		var read scheme.Read
-		err := dec.Decode(&read)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to decode a JSON response into an appropriate struct")
+		var read = new(scheme.Read)
+		if err := dec.Decode(read); err != nil {
+			return errors.Wrap(err, "failed to decode a JSON response into an appropriate struct")
 		}
-
-		out = append(out, &read)
+		out <- read
 	}
-
-	return out, nil
+	return nil
 }
 
 // WriteAsync writes data to a device, in an asynchronous manner.

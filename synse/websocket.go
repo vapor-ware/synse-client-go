@@ -8,11 +8,10 @@ import (
 	"reflect"
 	"sync/atomic"
 
-	"github.com/vapor-ware/synse-client-go/synse/scheme"
-
 	"github.com/gorilla/websocket"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
+	"github.com/vapor-ware/synse-client-go/synse/scheme"
 )
 
 type websocketClient struct {
@@ -337,7 +336,9 @@ func (c *websocketClient) ReadDevice(id string, opts scheme.ReadOptions) ([]*sch
 }
 
 // ReadCache returns stream reading data from the registered plugins.
-func (c *websocketClient) ReadCache(opts scheme.ReadCacheOptions) ([]*scheme.Read, error) {
+func (c *websocketClient) ReadCache(opts scheme.ReadCacheOptions, out chan<- *scheme.Read) error {
+	defer close(out)
+
 	req := scheme.RequestReadCache{
 		EventMeta: scheme.EventMeta{
 			ID:    c.addCounter(),
@@ -349,10 +350,12 @@ func (c *websocketClient) ReadCache(opts scheme.ReadCacheOptions) ([]*scheme.Rea
 	resp := new([]*scheme.Read)
 	err := c.makeRequest(req, resp)
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	return *resp, nil
+	for _, r := range *resp {
+		out <- r
+	}
+	return nil
 }
 
 // WriteAsync writes data to a device, in an asynchronous manner.
