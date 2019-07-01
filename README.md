@@ -13,12 +13,8 @@ API](https://github.com/vapor-ware/synse-server/blob/master/proposals/v3/api-web
 
 ## Installing
 
-In order to install this package, you can clone the repo, `cd` into the repo
-root, and set it up via `make`:
 ```
-$ git clone https://github.com/vapor-ware/synse-client-go.git
-$ cd synse-client-go
-$ make setup
+go get github.com/vapor-ware/synse-client-go
 ```
 
 ## Using
@@ -79,11 +75,6 @@ For more information about the response scheme, please refer to the
 
 
 ## Developing
-
-To install necessary development tools and initialize vendoring:
-```
-make setup
-```
 
 To lint and format the project:
 ```
