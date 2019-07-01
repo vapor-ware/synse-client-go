@@ -3,6 +3,12 @@ project_name: synse-client-go
 before:
   hooks:
     - go mod download
+builds:
+  -
+    goos:
+      - linux
+    ignore:
+      - goos: linux
 archives:
   - format: tar.gz
 checksum:
