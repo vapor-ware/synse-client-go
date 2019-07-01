@@ -3,15 +3,6 @@ project_name: synse-client-go
 before:
   hooks:
     - go mod download
-builds:
-  -
-    env:
-      - CGO_ENABLED=0
-    goos:
-      - linux
-      - darwin
-    goarch:
-      - amd64
 archives:
   - format: tar.gz
 checksum:
