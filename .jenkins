@@ -17,7 +17,7 @@ pipeline {
       steps {
         script {
           docker.image('vaporio/jenkins-agent-golang:latest').inside() {
-            sh 'go test -covermode=atomic ./...'
+            sh 'CGO_ENABLED=0 go test -covermode=atomic ./...'
           }
         }
       }
