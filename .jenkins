@@ -14,14 +14,12 @@ pipeline {
 
     // Run unit tests.
     stage('Test') {
-      agent {
-        docker {
-          image 'vaporio/golang:1.11'
-          reuseNode true
-        }
-      }
       steps {
-        sh 'make test'
+        script {
+          docker.image('vaporio/jenkins-agent-golang:latest').inside() {
+            sh 'go test -covermode=atomic ./...'
+          }
+        }
       }
     }
 
