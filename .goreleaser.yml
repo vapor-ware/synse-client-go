@@ -1,0 +1,34 @@
+# For details, see the GoReleaser documentation at http://goreleaser.com
+project_name: synse-client-go
+before:
+  hooks:
+    - go mod download
+builds:
+  -
+    # hack: goreleaser will always try to build, but will fail if there is
+    # no 'main' function for the package. to get it to play nicely, we tell
+    # it to only build for linux but also to ignore linux, effectively
+    # bypassing the build.
+    goos:
+      - linux
+    ignore:
+      - goos: linux
+archives:
+  - format: tar.gz
+checksum:
+  name_template: 'checksums-{{ .Tag }}.txt'
+release:
+  github:
+    owner: vapor-ware
+    name: synse-client-go
+  draft: false
+  prerelease: auto
+  name_template: "{{ .Version }}"
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
