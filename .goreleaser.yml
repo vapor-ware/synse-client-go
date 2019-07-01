@@ -5,6 +5,10 @@ before:
     - go mod download
 builds:
   -
+    # hack: goreleaser will always try to build, but will fail if there is
+    # no 'main' function for the package. to get it to play nicely, we tell
+    # it to only build for linux but also to ignore linux, effectively
+    # bypassing the build.
     goos:
       - linux
     ignore:
