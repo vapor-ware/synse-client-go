@@ -35,7 +35,16 @@ lint:  ## Lint project source files
 .PHONY: test
 test:  ## Run unit tests
 	@ # Note: this requires go1.10+ in order to do multi-package coverage reports
-	go test -race -coverprofile=coverage.out -covermode=atomic ./...
+	go test -short -race -coverprofile=coverage.out -covermode=atomic ./...
+
+.PHONY: test-integration
+test-integration:  ## Run integration tests
+	# FIXME - need to clean up stale containers `docker rm -f $(docker ps -aq)`
+	# every time before running the tests so they won't fail
+	docker-compose -f compose/server.yml up -d
+	sleep 6
+	go test -race -cover -run Integration ./... || (docker-compose -f compose/server.yml stop; exit 1)
+	docker-compose -f compose/server.yml down
 
 .PHONY: version
 version:  ## Print the version of the client
