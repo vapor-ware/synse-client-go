@@ -140,3 +140,25 @@ func TestIntegration_PluginInfo(t *testing.T) {
 	assert.Empty(t, resp.Health.Checks[1].Timestamp) // FIXME - should this be non-empty?
 	assert.Equal(t, "periodic", resp.Health.Checks[1].Type)
 }
+
+func TestIntegration_PluginHealth(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.PluginHealth()
+	assert.NoError(t, err)
+	assert.Equal(t, "healthy", resp.Status)
+	assert.NotNil(t, resp.Updated)
+	assert.Equal(t, 1, len(resp.Healthy))
+	assert.Equal(t, "4032ffbe-80db-5aa5-b794-f35c88dff85c", resp.Healthy[0])
+	assert.Equal(t, 0, len(resp.Unhealthy))
+	assert.Equal(t, 1, resp.Active)
+	assert.Equal(t, 0, resp.Inactive)
+}
