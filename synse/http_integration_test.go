@@ -7,7 +7,7 @@ import (
 	// "time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/vapor-ware/synse-client-go/synse/scheme"
+	// "github.com/vapor-ware/synse-client-go/synse/scheme"
 )
 
 func TestIntegration_Status(t *testing.T) {
@@ -57,37 +57,21 @@ func TestIntegration_Config(t *testing.T) {
 
 	resp, err := client.Config()
 	assert.NoError(t, err)
-
-	expected := &scheme.Config{
-		Locale:  "en_US",
-		Logging: "debug",
-		Plugin: scheme.PluginOptions{
-			TCP:  []string{"emulator:5001"},
-			Unix: []string{},
-			Discover: scheme.DiscoveryOptions{
-				Kubernetes: scheme.KubernetesOptions{
-					Namespace: "",
-					Endpoints: scheme.EndpointsOptions{
-						Labels: map[string]string(nil),
-					},
-				},
-			},
-		},
-		Cache: scheme.CacheOptions{
-			Device:      scheme.DeviceOptions{TTL: 0},
-			Transaction: scheme.TransactionOptions{TTL: 300},
-		},
-		GRPC: scheme.GRPCOptions{
-			Timeout: 3,
-			TLS:     scheme.TLSOptions{Cert: ""}},
-		Transport: scheme.TransportOptions{
-			HTTP:      false, // FIXME - should this be true?
-			WebSocket: false,
-		},
-		Metrics:    scheme.MetricsOptions{Enabled: false},
-		PrettyJSON: true,
-	}
-	assert.Equal(t, expected, resp)
+	assert.Equal(t, "en_US", resp.Locale)
+	assert.Equal(t, "debug", resp.Logging)
+	assert.Equal(t, 1, len(resp.Plugin.TCP))
+	assert.Equal(t, 0, len(resp.Plugin.Unix))
+	assert.Empty(t, resp.Plugin.Discover)
+	assert.Equal(t, 0, resp.Cache.Device.TTL)
+	assert.Equal(t, 300, resp.Cache.Transaction.TTL)
+	assert.Equal(t, 3, resp.GRPC.Timeout)
+	assert.Empty(t, resp.GRPC.TLS.Cert)
+	// FIXME - should both transport config be True because any http or
+	// websocket client could talk to it?
+	assert.False(t, resp.Transport.HTTP)
+	assert.False(t, resp.Transport.WebSocket)
+	assert.False(t, resp.Metrics.Enabled)
+	assert.True(t, resp.PrettyJSON)
 }
 
 func TestIntegration_Plugin(t *testing.T) {
@@ -104,24 +88,55 @@ func TestIntegration_Plugin(t *testing.T) {
 	resp, err := client.Plugins()
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(resp))
+	assert.True(t, resp[0].Active)
+	assert.Equal(t, "4032ffbe-80db-5aa5-b794-f35c88dff85c", resp[0].ID)
+	assert.Equal(t, "emulator plugin", resp[0].Name)
+	assert.Equal(t, "A plugin with emulated devices and data", resp[0].Description)
+	assert.Equal(t, "vaporio", resp[0].Maintainer)
+	assert.Equal(t, "vaporio/emulator-plugin", resp[0].Tag)
+}
 
-	expected := &scheme.PluginMeta{
-		Active:      true,
-		ID:          "4032ffbe-80db-5aa5-b794-f35c88dff85c",
-		Name:        "emulator plugin",
-		Description: "A plugin with emulated devices and data",
-		Maintainer:  "vaporio",
-		Tag:         "vaporio/emulator-plugin",
-		VCS:         "",
-		Version: scheme.VersionOptions{
-			PluginVersion: "",
-			SDKVersion:    "",
-			BuildDate:     "",
-			GitCommit:     "",
-			GitTag:        "",
-			Arch:          "",
-			OS:            "",
-		},
+func TestIntegration_PluginInfo(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
 	}
-	assert.Equal(t, expected, resp[0])
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Plugin("4032ffbe-80db-5aa5-b794-f35c88dff85c")
+	assert.NoError(t, err)
+	assert.True(t, resp.Active)
+	assert.Equal(t, "4032ffbe-80db-5aa5-b794-f35c88dff85c", resp.ID)
+	assert.Equal(t, "emulator plugin", resp.Name)
+	assert.Equal(t, "A plugin with emulated devices and data", resp.Description)
+	assert.Equal(t, "vaporio", resp.Maintainer)
+	assert.Equal(t, "vaporio/emulator-plugin", resp.Tag)
+	assert.Equal(t, "github.com/vapor-ware/synse-emulator-plugin", resp.VCS)
+	assert.Equal(t, "3.0.0-alpha.3", resp.Version.PluginVersion)
+	assert.Equal(t, "3.0.0-alpha.1", resp.Version.SDKVersion)
+	assert.NotNil(t, resp.Version.BuildDate)
+	assert.NotNil(t, resp.Version.GitCommit)
+	assert.Equal(t, "3.0.0-alpha.3", resp.Version.GitTag)
+	assert.Equal(t, "amd64", resp.Version.Arch)
+	assert.Equal(t, "linux", resp.Version.OS)
+	assert.Equal(t, "tcp", resp.Network.Protocol)
+	assert.Equal(t, "emulator:5001", resp.Network.Address)
+	assert.NotNil(t, resp.Health.Timestamp)
+	assert.Equal(t, "OK", resp.Health.Status)
+	assert.Empty(t, resp.Health.Message)
+	assert.Equal(t, 2, len(resp.Health.Checks))
+	assert.Equal(t, "read queue health", resp.Health.Checks[0].Name)
+	assert.Equal(t, "OK", resp.Health.Checks[0].Status)
+	assert.Empty(t, resp.Health.Checks[0].Message)
+	assert.Empty(t, resp.Health.Checks[0].Timestamp) // FIXME - should this be non-empty?
+	assert.Equal(t, "periodic", resp.Health.Checks[0].Type)
+	assert.Equal(t, "write queue health", resp.Health.Checks[1].Name)
+	assert.Equal(t, "OK", resp.Health.Checks[1].Status)
+	assert.Empty(t, resp.Health.Checks[1].Message)
+	assert.Empty(t, resp.Health.Checks[1].Timestamp) // FIXME - should this be non-empty?
+	assert.Equal(t, "periodic", resp.Health.Checks[1].Type)
 }
