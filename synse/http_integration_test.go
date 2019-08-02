@@ -20,10 +20,10 @@ func TestIntegration_Status(t *testing.T) {
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
 
-	resp, err := client.Status()
+	status, err := client.Status()
 	assert.NoError(t, err)
-	assert.Equal(t, "ok", resp.Status)
-	assert.NotEmpty(t, resp.Timestamp)
+	assert.Equal(t, "ok", status.Status)
+	assert.NotEmpty(t, status.Timestamp)
 }
 
 func TestIntegration_Version(t *testing.T) {
@@ -37,10 +37,10 @@ func TestIntegration_Version(t *testing.T) {
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
 
-	resp, err := client.Version()
+	version, err := client.Version()
 	assert.NoError(t, err)
-	assert.Equal(t, "v3", resp.APIVersion)
-	assert.NotEmpty(t, resp.Version)
+	assert.Equal(t, "v3", version.APIVersion)
+	assert.NotEmpty(t, version.Version)
 }
 
 func TestIntegration_Config(t *testing.T) {
@@ -54,9 +54,9 @@ func TestIntegration_Config(t *testing.T) {
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
 
-	resp, err := client.Config()
+	config, err := client.Config()
 	assert.NoError(t, err)
-	assert.NotEmpty(t, resp)
+	assert.NotEmpty(t, config)
 }
 
 func TestIntegration_Plugin(t *testing.T) {
@@ -70,45 +70,21 @@ func TestIntegration_Plugin(t *testing.T) {
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
 
-	resp, err := client.Plugins()
+	plugins, err := client.Plugins()
 	assert.NoError(t, err)
-	assert.Equal(t, 1, len(resp))
-	assert.NotEmpty(t, resp[0])
+	assert.Equal(t, 1, len(plugins))
+	assert.NotEmpty(t, plugins[0])
+
+	plugin, err := client.Plugin(plugins[0].ID)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, plugin)
+
+	pluginHealth, err := client.PluginHealth()
+	assert.NoError(t, err)
+	assert.NotEmpty(t, pluginHealth)
 }
 
-func TestIntegration_PluginInfo(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping integration test")
-	}
-
-	client, err := NewHTTPClientV3(&Options{
-		Address: "localhost:5000",
-	})
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
-
-	resp, err := client.Plugin("4032ffbe-80db-5aa5-b794-f35c88dff85c")
-	assert.NoError(t, err)
-	assert.NotEmpty(t, resp)
-}
-
-func TestIntegration_PluginHealth(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping integration test")
-	}
-
-	client, err := NewHTTPClientV3(&Options{
-		Address: "localhost:5000",
-	})
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
-
-	resp, err := client.PluginHealth()
-	assert.NoError(t, err)
-	assert.NotEmpty(t, resp)
-}
-
-func TestIntegration_Device(t *testing.T) {
+func TestIntegration_Read(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}
@@ -120,14 +96,14 @@ func TestIntegration_Device(t *testing.T) {
 	assert.NoError(t, err)
 
 	opts := scheme.ScanOptions{}
-	resp, err := client.Scan(opts)
+	devices, err := client.Scan(opts)
 	assert.NoError(t, err)
-	assert.Equal(t, 22, len(resp))
+	assert.Equal(t, 22, len(devices))
 
-	for _, v := range resp {
-		assert.NotEmpty(t, v)
+	for _, device := range devices {
+		assert.NotEmpty(t, device)
 
-		info, err := client.Info(v.ID)
+		info, err := client.Info(device.ID)
 		assert.NoError(t, err)
 		assert.NotEmpty(t, info)
 	}
@@ -145,11 +121,11 @@ func TestIntegration_Tags(t *testing.T) {
 	assert.NoError(t, err)
 
 	opts := scheme.TagsOptions{}
-	resp, err := client.Tags(opts)
+	tags, err := client.Tags(opts)
 	assert.NoError(t, err)
-	assert.Equal(t, 10, len(resp))
+	assert.Equal(t, 10, len(tags))
 
-	for _, v := range resp {
-		assert.NotEmpty(t, v)
+	for _, tag := range tags {
+		assert.NotEmpty(t, tag)
 	}
 }
