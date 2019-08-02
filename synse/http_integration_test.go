@@ -7,7 +7,7 @@ import (
 	// "time"
 
 	"github.com/stretchr/testify/assert"
-	// "github.com/vapor-ware/synse-client-go/synse/scheme"
+	"github.com/vapor-ware/synse-client-go/synse/scheme"
 )
 
 func TestIntegration_Status(t *testing.T) {
@@ -57,17 +57,71 @@ func TestIntegration_Config(t *testing.T) {
 
 	resp, err := client.Config()
 	assert.NoError(t, err)
-	assert.Equal(t, "en_US", resp.Locale)
-	assert.Equal(t, "debug", resp.Logging)
-	assert.Equal(t, "emulator:5001", resp.Plugin.TCP[0])
-	assert.Empty(t, resp.Plugin.Unix)
-	assert.Empty(t, resp.Plugin.Discover)
-	assert.Equal(t, 0, resp.Cache.Device.TTL)
-	assert.Equal(t, 300, resp.Cache.Transaction.TTL)
-	assert.Equal(t, 3, resp.GRPC.Timeout)
-	assert.Empty(t, resp.GRPC.TLS.Cert)
-	assert.Equal(t, false, resp.Transport.HTTP) // FIXME - should this be true?
-	assert.Equal(t, false, resp.Transport.WebSocket)
-	assert.Equal(t, false, resp.Metrics.Enabled)
-	assert.Equal(t, true, resp.PrettyJSON)
+
+	expected := &scheme.Config{
+		Locale:  "en_US",
+		Logging: "debug",
+		Plugin: scheme.PluginOptions{
+			TCP:  []string{"emulator:5001"},
+			Unix: []string{},
+			Discover: scheme.DiscoveryOptions{
+				Kubernetes: scheme.KubernetesOptions{
+					Namespace: "",
+					Endpoints: scheme.EndpointsOptions{
+						Labels: map[string]string(nil),
+					},
+				},
+			},
+		},
+		Cache: scheme.CacheOptions{
+			Device:      scheme.DeviceOptions{TTL: 0},
+			Transaction: scheme.TransactionOptions{TTL: 300},
+		},
+		GRPC: scheme.GRPCOptions{
+			Timeout: 3,
+			TLS:     scheme.TLSOptions{Cert: ""}},
+		Transport: scheme.TransportOptions{
+			HTTP:      false, // FIXME - should this be true?
+			WebSocket: false,
+		},
+		Metrics:    scheme.MetricsOptions{Enabled: false},
+		PrettyJSON: true,
+	}
+	assert.Equal(t, expected, resp)
+}
+
+func TestIntegration_Plugin(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	resp, err := client.Plugins()
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(resp))
+
+	expected := &scheme.PluginMeta{
+		Active:      true,
+		ID:          "4032ffbe-80db-5aa5-b794-f35c88dff85c",
+		Name:        "emulator plugin",
+		Description: "A plugin with emulated devices and data",
+		Maintainer:  "vaporio",
+		Tag:         "vaporio/emulator-plugin",
+		VCS:         "",
+		Version: scheme.VersionOptions{
+			PluginVersion: "",
+			SDKVersion:    "",
+			BuildDate:     "",
+			GitCommit:     "",
+			GitTag:        "",
+			Arch:          "",
+			OS:            "",
+		},
+	}
+	assert.Equal(t, expected, resp[0])
 }
