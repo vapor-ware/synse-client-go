@@ -116,6 +116,56 @@ func TestIntegration_Scan(t *testing.T) {
 	}
 }
 
+func TestIntegration_Tags(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := scheme.TagsOptions{}
+	tags, err := client.Tags(opts)
+	assert.NoError(t, err)
+	assert.Equal(t, 10, len(tags))
+
+	for _, tag := range tags {
+		assert.NotEmpty(t, tag)
+	}
+}
+
+func TestIntegration_Info(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := scheme.ScanOptions{}
+	devices, err := client.Scan(opts)
+	assert.NoError(t, err)
+	assert.Equal(t, 22, len(devices))
+
+	for _, device := range devices {
+		assert.NotEmpty(t, device)
+	}
+
+	for _, device := range devices {
+		assert.NotEmpty(t, device)
+
+		info, err := client.Info(device.ID)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, info)
+	}
+}
+
 func TestIntegration_Read(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
@@ -134,12 +184,30 @@ func TestIntegration_Read(t *testing.T) {
 
 	for _, device := range devices {
 		assert.NotEmpty(t, device)
+	}
+}
 
-		info, err := client.Info(device.Device)
-		assert.NoError(t, err)
-		assert.NotEmpty(t, info)
+func TestIntegration_ReadDevice(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
 
-		data, err := client.ReadDevice(device.Device, opts)
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := scheme.ScanOptions{}
+	devices, err := client.Scan(opts)
+	assert.NoError(t, err)
+	assert.Equal(t, 22, len(devices))
+
+	for _, device := range devices {
+		assert.NotEmpty(t, device)
+
+		opts := scheme.ReadOptions{}
+		data, err := client.ReadDevice(device.ID, opts)
 		assert.NoError(t, err)
 		assert.NotEmpty(t, data)
 	}
@@ -182,26 +250,5 @@ func TestIntegration_ReadCache(t *testing.T) {
 		if done {
 			break
 		}
-	}
-}
-
-func TestIntegration_Tags(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping integration test")
-	}
-
-	client, err := NewHTTPClientV3(&Options{
-		Address: "localhost:5000",
-	})
-	assert.NotNil(t, client)
-	assert.NoError(t, err)
-
-	opts := scheme.TagsOptions{}
-	tags, err := client.Tags(opts)
-	assert.NoError(t, err)
-	assert.Equal(t, 10, len(tags))
-
-	for _, tag := range tags {
-		assert.NotEmpty(t, tag)
 	}
 }
