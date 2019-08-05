@@ -14,7 +14,7 @@ API](https://github.com/vapor-ware/synse-server/blob/master/proposals/v3/api-web
 ## Installing
 
 ```
-go get github.com/vapor-ware/synse-client-go
+git clone https://github.com/vapor-ware/synse-client-go.git
 ```
 
 ## Using
