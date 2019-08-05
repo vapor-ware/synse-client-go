@@ -58,6 +58,28 @@ func TestIntegration_Config(t *testing.T) {
 	assert.NotEmpty(t, config)
 }
 
+func TestIntegration_Plugins(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	plugins, err := client.Plugins()
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(plugins))
+	assert.NotEmpty(t, plugins[0].Name)
+	assert.NotEmpty(t, plugins[0].Maintainer)
+	assert.NotEmpty(t, plugins[0].Tag)
+	assert.NotEmpty(t, plugins[0].Description)
+	assert.NotEmpty(t, plugins[0].ID)
+	assert.True(t, plugins[0].Active)
+}
+
 func TestIntegration_PluginInfo(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
@@ -76,7 +98,33 @@ func TestIntegration_PluginInfo(t *testing.T) {
 
 	plugin, err := client.Plugin(plugins[0].ID)
 	assert.NoError(t, err)
-	assert.NotEmpty(t, plugin)
+	assert.NotEmpty(t, plugin.Name)
+	assert.NotEmpty(t, plugin.Maintainer)
+	assert.NotEmpty(t, plugin.Tag)
+	assert.NotEmpty(t, plugin.Description)
+	assert.NotEmpty(t, plugin.VCS)
+	assert.NotEmpty(t, plugin.ID)
+	assert.True(t, plugin.Active)
+	assert.NotEmpty(t, plugin.Network.Address)
+	assert.NotEmpty(t, plugin.Network.Protocol)
+	assert.NotEmpty(t, plugin.Version.PluginVersion)
+	assert.NotEmpty(t, plugin.Version.SDKVersion)
+	assert.NotEmpty(t, plugin.Version.BuildDate)
+	assert.NotEmpty(t, plugin.Version.GitCommit)
+	assert.NotEmpty(t, plugin.Version.GitTag)
+	assert.NotEmpty(t, plugin.Version.Arch)
+	assert.NotEmpty(t, plugin.Version.OS)
+	assert.NotEmpty(t, plugin.Health.Timestamp)
+	assert.Equal(t, "OK", plugin.Health.Status)
+	assert.GreaterOrEqual(t, len(plugin.Health.Checks), 1)
+
+	for _, check := range plugin.Health.Checks {
+		assert.NotEmpty(t, check.Name)
+		assert.Equal(t, "OK", check.Status)
+		assert.NotEmpty(t, check.Type)
+		assert.Empty(t, check.Timestamp) // FIXME - should this be non-empty?
+		// NOTE - check.Message could be empty so we don't check that
+	}
 }
 
 func TestIntegration_PluginHealth(t *testing.T) {
@@ -92,7 +140,12 @@ func TestIntegration_PluginHealth(t *testing.T) {
 
 	health, err := client.PluginHealth()
 	assert.NoError(t, err)
-	assert.NotEmpty(t, health)
+	assert.NotEmpty(t, health.Status)
+	assert.NotEmpty(t, health.Updated)
+	assert.GreaterOrEqual(t, (health.Healthy), 1)
+	assert.Equal(t, 0, len(health.Unhealthy))
+	assert.Equal(t, 1, health.Active)
+	assert.Equal(t, 0, health.Active)
 }
 
 func TestIntegration_Scan(t *testing.T) {
@@ -112,7 +165,12 @@ func TestIntegration_Scan(t *testing.T) {
 	assert.Equal(t, 22, len(devices))
 
 	for _, device := range devices {
-		assert.NotEmpty(t, device)
+		assert.NotEmpty(t, device.ID)
+		assert.NotEmpty(t, device.Info)
+		assert.NotEmpty(t, device.Type)
+		assert.NotEmpty(t, device.Plugin)
+		assert.NotEmpty(t, device.Tags)
+		// NOTE - device.Alias could be empty so we don't check that
 	}
 }
 
