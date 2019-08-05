@@ -220,7 +220,27 @@ func TestIntegration_Info(t *testing.T) {
 
 		info, err := client.Info(device.ID)
 		assert.NoError(t, err)
-		assert.NotEmpty(t, info)
+		assert.NotEmpty(t, info.Timestamp)
+		assert.NotEmpty(t, info.ID)
+		assert.NotEmpty(t, info.Type)
+		assert.NotEmpty(t, info.Plugin)
+		assert.NotEmpty(t, info.Capabilities.Mode)
+		assert.NotEmpty(t, info.Tags)
+		// NOTE - these fields could be empty so we don't check them:
+		// - info.Alias
+		// - info.Metadata
+		// - info.Capabilities.Write.Actions
+		// TODO - add sort_index to the scheme
+
+		// FIXME - recheck if its outputs or output from the doc
+		// for _, output := range info.Output {
+		// 	assert.NotEmpty(t, output.Name)
+		// 	assert.NotEmpty(t, output.Type)
+		// 	assert.NotEmpty(t, output.Precision)
+		// 	assert.NotEmpty(t, output.ScalingFactor)
+		// 	assert.NotEmpty(t, output.Unit.Name)
+		// 	assert.NotEmpty(t, output.Unit.Symbol)
+		// }
 	}
 }
 
