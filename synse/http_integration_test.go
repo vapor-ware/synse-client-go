@@ -116,7 +116,7 @@ func TestIntegration_PluginInfo(t *testing.T) {
 	assert.NotEmpty(t, plugin.Version.OS)
 	assert.NotEmpty(t, plugin.Health.Timestamp)
 	assert.Equal(t, "OK", plugin.Health.Status)
-	assert.GreaterOrEqual(t, len(plugin.Health.Checks), 1)
+	assert.Equal(t, 2, len(plugin.Health.Checks))
 
 	for _, check := range plugin.Health.Checks {
 		assert.NotEmpty(t, check.Name)
@@ -142,10 +142,10 @@ func TestIntegration_PluginHealth(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotEmpty(t, health.Status)
 	assert.NotEmpty(t, health.Updated)
-	assert.GreaterOrEqual(t, (health.Healthy), 1)
+	assert.Equal(t, 1, len(health.Healthy))
 	assert.Equal(t, 0, len(health.Unhealthy))
 	assert.Equal(t, 1, health.Active)
-	assert.Equal(t, 0, health.Active)
+	assert.Equal(t, 0, health.Inactive)
 }
 
 func TestIntegration_Scan(t *testing.T) {
