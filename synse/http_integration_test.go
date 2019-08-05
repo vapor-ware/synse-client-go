@@ -1,9 +1,8 @@
 package synse
 
 import (
-	// "encoding/json"
 	"testing"
-	// "time"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/vapor-ware/synse-client-go/synse/scheme"
@@ -143,6 +142,46 @@ func TestIntegration_Read(t *testing.T) {
 		data, err := client.ReadDevice(device.Device, opts)
 		assert.NoError(t, err)
 		assert.NotEmpty(t, data)
+	}
+}
+
+func TestIntegration_ReadCache(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	opts := scheme.ReadCacheOptions{}
+	readings := make(chan *scheme.Read, 1)
+
+	go func() {
+		err := client.ReadCache(opts, readings)
+		assert.NoError(t, err)
+	}()
+
+	for {
+		var done bool
+		select {
+		case r, open := <-readings:
+			if !open {
+				done = true
+				break
+			}
+			assert.NotEmpty(t, r)
+
+		case <-time.After(2 * time.Second):
+			// If the test does not complete after 2s, error.
+			t.Fatal("timeout: failed getting readcache data from channel")
+		}
+
+		if done {
+			break
+		}
 	}
 }
 
