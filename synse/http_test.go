@@ -767,60 +767,54 @@ func TestHTTPClientV3_Tags_500(t *testing.T) {
 func TestHTTPClientV3_Info_200(t *testing.T) {
 	in := `
 {
-  "timestamp": "2019-03-20T17:37:07Z",
-  "id": "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
-  "alias": "",
-  "type": "humidity",
-  "metadata": {
-    "model": "emul8-humidity"
-  },
-  "plugin": "1b714cf2-cc56-5c36-9741-fd6a483b5f11",
-  "info": "Synse Humidity Sensor",
-  "tags": [
+   "timestamp":"2019-03-20T17:37:07Z",
+   "id":"1b714cf2-cc56-5c36-9741-fd6a483b5f10",
+   "alias":"",
+   "type":"humidity",
+   "metadata":{
+      "model":"emul8-humidity"
+   },
+   "plugin":"1b714cf2-cc56-5c36-9741-fd6a483b5f11",
+   "info":"Synse Humidity Sensor",
+   "tags":[
       "type:humidity",
       "humidity",
       "vio/fan-sensor"
-  ],
-  "capabilities": {
-    "mode": "rw",
-    "read": {},
-    "write": {
-      "actions": [
-        "color", 
-        "state"
-      ]
-    }
-  },
-  "output": [
-    {
-      "name": "humidity",
-      "type": "humidity",
-      "precision": 3,
-      "scaling_factor": 1.0,
-      "units": [
-        {
-          "name": "percent humidity",
-          "symbol": "%"
-        }
-      ]
-    },
-    {
-      "name": "temperature",
-      "type": "temperature",
-      "precision": 3,
-      "scaling_factor": 1.0,
-      "units": [
-        {
-          "name": "celsius",
-          "symbol": "C"
-        },
-        {
-          "name": "fahrenheit",
-          "symbol": "F"
-        }
-      ]
-    }
-  ]
+   ],
+   "capabilities":{
+      "mode":"rw",
+      "read":{
+
+      },
+      "write":{
+         "actions":[
+            "color",
+            "state"
+         ]
+      }
+   },
+   "outputs":[
+      {
+         "name":"humidity",
+         "type":"humidity",
+         "precision":3,
+         "scaling_factor":1.0,
+         "unit":{
+            "name":"percent humidity",
+            "symbol":"%"
+         }
+      },
+      {
+         "name":"temperature",
+         "type":"temperature",
+         "precision":3,
+         "scaling_factor":1.0,
+         "unit":{
+            "name":"celsius",
+            "symbol":"C"
+         }
+      }
+   ]
 }`
 
 	expected := &scheme.Info{
@@ -848,17 +842,15 @@ func TestHTTPClientV3_Info_200(t *testing.T) {
 				},
 			},
 		},
-		Output: []scheme.OutputOptions{
+		Outputs: []scheme.OutputOptions{
 			{
 				Name:          "humidity",
 				Type:          "humidity",
 				Precision:     int(3),
 				ScalingFactor: float64(1.0),
-				Units: []scheme.UnitOptions{
-					{
-						Name:   "percent humidity",
-						Symbol: "%",
-					},
+				Unit: scheme.UnitOptions{
+					Name:   "percent humidity",
+					Symbol: "%",
 				},
 			},
 			{
@@ -866,15 +858,9 @@ func TestHTTPClientV3_Info_200(t *testing.T) {
 				Type:          "temperature",
 				Precision:     int(3),
 				ScalingFactor: float64(1.0),
-				Units: []scheme.UnitOptions{
-					{
-						Name:   "celsius",
-						Symbol: "C",
-					},
-					{
-						Name:   "fahrenheit",
-						Symbol: "F",
-					},
+				Unit: scheme.UnitOptions{
+					Name:   "celsius",
+					Symbol: "C",
 				},
 			},
 		},
