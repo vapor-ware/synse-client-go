@@ -347,6 +347,7 @@ func TestIntegration_WriteAsync(t *testing.T) {
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
 
+	// collect all writable devices.
 	// FIXME - refer to #69, can only query one type atm.
 	opts := scheme.ScanOptions{
 		Tags: []string{
@@ -379,6 +380,61 @@ func TestIntegration_WriteAsync(t *testing.T) {
 			// assert.Equal(t, "101"), write.Context.Data)
 			assert.Empty(t, write.Context.Transaction)
 			assert.NotEmpty(t, write.Timeout)
+		}
+	}
+}
+
+func TestIntegration_WriteSync(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	// collect all writable devices.
+	// FIXME - refer to #69, can only query one type atm.
+	opts := scheme.ScanOptions{
+		Tags: []string{
+			"system/type:fan",
+			// "system/type:led",
+			// "system/type:lock",
+			// "system/type:power",
+		},
+	}
+	devices, err := client.Scan(opts)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(devices))
+
+	for _, device := range devices {
+		assert.NotEmpty(t, device.ID)
+
+		writeData := []scheme.WriteData{
+			{Action: "speed", Data: "101"}, // FIXME - if Data is int, get 500 from server.
+		}
+		writes, err := client.WriteSync(device.ID, writeData)
+		assert.NoError(t, err)
+
+		assert.Equal(t, 1, len(writes))
+
+		for _, write := range writes {
+			assert.NotEmpty(t, write.ID)
+			assert.NotEmpty(t, write.Created)
+			assert.NotEmpty(t, write.Updated)
+			assert.NotEmpty(t, write.Timeout)
+			assert.Equal(t, "DONE", write.Status)
+
+			assert.Equal(t, "speed", write.Context.Action)
+			// FIXME - reflected data is not decoded yet
+			// assert.Equal(t, "101"), write.Context.Data)
+			assert.Empty(t, write.Context.Transaction)
+			assert.NotEmpty(t, write.Timeout)
+			assert.Equal(t, device.ID, write.Device)
+
+			// NOTE - write.Message could be empty so we don't check that
 		}
 	}
 }
