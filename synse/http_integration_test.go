@@ -122,7 +122,8 @@ func TestIntegration_PluginInfo(t *testing.T) {
 		assert.NotEmpty(t, check.Name)
 		assert.Equal(t, "OK", check.Status)
 		assert.NotEmpty(t, check.Type)
-		assert.Empty(t, check.Timestamp) // FIXME - should this be non-empty?
+		// assert.NotEmpty(t, check.Timestamp) // FIXME - this is empty?
+
 		// NOTE - check.Message could be empty so we don't check that
 	}
 }
@@ -226,21 +227,25 @@ func TestIntegration_Info(t *testing.T) {
 		assert.NotEmpty(t, info.Plugin)
 		assert.NotEmpty(t, info.Capabilities.Mode)
 		assert.NotEmpty(t, info.Tags)
+
 		// NOTE - these fields could be empty so we don't check them:
 		// - info.Alias
 		// - info.Metadata
 		// - info.Capabilities.Write.Actions
+
 		// TODO - add sort_index to the scheme
 
-		// FIXME - recheck if its outputs or output from the doc
-		// for _, output := range info.Output {
-		// 	assert.NotEmpty(t, output.Name)
-		// 	assert.NotEmpty(t, output.Type)
-		// 	assert.NotEmpty(t, output.Precision)
-		// 	assert.NotEmpty(t, output.ScalingFactor)
-		// 	assert.NotEmpty(t, output.Unit.Name)
-		// 	assert.NotEmpty(t, output.Unit.Symbol)
-		// }
+		for _, output := range info.Outputs {
+			assert.NotEmpty(t, output.Name)
+			// FIXME - some of these are empty sometimes?
+			// assert.NotEmpty(t, output.Type)
+			// assert.NotEmpty(t, output.Unit.Name)
+			// assert.NotEmpty(t, output.Unit.Symbol)
+
+			// NOTE - these field could be empty so we don't check them:
+			// - output.Precision
+			// - output.ScalingFactor
+		}
 	}
 }
 
