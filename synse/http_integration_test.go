@@ -122,7 +122,7 @@ func TestIntegration_PluginInfo(t *testing.T) {
 		assert.NotEmpty(t, check.Name)
 		assert.Equal(t, "OK", check.Status)
 		assert.NotEmpty(t, check.Type)
-		// assert.NotEmpty(t, check.Timestamp) // FIXME - this is empty?
+		// assert.NotEmpty(t, check.Timestamp) // FIXME - should this be empty?
 
 		// NOTE - check.Message could be empty so we don't check that
 	}
@@ -326,12 +326,59 @@ func TestIntegration_ReadCache(t *testing.T) {
 			assert.NotEmpty(t, r)
 
 		case <-time.After(2 * time.Second):
-			// If the test does not complete after 2s, error.
+			// if the test does not complete after 2s, error.
 			t.Fatal("timeout: failed getting readcache data from channel")
 		}
 
 		if done {
 			break
+		}
+	}
+}
+
+func TestIntegration_WriteAsync(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	// FIXME - refer to #69, can only query one type atm.
+	opts := scheme.ScanOptions{
+		Tags: []string{
+			"system/type:fan",
+			// "system/type:led",
+			// "system/type:lock",
+			// "system/type:power",
+		},
+	}
+	devices, err := client.Scan(opts)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(devices))
+
+	for _, device := range devices {
+		assert.NotEmpty(t, device.ID)
+
+		writeData := []scheme.WriteData{
+			{Action: "speed", Data: "101"}, // FIXME - if Data is int, get 500 from server.
+		}
+		writes, err := client.WriteAsync(device.ID, writeData)
+		assert.NoError(t, err)
+
+		assert.Equal(t, 1, len(writes))
+
+		for _, write := range writes {
+			assert.NotEmpty(t, write.ID)
+			assert.NotEmpty(t, write.Device)
+			assert.Equal(t, "speed", write.Context.Action)
+			// FIXME - reflected data is not decoded yet
+			// assert.Equal(t, "101"), write.Context.Data)
+			assert.Empty(t, write.Context.Transaction)
+			assert.NotEmpty(t, write.Timeout)
 		}
 	}
 }
