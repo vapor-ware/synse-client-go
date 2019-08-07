@@ -938,34 +938,26 @@ func TestWebSocketClientV3_Info_200(t *testing.T) {
             ]
          }
       },
-      "output":[
+      "outputs":[
          {
             "name":"humidity",
             "type":"humidity",
             "precision":3,
             "scaling_factor":1.0,
-            "units":[
-               {
-                  "name":"percent humidity",
-                  "symbol":"%"
-               }
-            ]
+            "unit":{
+               "name":"percent humidity",
+               "symbol":"%"
+            }
          },
          {
             "name":"temperature",
             "type":"temperature",
             "precision":3,
             "scaling_factor":1.0,
-            "units":[
-               {
-                  "name":"celsius",
-                  "symbol":"C"
-               },
-               {
-                  "name":"fahrenheit",
-                  "symbol":"F"
-               }
-            ]
+            "unit":{
+               "name":"celsius",
+               "symbol":"C"
+            }
          }
       ]
    }
@@ -996,17 +988,15 @@ func TestWebSocketClientV3_Info_200(t *testing.T) {
 				},
 			},
 		},
-		Output: []scheme.OutputOptions{
+		Outputs: []scheme.OutputOptions{
 			{
 				Name:          "humidity",
 				Type:          "humidity",
 				Precision:     int(3),
 				ScalingFactor: float64(1.0),
-				Units: []scheme.UnitOptions{
-					{
-						Name:   "percent humidity",
-						Symbol: "%",
-					},
+				Unit: scheme.UnitOptions{
+					Name:   "percent humidity",
+					Symbol: "%",
 				},
 			},
 			{
@@ -1014,15 +1004,9 @@ func TestWebSocketClientV3_Info_200(t *testing.T) {
 				Type:          "temperature",
 				Precision:     int(3),
 				ScalingFactor: float64(1.0),
-				Units: []scheme.UnitOptions{
-					{
-						Name:   "celsius",
-						Symbol: "C",
-					},
-					{
-						Name:   "fahrenheit",
-						Symbol: "F",
-					},
+				Unit: scheme.UnitOptions{
+					Name:   "celsius",
+					Symbol: "C",
 				},
 			},
 		},

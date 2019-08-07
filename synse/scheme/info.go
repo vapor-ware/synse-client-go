@@ -11,7 +11,7 @@ type Info struct {
 	Info         string              `json:"info" yaml:"info" mapstructure:"info"`
 	Tags         []string            `json:"tags" yaml:"tags" mapstructure:"tags"`
 	Capabilities CapabilitiesOptions `json:"capabilities" yaml:"capabilities" mapstructure:"capabilities"`
-	Output       []OutputOptions     `json:"output" yaml:"output" mapstructure:"output"`
+	Outputs      []OutputOptions     `json:"outputs" yaml:"outputs" mapstructure:"outputs"`
 }
 
 // CapabilitiesOptions holds the capabilities info.
@@ -28,11 +28,11 @@ type WriteOptions struct {
 
 // OutputOptions holds the output info.
 type OutputOptions struct {
-	Name          string        `json:"name" yaml:"name" mapstructure:"name"`
-	Type          string        `json:"type" yaml:"type" mapstructure:"type"`
-	Precision     int           `json:"precision" yaml:"precision" mapstructure:"precision"`
-	ScalingFactor float64       `json:"scaling_factor" yaml:"scaling_factor" mapstructure:"scaling_factor"`
-	Units         []UnitOptions `json:"units" yaml:"units" mapstructure:"units"`
+	Name          string      `json:"name" yaml:"name" mapstructure:"name"`
+	Type          string      `json:"type" yaml:"type" mapstructure:"type"`
+	Precision     int         `json:"precision" yaml:"precision" mapstructure:"precision"`
+	ScalingFactor float64     `json:"scaling_factor" yaml:"scaling_factor" mapstructure:"scaling_factor"`
+	Unit          UnitOptions `json:"unit" yaml:"unit" mapstructure:"unit"`
 }
 
 // UnitOptions holds the unit info.
