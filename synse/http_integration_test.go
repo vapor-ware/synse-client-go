@@ -438,3 +438,53 @@ func TestIntegration_WriteSync(t *testing.T) {
 		}
 	}
 }
+
+func TestIntegration_Transactions(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	transactions, err := client.Transactions()
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(transactions))
+}
+
+func TestIntegration_Transaction(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	transactions, err := client.Transactions()
+	assert.NoError(t, err)
+
+	for _, id := range transactions {
+		transaction, err := client.Transaction(id)
+		assert.NoError(t, err)
+
+		assert.NotEmpty(t, transaction.ID)
+		assert.NotEmpty(t, transaction.Created)
+		assert.NotEmpty(t, transaction.Updated)
+		assert.NotEmpty(t, transaction.Timeout)
+		assert.Equal(t, "DONE", transaction.Status)
+		assert.NotEmpty(t, transaction.Context.Action)
+		assert.NotEmpty(t, transaction.Context.Data)
+		assert.Empty(t, transaction.Context.Transaction)
+		assert.NotEmpty(t, transaction.Timeout)
+		assert.NotEmpty(t, transaction.Device)
+
+		// NOTE - write.Message could be empty so we don't check that
+
+	}
+}
