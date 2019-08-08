@@ -72,12 +72,15 @@ func TestIntegration_Plugins(t *testing.T) {
 	plugins, err := client.Plugins()
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(plugins))
-	assert.NotEmpty(t, plugins[0].Name)
-	assert.NotEmpty(t, plugins[0].Maintainer)
-	assert.NotEmpty(t, plugins[0].Tag)
-	assert.NotEmpty(t, plugins[0].Description)
-	assert.NotEmpty(t, plugins[0].ID)
-	assert.True(t, plugins[0].Active)
+
+	for _, plugin := range plugins {
+		assert.NotEmpty(t, plugin.Name)
+		assert.NotEmpty(t, plugin.Maintainer)
+		assert.NotEmpty(t, plugin.Tag)
+		assert.NotEmpty(t, plugin.Description)
+		assert.NotEmpty(t, plugin.ID)
+		assert.True(t, plugin.Active)
+	}
 }
 
 func TestIntegration_PluginInfo(t *testing.T) {
@@ -94,36 +97,38 @@ func TestIntegration_PluginInfo(t *testing.T) {
 	plugins, err := client.Plugins()
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(plugins))
-	assert.NotEmpty(t, plugins[0])
 
-	plugin, err := client.Plugin(plugins[0].ID)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, plugin.Name)
-	assert.NotEmpty(t, plugin.Maintainer)
-	assert.NotEmpty(t, plugin.Tag)
-	assert.NotEmpty(t, plugin.Description)
-	assert.NotEmpty(t, plugin.VCS)
-	assert.NotEmpty(t, plugin.ID)
-	assert.True(t, plugin.Active)
-	assert.NotEmpty(t, plugin.Network.Address)
-	assert.NotEmpty(t, plugin.Network.Protocol)
-	assert.NotEmpty(t, plugin.Version.PluginVersion)
-	assert.NotEmpty(t, plugin.Version.SDKVersion)
-	assert.NotEmpty(t, plugin.Version.BuildDate)
-	assert.NotEmpty(t, plugin.Version.GitCommit)
-	assert.NotEmpty(t, plugin.Version.GitTag)
-	assert.NotEmpty(t, plugin.Version.Arch)
-	assert.NotEmpty(t, plugin.Version.OS)
-	assert.NotEmpty(t, plugin.Health.Timestamp)
-	assert.Equal(t, "OK", plugin.Health.Status)
-	assert.Equal(t, 2, len(plugin.Health.Checks))
+	for _, p := range plugins {
+		plugin, err := client.Plugin(p.ID)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, plugin.Name)
+		assert.NotEmpty(t, plugin.Maintainer)
+		assert.NotEmpty(t, plugin.Tag)
+		assert.NotEmpty(t, plugin.Description)
+		assert.NotEmpty(t, plugin.VCS)
+		assert.NotEmpty(t, plugin.ID)
+		assert.True(t, plugin.Active)
+		assert.NotEmpty(t, plugin.Network.Address)
+		assert.NotEmpty(t, plugin.Network.Protocol)
+		assert.NotEmpty(t, plugin.Version.PluginVersion)
+		assert.NotEmpty(t, plugin.Version.SDKVersion)
+		assert.NotEmpty(t, plugin.Version.BuildDate)
+		assert.NotEmpty(t, plugin.Version.GitCommit)
+		assert.NotEmpty(t, plugin.Version.GitTag)
+		assert.NotEmpty(t, plugin.Version.Arch)
+		assert.NotEmpty(t, plugin.Version.OS)
+		assert.NotEmpty(t, plugin.Health.Timestamp)
+		assert.Equal(t, "OK", plugin.Health.Status)
+		assert.Equal(t, 2, len(plugin.Health.Checks))
 
-	for _, check := range plugin.Health.Checks {
-		assert.NotEmpty(t, check.Name)
-		assert.Equal(t, "OK", check.Status)
-		assert.NotEmpty(t, check.Type)
-		assert.NotEmpty(t, check.Timestamp)
-		assert.Empty(t, check.Message)
+		for _, check := range plugin.Health.Checks {
+			assert.NotEmpty(t, check.Name)
+			assert.Equal(t, "OK", check.Status)
+			assert.NotEmpty(t, check.Type)
+			assert.NotEmpty(t, check.Timestamp)
+			assert.Empty(t, check.Message)
+		}
+
 	}
 }
 
@@ -246,7 +251,7 @@ func TestIntegration_Info(t *testing.T) {
 
 		for _, output := range info.Outputs {
 			assert.NotEmpty(t, output.Name)
-			// assert.NotEmpty(t, output.Type) // FIXME - type is empty for airflow devices?
+			// assert.NotEmpty(t, output.Type) // FIXME - only airflow types are empty?
 
 			// led and lock devices don't produce unit and precision output
 			if output.Name == "state" || output.Name == "color" || output.Name == "status" {
@@ -281,7 +286,21 @@ func TestIntegration_Read(t *testing.T) {
 	assert.Equal(t, 25, len(devices))
 
 	for _, device := range devices {
-		assert.NotEmpty(t, device)
+		assert.NotEmpty(t, device.Device)
+		assert.NotEmpty(t, device.Timestamp)
+		// assert.NotEmpty(t, device.Type) // FIXME - fan and airflow types are empty?
+		assert.NotEmpty(t, device.DeviceType)
+
+		// led and lock devices don't produce unit output
+		if device.DeviceType == "led" || device.DeviceType == "lock" {
+			assert.Empty(t, device.Unit.Name)
+			assert.Empty(t, device.Unit.Symbol)
+		} else {
+			assert.NotEmpty(t, device.Unit.Name)
+			assert.NotEmpty(t, device.Unit.Symbol)
+		}
+
+		// NOTE - device.Value could be 0 so no need to check that
 	}
 }
 
