@@ -171,10 +171,11 @@ func TestIntegration_Scan(t *testing.T) {
 		assert.NotEmpty(t, device.Plugin)
 		assert.NotEmpty(t, device.Tags)
 
-		if device.Type != "led" {
-			assert.Empty(t, device.Alias)
-		} else {
+		// only led devices have alias
+		if device.Type == "led" {
 			assert.NotEmpty(t, device.Alias)
+		} else {
+			assert.Empty(t, device.Alias)
 		}
 	}
 }
@@ -231,23 +232,34 @@ func TestIntegration_Info(t *testing.T) {
 		assert.NotEmpty(t, info.Plugin)
 		assert.NotEmpty(t, info.Capabilities.Mode)
 		assert.NotEmpty(t, info.Tags)
-
-		// NOTE - these fields could be empty so we don't check them:
-		// - info.Alias
-		// - info.Metadata
-		// - info.Capabilities.Write.Actions
+		assert.NotEmpty(t, info.Metadata)
+		assert.Empty(t, info.Capabilities.Write.Actions)
 
 		// TODO - add sort_index to the scheme
 
+		// only led devices have alias
+		if info.Type == "led" {
+			assert.NotEmpty(t, info.Alias)
+		} else {
+			assert.Empty(t, info.Alias)
+		}
+
 		for _, output := range info.Outputs {
 			assert.NotEmpty(t, output.Name)
-			// assert.NotEmpty(t, output.Type) // FIXME - type is empty airflow devices?
-			// assert.NotEmpty(t, output.Unit.Name, output.Name)
-			// assert.NotEmpty(t, output.Unit.Symbol)
+			// assert.NotEmpty(t, output.Type) // FIXME - type is empty for airflow devices?
 
-			// NOTE - these field could be empty so we don't check them:
-			// - output.Precision
-			// - output.ScalingFactor
+			// led and lock devices don't produce unit and precision output
+			if output.Name == "state" || output.Name == "color" || output.Name == "status" {
+				assert.Empty(t, output.Unit.Name)
+				assert.Empty(t, output.Unit.Symbol)
+				assert.Empty(t, output.Precision)
+			} else {
+				assert.NotEmpty(t, output.Unit.Name)
+				assert.NotEmpty(t, output.Unit.Symbol)
+				assert.NotEmpty(t, output.Precision)
+			}
+
+			assert.Empty(t, output.ScalingFactor)
 		}
 	}
 }
