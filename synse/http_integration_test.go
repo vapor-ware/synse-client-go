@@ -321,12 +321,27 @@ func TestIntegration_ReadDevice(t *testing.T) {
 	assert.Equal(t, 22, len(devices))
 
 	for _, device := range devices {
-		assert.NotEmpty(t, device)
-
 		opts := scheme.ReadOptions{}
-		data, err := client.ReadDevice(device.ID, opts)
+		reads, err := client.ReadDevice(device.ID, opts)
 		assert.NoError(t, err)
-		assert.NotEmpty(t, data)
+
+		for _, read := range reads {
+			assert.NotEmpty(t, read.Device)
+			assert.NotEmpty(t, read.Timestamp)
+			// assert.NotEmpty(t, read.Type) // FIXME - fan and airflow types are empty?
+			assert.NotEmpty(t, read.DeviceType)
+
+			// led and lock devices don't produce unit output
+			if read.DeviceType == "led" || read.DeviceType == "lock" {
+				assert.Empty(t, read.Unit.Name)
+				assert.Empty(t, read.Unit.Symbol)
+			} else {
+				assert.NotEmpty(t, read.Unit.Name)
+				assert.NotEmpty(t, read.Unit.Symbol)
+			}
+
+			// NOTE - read.Value could be 0 so no need to check that
+		}
 	}
 }
 
@@ -342,22 +357,37 @@ func TestIntegration_ReadCache(t *testing.T) {
 	assert.NoError(t, err)
 
 	opts := scheme.ReadCacheOptions{}
-	readings := make(chan *scheme.Read, 1)
+	reads := make(chan *scheme.Read, 1)
 
 	go func() {
-		err := client.ReadCache(opts, readings)
+		err := client.ReadCache(opts, reads)
 		assert.NoError(t, err)
 	}()
 
 	for {
 		var done bool
 		select {
-		case r, open := <-readings:
+		case read, open := <-reads:
 			if !open {
 				done = true
 				break
 			}
-			assert.NotEmpty(t, r)
+
+			assert.NotEmpty(t, read.Device)
+			assert.NotEmpty(t, read.Timestamp)
+			// assert.NotEmpty(t, read.Type) // FIXME - fan and airflow types are empty?
+			assert.NotEmpty(t, read.DeviceType)
+
+			// led and lock devices don't produce unit output
+			if read.DeviceType == "led" || read.DeviceType == "lock" {
+				assert.Empty(t, read.Unit.Name)
+				assert.Empty(t, read.Unit.Symbol)
+			} else {
+				assert.NotEmpty(t, read.Unit.Name)
+				assert.NotEmpty(t, read.Unit.Symbol)
+			}
+
+			// NOTE - read.Value could be 0 so no need to check that
 
 		case <-time.After(2 * time.Second):
 			// if the test does not complete after 2s, error.
