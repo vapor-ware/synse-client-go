@@ -170,7 +170,12 @@ func TestIntegration_Scan(t *testing.T) {
 		assert.NotEmpty(t, device.Type)
 		assert.NotEmpty(t, device.Plugin)
 		assert.NotEmpty(t, device.Tags)
-		// NOTE - device.Alias could be empty so we don't check that
+
+		if device.Type != "led" {
+			assert.Empty(t, device.Alias)
+		} else {
+			assert.NotEmpty(t, device.Alias)
+		}
 	}
 }
 
@@ -236,9 +241,8 @@ func TestIntegration_Info(t *testing.T) {
 
 		for _, output := range info.Outputs {
 			assert.NotEmpty(t, output.Name)
-			// FIXME - some of these are empty sometimes?
-			// assert.NotEmpty(t, output.Type)
-			// assert.NotEmpty(t, output.Unit.Name)
+			// assert.NotEmpty(t, output.Type) // FIXME - type is empty airflow devices?
+			// assert.NotEmpty(t, output.Unit.Name, output.Name)
 			// assert.NotEmpty(t, output.Unit.Symbol)
 
 			// NOTE - these field could be empty so we don't check them:
