@@ -448,8 +448,7 @@ func TestIntegration_WriteSync(t *testing.T) {
 			assert.Empty(t, write.Context.Transaction)
 			assert.NotEmpty(t, write.Timeout)
 			assert.Equal(t, device.ID, write.Device)
-
-			// NOTE - write.Message could be empty so we don't check that
+			assert.Empty(t, write.Message)
 		}
 	}
 }
@@ -498,8 +497,6 @@ func TestIntegration_Transaction(t *testing.T) {
 		assert.Empty(t, transaction.Context.Transaction)
 		assert.NotEmpty(t, transaction.Timeout)
 		assert.NotEmpty(t, transaction.Device)
-
-		// NOTE - write.Message could be empty so we don't check that
-
+		assert.Empty(t, transaction.Message)
 	}
 }
