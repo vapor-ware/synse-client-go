@@ -122,9 +122,8 @@ func TestIntegration_PluginInfo(t *testing.T) {
 		assert.NotEmpty(t, check.Name)
 		assert.Equal(t, "OK", check.Status)
 		assert.NotEmpty(t, check.Type)
-		// assert.NotEmpty(t, check.Timestamp) // FIXME - should this be empty?
-
-		// NOTE - check.Message could be empty so we don't check that
+		assert.NotEmpty(t, check.Timestamp)
+		assert.Empty(t, check.Message)
 	}
 }
 
