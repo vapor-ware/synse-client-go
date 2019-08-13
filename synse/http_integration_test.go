@@ -38,8 +38,8 @@ func TestIntegration_Version(t *testing.T) {
 
 	version, err := client.Version()
 	assert.NoError(t, err)
+	assert.Equal(t, "3.0.0-alpha.3", version.Version)
 	assert.Equal(t, "v3", version.APIVersion)
-	assert.NotEmpty(t, version.Version)
 }
 
 func TestIntegration_Config(t *testing.T) {
@@ -67,100 +67,99 @@ func TestIntegration_Config(t *testing.T) {
 	assert.False(t, config.Metrics.Enabled)
 }
 
-// func TestIntegration_Plugins(t *testing.T) {
-// 	if testing.Short() {
-// 		t.Skip("skipping integration test")
-// 	}
+func TestIntegration_Plugins(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
 
-// 	client, err := NewHTTPClientV3(&Options{
-// 		Address: "localhost:5000",
-// 	})
-// 	assert.NotNil(t, client)
-// 	assert.NoError(t, err)
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
 
-// 	plugins, err := client.Plugins()
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, 1, len(plugins))
+	plugins, err := client.Plugins()
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(plugins))
 
-// 	for _, plugin := range plugins {
-// 		assert.NotEmpty(t, plugin.Name)
-// 		assert.NotEmpty(t, plugin.Maintainer)
-// 		assert.NotEmpty(t, plugin.Tag)
-// 		assert.NotEmpty(t, plugin.Description)
-// 		assert.NotEmpty(t, plugin.ID)
-// 		assert.True(t, plugin.Active)
-// 	}
-// }
+	plugin := plugins[0]
+	assert.Equal(t, "emulator plugin", plugin.Name)
+	assert.Equal(t, "vaporio", plugin.Maintainer)
+	assert.Equal(t, "vaporio/emulator-plugin", plugin.Tag)
+	assert.Equal(t, "A plugin with emulated devices and data", plugin.Description)
+	assert.Equal(t, "4032ffbe-80db-5aa5-b794-f35c88dff85c", plugin.ID)
+	assert.True(t, plugin.Active)
+}
 
-// func TestIntegration_PluginInfo(t *testing.T) {
-// 	if testing.Short() {
-// 		t.Skip("skipping integration test")
-// 	}
+func TestIntegration_PluginInfo(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
 
-// 	client, err := NewHTTPClientV3(&Options{
-// 		Address: "localhost:5000",
-// 	})
-// 	assert.NotNil(t, client)
-// 	assert.NoError(t, err)
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
 
-// 	plugins, err := client.Plugins()
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, 1, len(plugins))
+	plugin, err := client.Plugin("4032ffbe-80db-5aa5-b794-f35c88dff85c")
+	assert.NoError(t, err)
+	assert.Equal(t, "emulator plugin", plugin.Name)
+	assert.Equal(t, "vaporio", plugin.Maintainer)
+	assert.Equal(t, "vaporio/emulator-plugin", plugin.Tag)
+	assert.Equal(t, "A plugin with emulated devices and data", plugin.Description)
+	assert.Equal(t, "4032ffbe-80db-5aa5-b794-f35c88dff85c", plugin.ID)
+	assert.True(t, plugin.Active)
 
-// 	for _, p := range plugins {
-// 		plugin, err := client.Plugin(p.ID)
-// 		assert.NoError(t, err)
-// 		assert.NotEmpty(t, plugin.Name)
-// 		assert.NotEmpty(t, plugin.Maintainer)
-// 		assert.NotEmpty(t, plugin.Tag)
-// 		assert.NotEmpty(t, plugin.Description)
-// 		assert.NotEmpty(t, plugin.VCS)
-// 		assert.NotEmpty(t, plugin.ID)
-// 		assert.True(t, plugin.Active)
-// 		assert.NotEmpty(t, plugin.Network.Address)
-// 		assert.NotEmpty(t, plugin.Network.Protocol)
-// 		assert.NotEmpty(t, plugin.Version.PluginVersion)
-// 		assert.NotEmpty(t, plugin.Version.SDKVersion)
-// 		assert.NotEmpty(t, plugin.Version.BuildDate)
-// 		assert.NotEmpty(t, plugin.Version.GitCommit)
-// 		assert.NotEmpty(t, plugin.Version.GitTag)
-// 		assert.NotEmpty(t, plugin.Version.Arch)
-// 		assert.NotEmpty(t, plugin.Version.OS)
-// 		assert.NotEmpty(t, plugin.Health.Timestamp)
-// 		assert.Equal(t, "OK", plugin.Health.Status)
-// 		assert.Equal(t, 2, len(plugin.Health.Checks))
+	assert.Equal(t, "emulator:5001", plugin.Network.Address)
+	assert.Equal(t, "tcp", plugin.Network.Protocol)
+	assert.Equal(t, "3.0.0-alpha.3", plugin.Version.PluginVersion)
+	assert.Equal(t, "3.0.0-alpha.1", plugin.Version.SDKVersion)
+	assert.NotEmpty(t, plugin.Version.BuildDate)
+	assert.Equal(t, "4234777", plugin.Version.GitCommit)
+	assert.Equal(t, "3.0.0-alpha.3", plugin.Version.GitTag)
+	assert.Equal(t, "amd64", plugin.Version.Arch)
+	assert.Equal(t, "linux", plugin.Version.OS)
+	assert.NotEmpty(t, plugin.Health.Timestamp)
+	assert.Equal(t, "OK", plugin.Health.Status)
+	assert.Equal(t, 2, len(plugin.Health.Checks))
 
-// 		for _, check := range plugin.Health.Checks {
-// 			assert.NotEmpty(t, check.Name)
-// 			assert.Equal(t, "OK", check.Status)
-// 			assert.NotEmpty(t, check.Type)
-// 			assert.NotEmpty(t, check.Timestamp)
-// 			assert.Empty(t, check.Message)
-// 		}
+	readCheck := plugin.Health.Checks[0]
+	assert.Equal(t, "read queue health", readCheck.Name)
+	assert.Equal(t, "OK", readCheck.Status)
+	assert.Equal(t, "periodic", readCheck.Type)
+	assert.NotEmpty(t, readCheck.Timestamp)
+	assert.Empty(t, readCheck.Message)
 
-// 	}
-// }
+	writeCheck := plugin.Health.Checks[1]
+	assert.Equal(t, "write queue health", writeCheck.Name)
+	assert.Equal(t, "OK", writeCheck.Status)
+	assert.Equal(t, "periodic", writeCheck.Type)
+	assert.NotEmpty(t, writeCheck.Timestamp)
+	assert.Empty(t, writeCheck.Message)
+}
 
-// func TestIntegration_PluginHealth(t *testing.T) {
-// 	if testing.Short() {
-// 		t.Skip("skipping integration test")
-// 	}
+func TestIntegration_PluginHealth(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
 
-// 	client, err := NewHTTPClientV3(&Options{
-// 		Address: "localhost:5000",
-// 	})
-// 	assert.NotNil(t, client)
-// 	assert.NoError(t, err)
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
 
-// 	health, err := client.PluginHealth()
-// 	assert.NoError(t, err)
-// 	assert.NotEmpty(t, health.Status)
-// 	assert.NotEmpty(t, health.Updated)
-// 	assert.Equal(t, 1, len(health.Healthy))
-// 	assert.Equal(t, 0, len(health.Unhealthy))
-// 	assert.Equal(t, 1, health.Active)
-// 	assert.Equal(t, 0, health.Inactive)
-// }
+	health, err := client.PluginHealth()
+	assert.NoError(t, err)
+	assert.Equal(t, "healthy", health.Status)
+	assert.NotEmpty(t, health.Updated)
+	assert.Equal(t, 1, len(health.Healthy))
+	assert.Equal(t, "4032ffbe-80db-5aa5-b794-f35c88dff85c", health.Healthy[0])
+	assert.Equal(t, 0, len(health.Unhealthy))
+	assert.Equal(t, 1, health.Active)
+	assert.Equal(t, 0, health.Inactive)
+}
 
 // func TestIntegration_Scan(t *testing.T) {
 // 	if testing.Short() {

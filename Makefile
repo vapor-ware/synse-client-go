@@ -1,7 +1,5 @@
 #
-# synse-client-go
-#
-
+# synse-client-go # 
 PKG_VERSION := 0.0.1
 
 
@@ -43,7 +41,7 @@ test-integration:  ## Run integration tests
 	# every time before running the tests so they won't fail
 	docker-compose -f compose/server.yml up -d
 	# have to wait at least 30 seconds for the emulated health checks to be fully populated
-	sleep 6
+	sleep 30
 	go test -race -cover -run Integration ./... || (docker-compose -f compose/server.yml stop; exit 1)
 	docker-compose -f compose/server.yml down
 
