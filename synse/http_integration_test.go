@@ -364,107 +364,83 @@ func TestIntegration_ReadCache(t *testing.T) {
 	}
 }
 
-// func TestIntegration_WriteAsync(t *testing.T) {
-// 	if testing.Short() {
-// 		t.Skip("skipping integration test")
-// 	}
+func TestIntegration_WriteAsync(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
 
-// 	client, err := NewHTTPClientV3(&Options{
-// 		Address: "localhost:5000",
-// 	})
-// 	assert.NotNil(t, client)
-// 	assert.NoError(t, err)
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
 
-// 	// collect all writable devices.
-// 	// FIXME - refer to #69, can only query one type atm.
-// 	opts := scheme.ScanOptions{
-// 		Tags: []string{
-// 			"system/type:fan",
-// 			// "system/type:led",
-// 			// "system/type:lock",
-// 			// "system/type:power",
-// 		},
-// 	}
-// 	devices, err := client.Scan(opts)
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, 1, len(devices))
+	writeData := []scheme.WriteData{
+		{Action: "state", Data: "on"},
+		{Action: "color", Data: "ffffff"},
+	}
+	writes, err := client.WriteAsync("f041883c-cf87-55d7-a978-3d3103836412", writeData)
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(writes))
 
-// 	for _, device := range devices {
-// 		assert.NotEmpty(t, device.ID)
+	stateWrite := writes[0]
+	assert.NotEmpty(t, stateWrite.ID)
+	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", stateWrite.Device)
+	assert.Equal(t, "state", stateWrite.Context.Action)
+	// assert.Equal(t, "on", stateWrite.Context.Data) // FIXME - reflected data isn't decoded yet
+	assert.Empty(t, stateWrite.Context.Transaction)
+	assert.Equal(t, "30s", stateWrite.Timeout)
 
-// 		writeData := []scheme.WriteData{
-// 			{Action: "speed", Data: "101"}, // FIXME - if Data is int, get 500 from server.
-// 		}
-// 		writes, err := client.WriteAsync(device.ID, writeData)
-// 		assert.NoError(t, err)
+	colorWrite := writes[1]
+	assert.NotEmpty(t, colorWrite.ID)
+	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", colorWrite.Device)
+	assert.Equal(t, "color", colorWrite.Context.Action)
+	// assert.Equal(t, "ffffff", colorWrite.Context.Data) // FIXME - reflected data isn't decoded yet
+	assert.Empty(t, colorWrite.Context.Transaction)
+	assert.Equal(t, "30s", colorWrite.Timeout)
+}
 
-// 		assert.Equal(t, 1, len(writes))
+func TestIntegration_WriteSync(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
 
-// 		for _, write := range writes {
-// 			assert.NotEmpty(t, write.ID)
-// 			assert.NotEmpty(t, write.Device)
-// 			assert.Equal(t, "speed", write.Context.Action)
-// 			// FIXME - reflected data is not decoded yet
-// 			// assert.Equal(t, "101"), write.Context.Data)
-// 			assert.Empty(t, write.Context.Transaction)
-// 			assert.NotEmpty(t, write.Timeout)
-// 		}
-// 	}
-// }
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
 
-// func TestIntegration_WriteSync(t *testing.T) {
-// 	if testing.Short() {
-// 		t.Skip("skipping integration test")
-// 	}
+	writeData := []scheme.WriteData{
+		{Action: "state", Data: "on"},
+		{Action: "color", Data: "ffffff"},
+	}
+	writes, err := client.WriteSync("f041883c-cf87-55d7-a978-3d3103836412", writeData)
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(writes))
 
-// 	client, err := NewHTTPClientV3(&Options{
-// 		Address: "localhost:5000",
-// 	})
-// 	assert.NotNil(t, client)
-// 	assert.NoError(t, err)
+	stateWrite := writes[0]
+	assert.NotEmpty(t, stateWrite.ID)
+	assert.NotEmpty(t, stateWrite.Created)
+	assert.NotEmpty(t, stateWrite.Updated)
+	assert.Equal(t, "30s", stateWrite.Timeout)
+	assert.Equal(t, "DONE", stateWrite.Status)
+	assert.Equal(t, "state", stateWrite.Context.Action)
+	// assert.Equal(t, "on", stateWrite.Context.Data) // FIXME - reflected data isn't decoded yet
+	assert.Empty(t, stateWrite.Context.Transaction)
+	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", stateWrite.Device)
 
-// 	// collect all writable devices.
-// 	// FIXME - refer to #69, can only query one type atm.
-// 	opts := scheme.ScanOptions{
-// 		Tags: []string{
-// 			"system/type:fan",
-// 			// "system/type:led",
-// 			// "system/type:lock",
-// 			// "system/type:power",
-// 		},
-// 	}
-// 	devices, err := client.Scan(opts)
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, 1, len(devices))
-
-// 	for _, device := range devices {
-// 		assert.NotEmpty(t, device.ID)
-
-// 		writeData := []scheme.WriteData{
-// 			{Action: "speed", Data: "101"}, // FIXME - if Data is int, get 500 from server.
-// 		}
-// 		writes, err := client.WriteSync(device.ID, writeData)
-// 		assert.NoError(t, err)
-
-// 		assert.Equal(t, 1, len(writes))
-
-// 		for _, write := range writes {
-// 			assert.NotEmpty(t, write.ID)
-// 			assert.NotEmpty(t, write.Created)
-// 			assert.NotEmpty(t, write.Updated)
-// 			assert.NotEmpty(t, write.Timeout)
-// 			assert.Equal(t, "DONE", write.Status)
-
-// 			assert.Equal(t, "speed", write.Context.Action)
-// 			// FIXME - reflected data is not decoded yet
-// 			// assert.Equal(t, "101"), write.Context.Data)
-// 			assert.Empty(t, write.Context.Transaction)
-// 			assert.NotEmpty(t, write.Timeout)
-// 			assert.Equal(t, device.ID, write.Device)
-// 			assert.Empty(t, write.Message)
-// 		}
-// 	}
-// }
+	colorWrite := writes[1]
+	assert.NotEmpty(t, colorWrite.ID)
+	assert.NotEmpty(t, colorWrite.Created)
+	assert.NotEmpty(t, colorWrite.Updated)
+	assert.Equal(t, "30s", colorWrite.Timeout)
+	assert.Equal(t, "DONE", colorWrite.Status)
+	assert.Equal(t, "color", colorWrite.Context.Action)
+	// assert.Equal(t, "ffffff", colorWrite.Context.Data) // FIXME - reflected data isn't decoded yet
+	assert.Empty(t, colorWrite.Context.Transaction)
+	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", colorWrite.Device)
+}
 
 // func TestIntegration_Transactions(t *testing.T) {
 // 	if testing.Short() {
