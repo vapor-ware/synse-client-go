@@ -43,7 +43,7 @@ test-integration:  ## Run integration tests
 	# every time before running the tests so they won't fail
 	docker-compose -f compose/server.yml up -d
 	# have to wait at least 30 seconds for the emulated health checks to be fully populated
-	sleep 30
+	sleep 6
 	go test -race -cover -run Integration ./... || (docker-compose -f compose/server.yml stop; exit 1)
 	docker-compose -f compose/server.yml down
 
