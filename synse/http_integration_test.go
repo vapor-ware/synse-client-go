@@ -61,7 +61,7 @@ func TestIntegration_Config(t *testing.T) {
 	assert.Equal(t, 1, len(config.Plugin.TCP))
 	assert.Equal(t, "emulator:5001", config.Plugin.TCP[0])
 	assert.Equal(t, 0, len(config.Plugin.Unix))
-	// assert.Equal(t, 180, config.Cache.Device.RebuildEvery) // TODO: update new schema changes from upstream
+	// assert.Equal(t, 180, config.Cache.Device.RebuildEvery) // TODO - update scheme
 	assert.Equal(t, 300, config.Cache.Transaction.TTL)
 	assert.Equal(t, 3, config.GRPC.Timeout)
 	assert.False(t, config.Metrics.Enabled)
@@ -188,89 +188,65 @@ func TestIntegration_Scan(t *testing.T) {
 	assert.Equal(t, "system/type:led", device.Tags[1])
 }
 
-// func TestIntegration_Tags(t *testing.T) {
-// 	if testing.Short() {
-// 		t.Skip("skipping integration test")
-// 	}
+func TestIntegration_Tags(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
 
-// 	client, err := NewHTTPClientV3(&Options{
-// 		Address: "localhost:5000",
-// 	})
-// 	assert.NotNil(t, client)
-// 	assert.NoError(t, err)
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
 
-// 	opts := scheme.TagsOptions{}
-// 	tags, err := client.Tags(opts)
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, 10, len(tags))
+	opts := scheme.TagsOptions{}
+	tags, err := client.Tags(opts)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(tags))
+	assert.Equal(t, "system/type:led", tags[0])
+}
 
-// 	for _, tag := range tags {
-// 		assert.NotEmpty(t, tag)
-// 	}
-// }
+func TestIntegration_Info(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
 
-// func TestIntegration_Info(t *testing.T) {
-// 	if testing.Short() {
-// 		t.Skip("skipping integration test")
-// 	}
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
 
-// 	client, err := NewHTTPClientV3(&Options{
-// 		Address: "localhost:5000",
-// 	})
-// 	assert.NotNil(t, client)
-// 	assert.NoError(t, err)
+	device, err := client.Info("f041883c-cf87-55d7-a978-3d3103836412")
+	assert.NoError(t, err)
+	assert.NotEmpty(t, device.Timestamp)
+	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", device.ID)
+	assert.Equal(t, "led", device.Type)
+	assert.Equal(t, "4032ffbe-80db-5aa5-b794-f35c88dff85c", device.Plugin)
+	assert.Equal(t, "Synse LED", device.Info)
+	assert.Equal(t, "emulator-led", device.Alias)
+	assert.Equal(t, map[string]string{"model": "emul8-led"}, device.Metadata)
+	assert.Equal(t, "rw", device.Capabilities.Mode)
+	assert.Equal(t, 0, len(device.Capabilities.Write.Actions))
+	assert.Equal(t, 2, len(device.Tags))
+	assert.Equal(t, "system/id:f041883c-cf87-55d7-a978-3d3103836412", device.Tags[0])
+	assert.Equal(t, "system/type:led", device.Tags[1])
+	assert.Equal(t, 2, len(device.Outputs))
 
-// 	opts := scheme.ScanOptions{}
-// 	devices, err := client.Scan(opts)
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, 22, len(devices))
+	stateOutput := device.Outputs[0]
+	assert.Equal(t, "state", stateOutput.Name)
+	assert.Equal(t, "state", stateOutput.Type)
+	assert.Equal(t, 0, stateOutput.Precision)
+	assert.Equal(t, 0.0, stateOutput.ScalingFactor)
 
-// 	for _, device := range devices {
-// 		assert.NotEmpty(t, device)
-// 	}
+	colorOutput := device.Outputs[1]
+	assert.Equal(t, "color", colorOutput.Name)
+	assert.Equal(t, "color", colorOutput.Type)
+	assert.Equal(t, 0, colorOutput.Precision)
+	assert.Equal(t, 0.0, colorOutput.ScalingFactor)
 
-// 	for _, device := range devices {
-// 		assert.NotEmpty(t, device)
-
-// 		info, err := client.Info(device.ID)
-// 		assert.NoError(t, err)
-// 		assert.NotEmpty(t, info.Timestamp)
-// 		assert.NotEmpty(t, info.ID)
-// 		assert.NotEmpty(t, info.Type)
-// 		assert.NotEmpty(t, info.Plugin)
-// 		assert.NotEmpty(t, info.Capabilities.Mode)
-// 		assert.NotEmpty(t, info.Tags)
-// 		assert.NotEmpty(t, info.Metadata)
-// 		assert.Empty(t, info.Capabilities.Write.Actions)
-
-// 		// TODO - add sort_index to the scheme
-
-// 		// only led devices have alias
-// 		if info.Type == "led" {
-// 			assert.NotEmpty(t, info.Alias)
-// 		} else {
-// 			assert.Empty(t, info.Alias)
-// 		}
-
-// 		for _, output := range info.Outputs {
-// 			assert.NotEmpty(t, output.Name)
-// 			// assert.NotEmpty(t, output.Type) // FIXME - only airflow types are empty?
-
-// 			// led and lock devices don't produce unit and precision output
-// 			if output.Name == "state" || output.Name == "color" || output.Name == "status" {
-// 				assert.Empty(t, output.Unit.Name)
-// 				assert.Empty(t, output.Unit.Symbol)
-// 				assert.Empty(t, output.Precision)
-// 			} else {
-// 				assert.NotEmpty(t, output.Unit.Name)
-// 				assert.NotEmpty(t, output.Unit.Symbol)
-// 				assert.NotEmpty(t, output.Precision)
-// 			}
-
-// 			assert.Empty(t, output.ScalingFactor)
-// 		}
-// 	}
-// }
+	// assert.Equal(t, 0, device.SortIndex) // TODO - update scheme
+}
 
 // func TestIntegration_Read(t *testing.T) {
 // 	if testing.Short() {
