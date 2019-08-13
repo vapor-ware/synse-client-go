@@ -27,3 +27,9 @@ services:
     expose:
     - "5001"
     command: ["--debug"]
+    volumes:
+      - ./config/tcp:/tmp/config
+      - ./config/device:/tmp/device
+    environment:
+      PLUGIN_CONFIG: /tmp/config
+      PLUGIN_DEVICE_CONFIG: /tmp/device

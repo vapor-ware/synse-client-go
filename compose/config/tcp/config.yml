@@ -1,0 +1,16 @@
+version: 3
+debug: true
+id:
+  useMachineID: false
+network:
+  type: tcp
+  address: ":5001"
+settings:
+  mode: parallel
+  read:
+    interval: 1s
+  write:
+    interval: 2s
+  cache:
+    enabled: true
+    ttl: 5m
