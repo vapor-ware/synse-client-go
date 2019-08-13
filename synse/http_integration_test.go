@@ -412,8 +412,8 @@ func TestIntegration_WriteSync(t *testing.T) {
 	assert.NoError(t, err)
 
 	writeData := []scheme.WriteData{
-		{Action: "state", Data: "on"},
-		{Action: "color", Data: "ffffff"},
+		{Action: "state", Data: "blink"},
+		{Action: "color", Data: "0f0f0f"},
 	}
 	writes, err := client.WriteSync("f041883c-cf87-55d7-a978-3d3103836412", writeData)
 	assert.NoError(t, err)
@@ -426,7 +426,7 @@ func TestIntegration_WriteSync(t *testing.T) {
 	assert.Equal(t, "30s", stateWrite.Timeout)
 	assert.Equal(t, "DONE", stateWrite.Status)
 	assert.Equal(t, "state", stateWrite.Context.Action)
-	// assert.Equal(t, "on", stateWrite.Context.Data) // FIXME - reflected data isn't decoded yet
+	// assert.Equal(t, "blink", stateWrite.Context.Data) // FIXME - reflected data isn't decoded yet
 	assert.Empty(t, stateWrite.Context.Transaction)
 	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", stateWrite.Device)
 
@@ -437,55 +437,37 @@ func TestIntegration_WriteSync(t *testing.T) {
 	assert.Equal(t, "30s", colorWrite.Timeout)
 	assert.Equal(t, "DONE", colorWrite.Status)
 	assert.Equal(t, "color", colorWrite.Context.Action)
-	// assert.Equal(t, "ffffff", colorWrite.Context.Data) // FIXME - reflected data isn't decoded yet
+	// assert.Equal(t, "0f0f0f", colorWrite.Context.Data) // FIXME - reflected data isn't decoded yet
 	assert.Empty(t, colorWrite.Context.Transaction)
 	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", colorWrite.Device)
 }
 
-// func TestIntegration_Transactions(t *testing.T) {
-// 	if testing.Short() {
-// 		t.Skip("skipping integration test")
-// 	}
+func TestIntegration_Transaction(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
 
-// 	client, err := NewHTTPClientV3(&Options{
-// 		Address: "localhost:5000",
-// 	})
-// 	assert.NotNil(t, client)
-// 	assert.NoError(t, err)
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
 
-// 	transactions, err := client.Transactions()
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, 2, len(transactions))
-// }
+	transactions, err := client.Transactions()
+	assert.NoError(t, err)
+	assert.Equal(t, 4, len(transactions))
 
-// func TestIntegration_Transaction(t *testing.T) {
-// 	if testing.Short() {
-// 		t.Skip("skipping integration test")
-// 	}
-
-// 	client, err := NewHTTPClientV3(&Options{
-// 		Address: "localhost:5000",
-// 	})
-// 	assert.NotNil(t, client)
-// 	assert.NoError(t, err)
-
-// 	transactions, err := client.Transactions()
-// 	assert.NoError(t, err)
-
-// 	for _, id := range transactions {
-// 		transaction, err := client.Transaction(id)
-// 		assert.NoError(t, err)
-
-// 		assert.NotEmpty(t, transaction.ID)
-// 		assert.NotEmpty(t, transaction.Created)
-// 		assert.NotEmpty(t, transaction.Updated)
-// 		assert.NotEmpty(t, transaction.Timeout)
-// 		assert.Equal(t, "DONE", transaction.Status)
-// 		assert.NotEmpty(t, transaction.Context.Action)
-// 		assert.NotEmpty(t, transaction.Context.Data)
-// 		assert.Empty(t, transaction.Context.Transaction)
-// 		assert.NotEmpty(t, transaction.Timeout)
-// 		assert.NotEmpty(t, transaction.Device)
-// 		assert.Empty(t, transaction.Message)
-// 	}
-// }
+	for _, id := range transactions {
+		transaction, err := client.Transaction(id)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, transaction.ID)
+		assert.NotEmpty(t, transaction.Created)
+		assert.NotEmpty(t, transaction.Updated)
+		assert.Equal(t, "30s", transaction.Timeout)
+		assert.Equal(t, "DONE", transaction.Status)
+		assert.Contains(t, []string{"state", "color"}, transaction.Context.Action)
+		// assert.Contains(t, []string{"on", "blink", "ffffff", "0f0f0f"}, transaction.Context.Data) // FIXME - reflected data isn't decoded yet
+		assert.Empty(t, transaction.Message)
+		assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", transaction.Device)
+	}
+}
