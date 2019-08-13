@@ -248,81 +248,75 @@ func TestIntegration_Info(t *testing.T) {
 	// assert.Equal(t, 0, device.SortIndex) // TODO - update scheme
 }
 
-// func TestIntegration_Read(t *testing.T) {
-// 	if testing.Short() {
-// 		t.Skip("skipping integration test")
-// 	}
+func TestIntegration_Read(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
 
-// 	client, err := NewHTTPClientV3(&Options{
-// 		Address: "localhost:5000",
-// 	})
-// 	assert.NotNil(t, client)
-// 	assert.NoError(t, err)
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
 
-// 	opts := scheme.ReadOptions{}
-// 	devices, err := client.Read(opts)
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, 25, len(devices))
+	opts := scheme.ReadOptions{}
+	readings, err := client.Read(opts)
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(readings))
 
-// 	for _, device := range devices {
-// 		assert.NotEmpty(t, device.Device)
-// 		assert.NotEmpty(t, device.Timestamp)
-// 		// assert.NotEmpty(t, device.Type) // FIXME - fan and airflow types are empty?
-// 		assert.NotEmpty(t, device.DeviceType)
+	stateRead := readings[0]
+	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", stateRead.Device)
+	assert.NotEmpty(t, stateRead.Timestamp)
+	assert.Equal(t, "state", stateRead.Type)
+	assert.Equal(t, "led", stateRead.DeviceType)
+	assert.Empty(t, stateRead.Unit)
+	assert.Equal(t, "off", stateRead.Value)
+	assert.Empty(t, stateRead.Context)
 
-// 		// led and lock devices don't produce unit output
-// 		if device.DeviceType == "led" || device.DeviceType == "lock" {
-// 			assert.Empty(t, device.Unit.Name)
-// 			assert.Empty(t, device.Unit.Symbol)
-// 		} else {
-// 			assert.NotEmpty(t, device.Unit.Name)
-// 			assert.NotEmpty(t, device.Unit.Symbol)
-// 		}
+	colorRead := readings[1]
+	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", colorRead.Device)
+	assert.NotEmpty(t, colorRead.Timestamp)
+	assert.Equal(t, "color", colorRead.Type)
+	assert.Equal(t, "led", colorRead.DeviceType)
+	assert.Empty(t, colorRead.Unit)
+	assert.Equal(t, "000000", colorRead.Value)
+	assert.Empty(t, colorRead.Context)
+}
 
-// 		// NOTE - device.Value could be 0 so no need to check that
-// 	}
-// }
+func TestIntegration_ReadDevice(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
 
-// func TestIntegration_ReadDevice(t *testing.T) {
-// 	if testing.Short() {
-// 		t.Skip("skipping integration test")
-// 	}
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
 
-// 	client, err := NewHTTPClientV3(&Options{
-// 		Address: "localhost:5000",
-// 	})
-// 	assert.NotNil(t, client)
-// 	assert.NoError(t, err)
+	opts := scheme.ReadOptions{}
+	readings, err := client.ReadDevice("f041883c-cf87-55d7-a978-3d3103836412", opts)
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(readings))
 
-// 	opts := scheme.ScanOptions{}
-// 	devices, err := client.Scan(opts)
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, 22, len(devices))
+	stateRead := readings[0]
+	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", stateRead.Device)
+	assert.NotEmpty(t, stateRead.Timestamp)
+	assert.Equal(t, "state", stateRead.Type)
+	assert.Equal(t, "led", stateRead.DeviceType)
+	assert.Empty(t, stateRead.Unit)
+	assert.Equal(t, "off", stateRead.Value)
+	assert.Empty(t, stateRead.Context)
 
-// 	for _, device := range devices {
-// 		opts := scheme.ReadOptions{}
-// 		reads, err := client.ReadDevice(device.ID, opts)
-// 		assert.NoError(t, err)
-
-// 		for _, read := range reads {
-// 			assert.NotEmpty(t, read.Device)
-// 			assert.NotEmpty(t, read.Timestamp)
-// 			// assert.NotEmpty(t, read.Type) // FIXME - fan and airflow types are empty?
-// 			assert.NotEmpty(t, read.DeviceType)
-
-// 			// led and lock devices don't produce unit output
-// 			if read.DeviceType == "led" || read.DeviceType == "lock" {
-// 				assert.Empty(t, read.Unit.Name)
-// 				assert.Empty(t, read.Unit.Symbol)
-// 			} else {
-// 				assert.NotEmpty(t, read.Unit.Name)
-// 				assert.NotEmpty(t, read.Unit.Symbol)
-// 			}
-
-// 			// NOTE - read.Value could be 0 so no need to check that
-// 		}
-// 	}
-// }
+	colorRead := readings[1]
+	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", colorRead.Device)
+	assert.NotEmpty(t, colorRead.Timestamp)
+	assert.Equal(t, "color", colorRead.Type)
+	assert.Equal(t, "led", colorRead.DeviceType)
+	assert.Empty(t, colorRead.Unit)
+	assert.Equal(t, "000000", colorRead.Value)
+	assert.Empty(t, colorRead.Context)
+}
 
 // func TestIntegration_ReadCache(t *testing.T) {
 // 	if testing.Short() {
