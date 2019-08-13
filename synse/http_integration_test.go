@@ -5,7 +5,7 @@ import (
 	// "time"
 
 	"github.com/stretchr/testify/assert"
-	// "github.com/vapor-ware/synse-client-go/synse/scheme"
+	"github.com/vapor-ware/synse-client-go/synse/scheme"
 )
 
 func TestIntegration_Status(t *testing.T) {
@@ -161,37 +161,32 @@ func TestIntegration_PluginHealth(t *testing.T) {
 	assert.Equal(t, 0, health.Inactive)
 }
 
-// func TestIntegration_Scan(t *testing.T) {
-// 	if testing.Short() {
-// 		t.Skip("skipping integration test")
-// 	}
+func TestIntegration_Scan(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
 
-// 	client, err := NewHTTPClientV3(&Options{
-// 		Address: "localhost:5000",
-// 	})
-// 	assert.NotNil(t, client)
-// 	assert.NoError(t, err)
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
 
-// 	opts := scheme.ScanOptions{}
-// 	devices, err := client.Scan(opts)
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, 22, len(devices))
+	opts := scheme.ScanOptions{}
+	devices, err := client.Scan(opts)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(devices))
 
-// 	for _, device := range devices {
-// 		assert.NotEmpty(t, device.ID)
-// 		assert.NotEmpty(t, device.Info)
-// 		assert.NotEmpty(t, device.Type)
-// 		assert.NotEmpty(t, device.Plugin)
-// 		assert.NotEmpty(t, device.Tags)
-
-// 		// only led devices have alias
-// 		if device.Type == "led" {
-// 			assert.NotEmpty(t, device.Alias)
-// 		} else {
-// 			assert.Empty(t, device.Alias)
-// 		}
-// 	}
-// }
+	device := devices[0]
+	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", device.ID)
+	assert.Equal(t, "emulator-led", device.Alias)
+	assert.Equal(t, "Synse LED", device.Info)
+	assert.Equal(t, "led", device.Type)
+	assert.Equal(t, "4032ffbe-80db-5aa5-b794-f35c88dff85c", device.Plugin)
+	assert.Equal(t, 2, len(device.Tags))
+	assert.Equal(t, "system/id:f041883c-cf87-55d7-a978-3d3103836412", device.Tags[0])
+	assert.Equal(t, "system/type:led", device.Tags[1])
+}
 
 // func TestIntegration_Tags(t *testing.T) {
 // 	if testing.Short() {
