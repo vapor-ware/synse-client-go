@@ -28,7 +28,7 @@ services:
     - "5001"
     command: ["--debug"]
     volumes:
-      - ./config/config.yaml:/tmp/config/config.yaml
+      - ./config:/tmp/config
       - ./config/device:/tmp/device
     environment:
       PLUGIN_CONFIG: /tmp/config
