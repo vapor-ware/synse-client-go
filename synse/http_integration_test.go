@@ -38,7 +38,7 @@ func TestIntegration_Version(t *testing.T) {
 
 	version, err := client.Version()
 	assert.NoError(t, err)
-	assert.Equal(t, "3.0.0-alpha.3", version.Version)
+	assert.NotEmpty(t, version.Version)
 	assert.Equal(t, "v3", version.APIVersion)
 }
 
@@ -113,11 +113,11 @@ func TestIntegration_PluginInfo(t *testing.T) {
 
 	assert.Equal(t, "emulator:5001", plugin.Network.Address)
 	assert.Equal(t, "tcp", plugin.Network.Protocol)
-	assert.Equal(t, "3.0.0-alpha.3", plugin.Version.PluginVersion)
-	assert.Equal(t, "3.0.0-alpha.1", plugin.Version.SDKVersion)
+	assert.NotEmpty(t, plugin.Version.PluginVersion)
+	assert.NotEmpty(t, plugin.Version.SDKVersion)
 	assert.NotEmpty(t, plugin.Version.BuildDate)
-	assert.Equal(t, "4234777", plugin.Version.GitCommit)
-	assert.Equal(t, "3.0.0-alpha.3", plugin.Version.GitTag)
+	assert.NotEmpty(t, plugin.Version.GitCommit)
+	assert.NotEmpty(t, plugin.Version.GitTag)
 	assert.Equal(t, "amd64", plugin.Version.Arch)
 	assert.Equal(t, "linux", plugin.Version.OS)
 	assert.NotEmpty(t, plugin.Health.Timestamp)
