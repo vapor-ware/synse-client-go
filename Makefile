@@ -1,5 +1,7 @@
 #
-# synse-client-go # 
+# synse-client-go
+#
+
 PKG_VERSION := 0.0.1
 
 
