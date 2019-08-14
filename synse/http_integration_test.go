@@ -387,7 +387,7 @@ func TestIntegration_WriteAsync(t *testing.T) {
 	assert.NotEmpty(t, stateWrite.ID)
 	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", stateWrite.Device)
 	assert.Equal(t, "state", stateWrite.Context.Action)
-	// assert.Equal(t, "on", stateWrite.Context.Data) // FIXME - reflected data isn't decoded yet
+	assert.Equal(t, "on", stateWrite.Context.Data)
 	assert.Empty(t, stateWrite.Context.Transaction)
 	assert.Equal(t, "30s", stateWrite.Timeout)
 
@@ -395,7 +395,7 @@ func TestIntegration_WriteAsync(t *testing.T) {
 	assert.NotEmpty(t, colorWrite.ID)
 	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", colorWrite.Device)
 	assert.Equal(t, "color", colorWrite.Context.Action)
-	// assert.Equal(t, "ffffff", colorWrite.Context.Data) // FIXME - reflected data isn't decoded yet
+	assert.Equal(t, "ffffff", colorWrite.Context.Data)
 	assert.Empty(t, colorWrite.Context.Transaction)
 	assert.Equal(t, "30s", colorWrite.Timeout)
 }
@@ -426,7 +426,7 @@ func TestIntegration_WriteSync(t *testing.T) {
 	assert.Equal(t, "30s", stateWrite.Timeout)
 	assert.Equal(t, "DONE", stateWrite.Status)
 	assert.Equal(t, "state", stateWrite.Context.Action)
-	// assert.Equal(t, "blink", stateWrite.Context.Data) // FIXME - reflected data isn't decoded yet
+	assert.Equal(t, "blink", stateWrite.Context.Data)
 	assert.Empty(t, stateWrite.Context.Transaction)
 	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", stateWrite.Device)
 
@@ -437,7 +437,7 @@ func TestIntegration_WriteSync(t *testing.T) {
 	assert.Equal(t, "30s", colorWrite.Timeout)
 	assert.Equal(t, "DONE", colorWrite.Status)
 	assert.Equal(t, "color", colorWrite.Context.Action)
-	// assert.Equal(t, "0f0f0f", colorWrite.Context.Data) // FIXME - reflected data isn't decoded yet
+	assert.Equal(t, "0f0f0f", colorWrite.Context.Data)
 	assert.Empty(t, colorWrite.Context.Transaction)
 	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", colorWrite.Device)
 }
@@ -466,7 +466,7 @@ func TestIntegration_Transaction(t *testing.T) {
 		assert.Equal(t, "30s", transaction.Timeout)
 		assert.Equal(t, "DONE", transaction.Status)
 		assert.Contains(t, []string{"state", "color"}, transaction.Context.Action)
-		// assert.Contains(t, []string{"on", "blink", "ffffff", "0f0f0f"}, transaction.Context.Data) // FIXME - reflected data isn't decoded yet
+		assert.Contains(t, []string{"on", "blink", "ffffff", "0f0f0f"}, transaction.Context.Data)
 		assert.Empty(t, transaction.Message)
 		assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", transaction.Device)
 	}
