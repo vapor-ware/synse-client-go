@@ -204,7 +204,8 @@ func TestHTTPClientV3_Config_200(t *testing.T) {
    "locale":"en_US",
    "cache":{
       "device":{
-         "ttl":20
+         "ttl":20,
+         "rebuild_every":180
       },
       "transaction":{
          "ttl":300
@@ -250,7 +251,8 @@ func TestHTTPClientV3_Config_200(t *testing.T) {
 		Locale:     "en_US",
 		Cache: scheme.CacheOptions{
 			Device: scheme.DeviceOptions{
-				TTL: int(20),
+				TTL:          int(20),
+				RebuildEvery: int(180),
 			},
 			Transaction: scheme.TransactionOptions{
 				TTL: int(300),

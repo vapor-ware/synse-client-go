@@ -61,7 +61,7 @@ func TestIntegration_Config(t *testing.T) {
 	assert.Equal(t, 1, len(config.Plugin.TCP))
 	assert.Equal(t, "emulator:5001", config.Plugin.TCP[0])
 	assert.Equal(t, 0, len(config.Plugin.Unix))
-	// assert.Equal(t, 180, config.Cache.Device.RebuildEvery) // TODO - update scheme
+	assert.Equal(t, 180, config.Cache.Device.RebuildEvery)
 	assert.Equal(t, 300, config.Cache.Transaction.TTL)
 	assert.Equal(t, 3, config.GRPC.Timeout)
 	assert.False(t, config.Metrics.Enabled)
