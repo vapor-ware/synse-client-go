@@ -22,7 +22,12 @@ devices:
         data:
           id: 1
       - info: Synse Temperature Sensor 2
+        tags:
+          - foo/bar
+        data:
+          id: 2
+      - info: Synse Temperature Sensor 3
         alias:
           name: emulator-temp
         data:
-          id: 2
+          id: 3
