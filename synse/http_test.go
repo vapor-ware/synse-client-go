@@ -204,7 +204,8 @@ func TestHTTPClientV3_Config_200(t *testing.T) {
    "locale":"en_US",
    "cache":{
       "device":{
-         "ttl":20
+         "ttl":20,
+         "rebuild_every":180
       },
       "transaction":{
          "ttl":300
@@ -250,7 +251,8 @@ func TestHTTPClientV3_Config_200(t *testing.T) {
 		Locale:     "en_US",
 		Cache: scheme.CacheOptions{
 			Device: scheme.DeviceOptions{
-				TTL: int(20),
+				TTL:          int(20),
+				RebuildEvery: int(180),
 			},
 			Transaction: scheme.TransactionOptions{
 				TTL: int(300),
@@ -776,6 +778,7 @@ func TestHTTPClientV3_Info_200(t *testing.T) {
    },
    "plugin":"1b714cf2-cc56-5c36-9741-fd6a483b5f11",
    "info":"Synse Humidity Sensor",
+   "sort_index":0,
    "tags":[
       "type:humidity",
       "humidity",
@@ -825,8 +828,9 @@ func TestHTTPClientV3_Info_200(t *testing.T) {
 		Metadata: map[string]string{
 			"model": "emul8-humidity",
 		},
-		Plugin: "1b714cf2-cc56-5c36-9741-fd6a483b5f11",
-		Info:   "Synse Humidity Sensor",
+		Plugin:    "1b714cf2-cc56-5c36-9741-fd6a483b5f11",
+		Info:      "Synse Humidity Sensor",
+		SortIndex: int(0),
 		Tags: []string{
 			"type:humidity",
 			"humidity",

@@ -43,7 +43,8 @@ type CacheOptions struct {
 
 // DeviceOptions is the config options for device cache.
 type DeviceOptions struct {
-	TTL int `json:"ttl" yaml:"ttl" mapstructure:"ttl"`
+	TTL          int `json:"ttl" yaml:"ttl" mapstructure:"ttl"`
+	RebuildEvery int `json:"rebuild_every" yaml:"rebuild_every" mapstructure:"rebuild_every"`
 }
 
 // TransactionOptions is the config options for transaction cache.
