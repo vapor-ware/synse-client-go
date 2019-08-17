@@ -2,7 +2,7 @@ package synse
 
 import (
 	"testing"
-	// "time"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/vapor-ware/synse-client-go/synse/scheme"
@@ -351,51 +351,63 @@ func TestIntegration_ReadDevice(t *testing.T) {
 	assert.Empty(t, colorRead.Context)
 }
 
-// func TestIntegration_ReadCache(t *testing.T) {
-// 	if testing.Short() {
-// 		t.Skip("skipping integration test")
-// 	}
+func TestIntegration_ReadCache(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
 
-// 	client, err := NewHTTPClientV3(&Options{
-// 		Address: "localhost:5000",
-// 	})
-// 	assert.NotNil(t, client)
-// 	assert.NoError(t, err)
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
 
-// 	opts := scheme.ReadCacheOptions{}
-// 	readings := make(chan *scheme.Read, 1)
+	opts := scheme.ReadCacheOptions{}
+	readings := make(chan *scheme.Read, 1)
 
-// 	go func() {
-// 		err := client.ReadCache(opts, readings)
-// 		assert.NoError(t, err)
-// 	}()
+	go func() {
+		err := client.ReadCache(opts, readings)
+		assert.NoError(t, err)
+	}()
 
-// 	for {
-// 		var done bool
-// 		select {
-// 		case read, open := <-readings:
-// 			if !open {
-// 				done = true
-// 				break
-// 			}
+	for {
+		var done bool
+		select {
+		case read, open := <-readings:
+			if !open {
+				done = true
+				break
+			}
 
-// 			assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", read.Device)
-// 			assert.NotEmpty(t, read.Timestamp)
-// 			assert.Contains(t, []string{"state", "color"}, read.Type)
-// 			assert.Equal(t, "led", read.DeviceType)
-// 			assert.Empty(t, read.Unit)
-// 			assert.Contains(t, []string{"off", "000000"}, read.Value)
+			if read.DeviceType == "led" {
+				assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", read.Device)
+				assert.NotEmpty(t, read.Timestamp)
+				assert.Contains(t, []string{"state", "color"}, read.Type)
+				assert.Empty(t, read.Unit)
+				assert.Contains(t, []string{"off", "000000"}, read.Value)
+				assert.Empty(t, read.Context)
+			} else if read.DeviceType == "temperature" {
+				assert.Contains(t, []string{"89fd576d-462c-53be-bcb6-7870e70c304a", "9907bdfa-75e1-5af5-8385-87184f356b22"}, read.Device)
+				assert.NotEmpty(t, read.Timestamp)
+				assert.Equal(t, "temperature", read.Type)
+				assert.Equal(t, "celsius", read.Unit.Name)
+				assert.Equal(t, "C", read.Unit.Symbol)
+				assert.NotEmpty(t, read.Value)
+				assert.Empty(t, read.Context)
+			} else {
+				t.Error("unexpected reading device type in response")
+			}
 
-// 		case <-time.After(2 * time.Second):
-// 			// if the test does not complete after 2s, error.
-// 			t.Fatal("timeout: failed getting readcache data from channel")
-// 		}
+		case <-time.After(2 * time.Second):
+			// if the test does not complete after 2s, error.
+			t.Fatal("timeout: failed getting readcache data from channel")
+		}
 
-// 		if done {
-// 			break
-// 		}
-// 	}
-// }
+		if done {
+			break
+		}
+	}
+}
 
 func TestIntegration_WriteAsync(t *testing.T) {
 	if testing.Short() {
