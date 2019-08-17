@@ -9,6 +9,7 @@ type Info struct {
 	Metadata     map[string]string   `json:"metadata" yaml:"metadata" mapstructure:"metadata"`
 	Plugin       string              `json:"plugin" yaml:"plugin" mapstructure:"plugin"`
 	Info         string              `json:"info" yaml:"info" mapstructure:"info"`
+	SortIndex    int                 `json:"sort_index" yaml:"sort_index" mapstructure:"sort_index"`
 	Tags         []string            `json:"tags" yaml:"tags" mapstructure:"tags"`
 	Capabilities CapabilitiesOptions `json:"capabilities" yaml:"capabilities" mapstructure:"capabilities"`
 	Outputs      []OutputOptions     `json:"outputs" yaml:"outputs" mapstructure:"outputs"`

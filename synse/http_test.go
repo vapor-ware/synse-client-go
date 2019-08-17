@@ -778,6 +778,7 @@ func TestHTTPClientV3_Info_200(t *testing.T) {
    },
    "plugin":"1b714cf2-cc56-5c36-9741-fd6a483b5f11",
    "info":"Synse Humidity Sensor",
+   "sort_index":0,
    "tags":[
       "type:humidity",
       "humidity",
@@ -827,8 +828,9 @@ func TestHTTPClientV3_Info_200(t *testing.T) {
 		Metadata: map[string]string{
 			"model": "emul8-humidity",
 		},
-		Plugin: "1b714cf2-cc56-5c36-9741-fd6a483b5f11",
-		Info:   "Synse Humidity Sensor",
+		Plugin:    "1b714cf2-cc56-5c36-9741-fd6a483b5f11",
+		Info:      "Synse Humidity Sensor",
+		SortIndex: int(0),
 		Tags: []string{
 			"type:humidity",
 			"humidity",

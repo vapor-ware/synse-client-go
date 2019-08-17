@@ -232,6 +232,7 @@ func TestIntegration_Info(t *testing.T) {
 	assert.Equal(t, "system/id:f041883c-cf87-55d7-a978-3d3103836412", device.Tags[0])
 	assert.Equal(t, "system/type:led", device.Tags[1])
 	assert.Equal(t, 2, len(device.Outputs))
+	assert.Equal(t, 0, device.SortIndex)
 
 	stateOutput := device.Outputs[0]
 	assert.Equal(t, "state", stateOutput.Name)
@@ -245,7 +246,6 @@ func TestIntegration_Info(t *testing.T) {
 	assert.Equal(t, 0, colorOutput.Precision)
 	assert.Equal(t, 0.0, colorOutput.ScalingFactor)
 
-	// assert.Equal(t, 0, device.SortIndex) // TODO - update scheme
 }
 
 func TestIntegration_Read(t *testing.T) {
