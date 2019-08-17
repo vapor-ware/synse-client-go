@@ -5,6 +5,8 @@ devices:
       model: emul8-led
     instances:
       - info: Synse LED
+        tags:
+          - foo/bar
         alias:
           name: emulator-led
         data:

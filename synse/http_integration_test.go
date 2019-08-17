@@ -183,9 +183,10 @@ func TestIntegration_Scan(t *testing.T) {
 	assert.Equal(t, "Synse LED", device.Info)
 	assert.Equal(t, "led", device.Type)
 	assert.Equal(t, "4032ffbe-80db-5aa5-b794-f35c88dff85c", device.Plugin)
-	assert.Equal(t, 2, len(device.Tags))
-	assert.Equal(t, "system/id:f041883c-cf87-55d7-a978-3d3103836412", device.Tags[0])
-	assert.Equal(t, "system/type:led", device.Tags[1])
+	assert.Equal(t, 3, len(device.Tags))
+	assert.Equal(t, "foo/bar", device.Tags[0])
+	assert.Equal(t, "system/id:f041883c-cf87-55d7-a978-3d3103836412", device.Tags[1])
+	assert.Equal(t, "system/type:led", device.Tags[2])
 }
 
 func TestIntegration_Tags(t *testing.T) {
@@ -202,8 +203,9 @@ func TestIntegration_Tags(t *testing.T) {
 	opts := scheme.TagsOptions{}
 	tags, err := client.Tags(opts)
 	assert.NoError(t, err)
-	assert.Equal(t, 1, len(tags))
-	assert.Equal(t, "system/type:led", tags[0])
+	assert.Equal(t, 2, len(tags))
+	assert.Equal(t, "foo/bar", tags[0])
+	assert.Equal(t, "system/type:led", tags[1])
 }
 
 func TestIntegration_Info(t *testing.T) {
@@ -228,9 +230,10 @@ func TestIntegration_Info(t *testing.T) {
 	assert.Equal(t, map[string]string{"model": "emul8-led"}, device.Metadata)
 	assert.Equal(t, "rw", device.Capabilities.Mode)
 	assert.Equal(t, 0, len(device.Capabilities.Write.Actions))
-	assert.Equal(t, 2, len(device.Tags))
-	assert.Equal(t, "system/id:f041883c-cf87-55d7-a978-3d3103836412", device.Tags[0])
-	assert.Equal(t, "system/type:led", device.Tags[1])
+	assert.Equal(t, 3, len(device.Tags))
+	assert.Equal(t, "foo/bar", device.Tags[0])
+	assert.Equal(t, "system/id:f041883c-cf87-55d7-a978-3d3103836412", device.Tags[1])
+	assert.Equal(t, "system/type:led", device.Tags[2])
 	assert.Equal(t, 2, len(device.Outputs))
 	assert.Equal(t, 0, device.SortIndex)
 
