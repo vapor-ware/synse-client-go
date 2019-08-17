@@ -1,0 +1,11 @@
+version: 3
+devices:
+  - type: led
+    metadata:
+      model: emul8-led
+    instances:
+      - info: Synse LED
+        alias:
+          name: emulator-led
+        data:
+          id: 1

@@ -35,7 +35,17 @@ lint:  ## Lint project source files
 .PHONY: test
 test:  ## Run unit tests
 	@ # Note: this requires go1.10+ in order to do multi-package coverage reports
-	go test -race -coverprofile=coverage.out -covermode=atomic ./...
+	go test -short -race -coverprofile=coverage.out -covermode=atomic ./...
+
+.PHONY: test-integration
+test-integration:  ## Run integration tests
+	# FIXME - need to clean up stale containers using `docker rm -f $(docker ps -aq)`
+	# every time before running the tests so they won't fail
+	docker-compose -f compose/server.yml up -d
+	# have to wait at least 30 seconds for the emulated health checks to be fully populated
+	sleep 30
+	go test -race -cover -run Integration ./... || (docker-compose -f compose/server.yml stop; exit 1)
+	docker-compose -f compose/server.yml down
 
 .PHONY: version
 version:  ## Print the version of the client
@@ -43,6 +53,6 @@ version:  ## Print the version of the client
 
 .PHONY: help
 help:  ## Print usage information
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-16s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
 
 .DEFAULT_GOAL := help
