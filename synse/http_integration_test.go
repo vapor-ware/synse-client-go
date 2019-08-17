@@ -180,6 +180,8 @@ func TestIntegration_Scan(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 3, len(devices))
 
+	// since scan responses are sorted by default, the devices order should be
+	// consistent.
 	tempDevice1 := devices[0]
 	assert.Equal(t, "89fd576d-462c-53be-bcb6-7870e70c304a", tempDevice1.ID)
 	assert.Equal(t, "emulator-temp", tempDevice1.Alias)
@@ -276,40 +278,43 @@ func TestIntegration_Info(t *testing.T) {
 
 }
 
-// func TestIntegration_Read(t *testing.T) {
-// 	if testing.Short() {
-// 		t.Skip("skipping integration test")
-// 	}
+func TestIntegration_Read(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
 
-// 	client, err := NewHTTPClientV3(&Options{
-// 		Address: "localhost:5000",
-// 	})
-// 	assert.NotNil(t, client)
-// 	assert.NoError(t, err)
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
 
-// 	opts := scheme.ReadOptions{}
-// 	readings, err := client.Read(opts)
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, 4, len(readings))
+	opts := scheme.ReadOptions{}
+	readings, err := client.Read(opts)
+	assert.NoError(t, err)
+	assert.Equal(t, 4, len(readings))
 
-// 	stateRead := readings[0]
-// 	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", stateRead.Device)
-// 	assert.NotEmpty(t, stateRead.Timestamp)
-// 	assert.Equal(t, "state", stateRead.Type)
-// 	assert.Equal(t, "led", stateRead.DeviceType)
-// 	assert.Empty(t, stateRead.Unit)
-// 	assert.Equal(t, "off", stateRead.Value)
-// 	assert.Empty(t, stateRead.Context)
-
-// 	colorRead := readings[1]
-// 	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", colorRead.Device)
-// 	assert.NotEmpty(t, colorRead.Timestamp)
-// 	assert.Equal(t, "color", colorRead.Type)
-// 	assert.Equal(t, "led", colorRead.DeviceType)
-// 	assert.Empty(t, colorRead.Unit)
-// 	assert.Equal(t, "000000", colorRead.Value)
-// 	assert.Empty(t, colorRead.Context)
-// }
+	for _, read := range readings {
+		if read.DeviceType == "led" {
+			assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", read.Device)
+			assert.NotEmpty(t, read.Timestamp)
+			assert.Contains(t, []string{"state", "color"}, read.Type)
+			assert.Empty(t, read.Unit)
+			assert.Contains(t, []string{"off", "000000"}, read.Value)
+			assert.Empty(t, read.Context)
+		} else if read.DeviceType == "temperature" {
+			assert.Contains(t, []string{"89fd576d-462c-53be-bcb6-7870e70c304a", "9907bdfa-75e1-5af5-8385-87184f356b22"}, read.Device)
+			assert.NotEmpty(t, read.Timestamp)
+			assert.Equal(t, "temperature", read.Type)
+			assert.Equal(t, "celsius", read.Unit.Name)
+			assert.Equal(t, "C", read.Unit.Symbol)
+			assert.NotEmpty(t, read.Value)
+			assert.Empty(t, read.Context)
+		} else {
+			t.Error("unexpected reading device type in response")
+		}
+	}
+}
 
 func TestIntegration_ReadDevice(t *testing.T) {
 	if testing.Short() {
