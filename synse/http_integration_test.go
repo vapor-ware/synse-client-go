@@ -275,7 +275,6 @@ func TestIntegration_Info(t *testing.T) {
 	assert.Equal(t, "color", colorOutput.Type)
 	assert.Equal(t, 0, colorOutput.Precision)
 	assert.Equal(t, 0.0, colorOutput.ScalingFactor)
-
 }
 
 func TestIntegration_Read(t *testing.T) {
@@ -293,6 +292,10 @@ func TestIntegration_Read(t *testing.T) {
 	readings, err := client.Read(opts)
 	assert.NoError(t, err)
 	assert.Equal(t, 4, len(readings))
+
+	counts := countDeviceType(readings)
+	assert.Equal(t, 2, counts["led"])
+	assert.Equal(t, 2, counts["temperature"])
 
 	for _, read := range readings {
 		if read.DeviceType == "led" {
@@ -515,4 +518,124 @@ func TestIntegration_Transaction(t *testing.T) {
 		assert.Empty(t, transaction.Message)
 		assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", transaction.Device)
 	}
+}
+
+func TestIntegration_TagsOptions(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	tests := []struct {
+		name     string
+		options  scheme.ReadOptions
+		expected map[string]int
+	}{
+		{
+			"single tag, multiple matches",
+			scheme.ReadOptions{
+				Tags: []string{"foo/bar"},
+			},
+			map[string]int{
+				"total":       3,
+				"led":         2,
+				"temperature": 1,
+			},
+		},
+		{
+			"single tag, single match",
+			scheme.ReadOptions{
+				Tags: []string{"system/id:9907bdfa-75e1-5af5-8385-87184f356b22"},
+			},
+			map[string]int{
+				"total":       1,
+				"led":         0,
+				"temperature": 1,
+			},
+		},
+		{
+			"single tag, no match",
+			scheme.ReadOptions{
+				Tags: []string{"bar/foo"},
+			},
+			map[string]int{
+				"total":       0,
+				"led":         0,
+				"temperature": 0,
+			},
+		},
+		{
+			"multiple tags, no match",
+			scheme.ReadOptions{
+				Tags: []string{"foo/bar", "system/id:89fd576d-462c-53be-bcb6-7870e70c304a"},
+			},
+			map[string]int{
+				"total":       0,
+				"led":         0,
+				"temperature": 0,
+			},
+		},
+		// TODO - refer to #69.
+		// {
+		// 	"multiple tags, multiple matches",
+		// 	scheme.ReadOptions{
+		// 		Tags: []string{"system/type:led", "system/type:temperature"},
+		// 	},
+		// 	map[string]int{
+		// 		"total":       4,
+		// 		"led":         2,
+		// 		"temperature": 2,
+		// 	},
+		// },
+
+		// {
+		// 	"multiple tags, single match",
+		// 	scheme.ReadOptions{
+		// 		Tags: []string{"foo/bar", "system/type:led"},
+		// 	},
+		// 	map[string]int{
+		// 		"total":       2,
+		// 		"led":         2,
+		// 		"temperature": 0,
+		// 	},
+		// },
+	}
+
+	for _, test := range tests {
+		tf := func(t *testing.T) {
+			readings, err := client.Read(test.options)
+			assert.NoError(t, err)
+			assert.Equal(t, test.expected["total"], len(readings))
+
+			counts := countDeviceType(readings)
+			assert.Equal(t, test.expected["led"], counts["led"])
+			assert.Equal(t, test.expected["temperature"], counts["temperature"])
+		}
+
+		t.Run(test.name, tf)
+	}
+}
+
+// countDeviceType returns the counts of devices for list of readings, grouped by
+// device types.
+func countDeviceType(readings []*scheme.Read) map[string]int {
+	m := map[string]int{
+		"led":         0,
+		"temperature": 0,
+	}
+
+	for _, read := range readings {
+		if read.DeviceType == "led" {
+			m["led"] += 1
+		} else if read.DeviceType == "temperature" {
+			m["temperature"] += 1
+		}
+	}
+
+	return m
 }
