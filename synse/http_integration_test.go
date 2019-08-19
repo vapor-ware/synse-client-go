@@ -642,9 +642,9 @@ func countDeviceType(readings []*scheme.Read) map[string]int {
 
 	for _, read := range readings {
 		if read.DeviceType == "led" {
-			m["led"] += 1
+			m["led"]++
 		} else if read.DeviceType == "temperature" {
-			m["temperature"] += 1
+			m["temperature"]++
 		}
 	}
 
