@@ -5,7 +5,29 @@ devices:
       model: emul8-led
     instances:
       - info: Synse LED
+        tags:
+          - foo/bar
         alias:
           name: emulator-led
         data:
           id: 1
+
+  - type: temperature
+    metadata:
+      model: emul8-temp
+    instances:
+      - info: Synse Temperature Sensor 1
+        tags:
+          - foo/bar
+        data:
+          id: 1
+      - info: Synse Temperature Sensor 2
+        tags:
+          - foo/bar
+        data:
+          id: 2
+      - info: Synse Temperature Sensor 3
+        alias:
+          name: emulator-temp
+        data:
+          id: 3

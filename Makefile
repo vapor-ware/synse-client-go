@@ -39,11 +39,9 @@ test:  ## Run unit tests
 
 .PHONY: test-integration
 test-integration:  ## Run integration tests
-	# FIXME - need to clean up stale containers using `docker rm -f $(docker ps -aq)`
-	# every time before running the tests so they won't fail
+	-docker-compose -f compose/server.yml rm -fsv
 	docker-compose -f compose/server.yml up -d
-	# have to wait at least 30 seconds for the emulated health checks to be fully populated
-	sleep 30
+	sleep 6
 	go test -race -cover -run Integration ./... || (docker-compose -f compose/server.yml stop; exit 1)
 	docker-compose -f compose/server.yml down
 

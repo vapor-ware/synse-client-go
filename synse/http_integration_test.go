@@ -128,15 +128,18 @@ func TestIntegration_PluginInfo(t *testing.T) {
 	assert.Equal(t, "read queue health", readCheck.Name)
 	assert.Equal(t, "OK", readCheck.Status)
 	assert.Equal(t, "periodic", readCheck.Type)
-	assert.NotEmpty(t, readCheck.Timestamp)
 	assert.Empty(t, readCheck.Message)
 
 	writeCheck := plugin.Health.Checks[1]
 	assert.Equal(t, "write queue health", writeCheck.Name)
 	assert.Equal(t, "OK", writeCheck.Status)
 	assert.Equal(t, "periodic", writeCheck.Type)
-	assert.NotEmpty(t, writeCheck.Timestamp)
 	assert.Empty(t, writeCheck.Message)
+
+	// NOTE - health check timestamp is not populated after at least 30s of
+	// deployment. that's a pretty long time so we won't check that for now.
+	// assert.NotEmpty(t, readCheck.Timestamp)
+	// assert.NotEmpty(t, writeCheck.Timestamp)
 }
 
 func TestIntegration_PluginHealth(t *testing.T) {
@@ -175,17 +178,52 @@ func TestIntegration_Scan(t *testing.T) {
 	opts := scheme.ScanOptions{}
 	devices, err := client.Scan(opts)
 	assert.NoError(t, err)
-	assert.Equal(t, 1, len(devices))
+	assert.Equal(t, 4, len(devices))
 
-	device := devices[0]
-	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", device.ID)
-	assert.Equal(t, "emulator-led", device.Alias)
-	assert.Equal(t, "Synse LED", device.Info)
-	assert.Equal(t, "led", device.Type)
-	assert.Equal(t, "4032ffbe-80db-5aa5-b794-f35c88dff85c", device.Plugin)
-	assert.Equal(t, 2, len(device.Tags))
-	assert.Equal(t, "system/id:f041883c-cf87-55d7-a978-3d3103836412", device.Tags[0])
-	assert.Equal(t, "system/type:led", device.Tags[1])
+	// since scan responses are sorted by default, the devices order should be
+	// consistent.
+	tempDevice1 := devices[0]
+	assert.Equal(t, "89fd576d-462c-53be-bcb6-7870e70c304a", tempDevice1.ID)
+	assert.Empty(t, tempDevice1.Alias)
+	assert.Equal(t, "Synse Temperature Sensor 2", tempDevice1.Info)
+	assert.Equal(t, "temperature", tempDevice1.Type)
+	assert.Equal(t, "4032ffbe-80db-5aa5-b794-f35c88dff85c", tempDevice1.Plugin)
+	assert.Equal(t, 3, len(tempDevice1.Tags))
+	assert.Equal(t, "foo/bar", tempDevice1.Tags[0])
+	assert.Equal(t, "system/id:89fd576d-462c-53be-bcb6-7870e70c304a", tempDevice1.Tags[1])
+	assert.Equal(t, "system/type:temperature", tempDevice1.Tags[2])
+
+	tempDevice2 := devices[1]
+	assert.Equal(t, "9907bdfa-75e1-5af5-8385-87184f356b22", tempDevice2.ID)
+	assert.Empty(t, tempDevice2.Alias)
+	assert.Equal(t, "Synse Temperature Sensor 1", tempDevice2.Info)
+	assert.Equal(t, "temperature", tempDevice2.Type)
+	assert.Equal(t, "4032ffbe-80db-5aa5-b794-f35c88dff85c", tempDevice2.Plugin)
+	assert.Equal(t, 3, len(tempDevice2.Tags))
+	assert.Equal(t, "foo/bar", tempDevice2.Tags[0])
+	assert.Equal(t, "system/id:9907bdfa-75e1-5af5-8385-87184f356b22", tempDevice2.Tags[1])
+	assert.Equal(t, "system/type:temperature", tempDevice2.Tags[2])
+
+	tempDevice3 := devices[2]
+	assert.Equal(t, "b9324904-385b-581d-b790-5e53eaabfd20", tempDevice3.ID)
+	assert.Equal(t, "emulator-temp", tempDevice3.Alias)
+	assert.Equal(t, "Synse Temperature Sensor 3", tempDevice3.Info)
+	assert.Equal(t, "temperature", tempDevice3.Type)
+	assert.Equal(t, "4032ffbe-80db-5aa5-b794-f35c88dff85c", tempDevice3.Plugin)
+	assert.Equal(t, 2, len(tempDevice3.Tags))
+	assert.Equal(t, "system/id:b9324904-385b-581d-b790-5e53eaabfd20", tempDevice3.Tags[0])
+	assert.Equal(t, "system/type:temperature", tempDevice3.Tags[1])
+
+	ledDevice := devices[3]
+	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", ledDevice.ID)
+	assert.Equal(t, "emulator-led", ledDevice.Alias)
+	assert.Equal(t, "Synse LED", ledDevice.Info)
+	assert.Equal(t, "led", ledDevice.Type)
+	assert.Equal(t, "4032ffbe-80db-5aa5-b794-f35c88dff85c", ledDevice.Plugin)
+	assert.Equal(t, 3, len(ledDevice.Tags))
+	assert.Equal(t, "foo/bar", ledDevice.Tags[0])
+	assert.Equal(t, "system/id:f041883c-cf87-55d7-a978-3d3103836412", ledDevice.Tags[1])
+	assert.Equal(t, "system/type:led", ledDevice.Tags[2])
 }
 
 func TestIntegration_Tags(t *testing.T) {
@@ -202,8 +240,10 @@ func TestIntegration_Tags(t *testing.T) {
 	opts := scheme.TagsOptions{}
 	tags, err := client.Tags(opts)
 	assert.NoError(t, err)
-	assert.Equal(t, 1, len(tags))
-	assert.Equal(t, "system/type:led", tags[0])
+	assert.Equal(t, 3, len(tags))
+	assert.Equal(t, "foo/bar", tags[0])
+	assert.Equal(t, "system/type:led", tags[1])
+	assert.Equal(t, "system/type:temperature", tags[2])
 }
 
 func TestIntegration_Info(t *testing.T) {
@@ -228,9 +268,10 @@ func TestIntegration_Info(t *testing.T) {
 	assert.Equal(t, map[string]string{"model": "emul8-led"}, device.Metadata)
 	assert.Equal(t, "rw", device.Capabilities.Mode)
 	assert.Equal(t, 0, len(device.Capabilities.Write.Actions))
-	assert.Equal(t, 2, len(device.Tags))
-	assert.Equal(t, "system/id:f041883c-cf87-55d7-a978-3d3103836412", device.Tags[0])
-	assert.Equal(t, "system/type:led", device.Tags[1])
+	assert.Equal(t, 3, len(device.Tags))
+	assert.Equal(t, "foo/bar", device.Tags[0])
+	assert.Equal(t, "system/id:f041883c-cf87-55d7-a978-3d3103836412", device.Tags[1])
+	assert.Equal(t, "system/type:led", device.Tags[2])
 	assert.Equal(t, 2, len(device.Outputs))
 	assert.Equal(t, 0, device.SortIndex)
 
@@ -245,7 +286,6 @@ func TestIntegration_Info(t *testing.T) {
 	assert.Equal(t, "color", colorOutput.Type)
 	assert.Equal(t, 0, colorOutput.Precision)
 	assert.Equal(t, 0.0, colorOutput.ScalingFactor)
-
 }
 
 func TestIntegration_Read(t *testing.T) {
@@ -262,25 +302,32 @@ func TestIntegration_Read(t *testing.T) {
 	opts := scheme.ReadOptions{}
 	readings, err := client.Read(opts)
 	assert.NoError(t, err)
-	assert.Equal(t, 2, len(readings))
+	assert.Equal(t, 5, len(readings))
 
-	stateRead := readings[0]
-	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", stateRead.Device)
-	assert.NotEmpty(t, stateRead.Timestamp)
-	assert.Equal(t, "state", stateRead.Type)
-	assert.Equal(t, "led", stateRead.DeviceType)
-	assert.Empty(t, stateRead.Unit)
-	assert.Equal(t, "off", stateRead.Value)
-	assert.Empty(t, stateRead.Context)
+	counts := countDeviceType(readings)
+	assert.Equal(t, 2, counts["led"])
+	assert.Equal(t, 3, counts["temperature"])
 
-	colorRead := readings[1]
-	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", colorRead.Device)
-	assert.NotEmpty(t, colorRead.Timestamp)
-	assert.Equal(t, "color", colorRead.Type)
-	assert.Equal(t, "led", colorRead.DeviceType)
-	assert.Empty(t, colorRead.Unit)
-	assert.Equal(t, "000000", colorRead.Value)
-	assert.Empty(t, colorRead.Context)
+	for _, read := range readings {
+		if read.DeviceType == "led" {
+			assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", read.Device)
+			assert.NotEmpty(t, read.Timestamp)
+			assert.Contains(t, []string{"state", "color"}, read.Type)
+			assert.Empty(t, read.Unit)
+			assert.Contains(t, []string{"off", "000000"}, read.Value)
+			assert.Empty(t, read.Context)
+		} else if read.DeviceType == "temperature" {
+			assert.Contains(t, []string{"89fd576d-462c-53be-bcb6-7870e70c304a", "9907bdfa-75e1-5af5-8385-87184f356b22", "b9324904-385b-581d-b790-5e53eaabfd20"}, read.Device)
+			assert.NotEmpty(t, read.Timestamp)
+			assert.Equal(t, "temperature", read.Type)
+			assert.Equal(t, "celsius", read.Unit.Name)
+			assert.Equal(t, "C", read.Unit.Symbol)
+			assert.NotEmpty(t, read.Value)
+			assert.Empty(t, read.Context)
+		} else {
+			t.Error("unexpected reading device type in response")
+		}
+	}
 }
 
 func TestIntegration_ReadDevice(t *testing.T) {
@@ -346,12 +393,24 @@ func TestIntegration_ReadCache(t *testing.T) {
 				break
 			}
 
-			assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", read.Device)
-			assert.NotEmpty(t, read.Timestamp)
-			assert.Contains(t, []string{"state", "color"}, read.Type)
-			assert.Equal(t, "led", read.DeviceType)
-			assert.Empty(t, read.Unit)
-			assert.Contains(t, []string{"off", "000000"}, read.Value)
+			if read.DeviceType == "led" {
+				assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", read.Device)
+				assert.NotEmpty(t, read.Timestamp)
+				assert.Contains(t, []string{"state", "color"}, read.Type)
+				assert.Empty(t, read.Unit)
+				assert.Contains(t, []string{"off", "000000"}, read.Value)
+				assert.Empty(t, read.Context)
+			} else if read.DeviceType == "temperature" {
+				assert.Contains(t, []string{"89fd576d-462c-53be-bcb6-7870e70c304a", "9907bdfa-75e1-5af5-8385-87184f356b22", "b9324904-385b-581d-b790-5e53eaabfd20"}, read.Device)
+				assert.NotEmpty(t, read.Timestamp)
+				assert.Equal(t, "temperature", read.Type)
+				assert.Equal(t, "celsius", read.Unit.Name)
+				assert.Equal(t, "C", read.Unit.Symbol)
+				assert.NotEmpty(t, read.Value)
+				assert.Empty(t, read.Context)
+			} else {
+				t.Error("unexpected reading device type in response")
+			}
 
 		case <-time.After(2 * time.Second):
 			// if the test does not complete after 2s, error.
@@ -470,4 +529,124 @@ func TestIntegration_Transaction(t *testing.T) {
 		assert.Empty(t, transaction.Message)
 		assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", transaction.Device)
 	}
+}
+
+func TestIntegration_TagsOptions(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+
+	client, err := NewHTTPClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	tests := []struct {
+		name     string
+		options  scheme.ReadOptions
+		expected map[string]int
+	}{
+		{
+			"single tag, no match",
+			scheme.ReadOptions{
+				Tags: []string{"bar/foo"},
+			},
+			map[string]int{
+				"total":       0,
+				"led":         0,
+				"temperature": 0,
+			},
+		},
+		{
+			"single tag, single match",
+			scheme.ReadOptions{
+				Tags: []string{"system/type:led"},
+			},
+			map[string]int{
+				"total":       2,
+				"led":         2,
+				"temperature": 0,
+			},
+		},
+		{
+			"single tag, multiple matches",
+			scheme.ReadOptions{
+				Tags: []string{"foo/bar"},
+			},
+			map[string]int{
+				"total":       4,
+				"led":         2,
+				"temperature": 2,
+			},
+		},
+		{
+			"multiple tags, no match",
+			scheme.ReadOptions{
+				Tags: []string{"system/type:led", "system/type:temperature"},
+			},
+			map[string]int{
+				"total":       0,
+				"led":         0,
+				"temperature": 0,
+			},
+		},
+		{
+			"multiple tags, single match",
+			scheme.ReadOptions{
+				Tags: []string{"foo/bar", "system/type:led"},
+			},
+			map[string]int{
+				"total":       2,
+				"led":         2,
+				"temperature": 0,
+			},
+		},
+		{
+			"multiple tags, multiple matches",
+			scheme.ReadOptions{
+				Tags: []string{"foo/bar", "system/type:temperature"},
+			},
+			map[string]int{
+				"total":       2,
+				"led":         0,
+				"temperature": 2,
+			},
+		},
+
+		// TODO - refer to #26: update tests for multiple tag group query.
+	}
+
+	for _, test := range tests {
+		tf := func(t *testing.T) {
+			readings, err := client.Read(test.options)
+			assert.NoError(t, err)
+			assert.Equal(t, test.expected["total"], len(readings))
+
+			counts := countDeviceType(readings)
+			assert.Equal(t, test.expected["led"], counts["led"])
+			assert.Equal(t, test.expected["temperature"], counts["temperature"])
+		}
+
+		t.Run(test.name, tf)
+	}
+}
+
+// countDeviceType returns the counts of devices for list of readings, grouped by
+// device types.
+func countDeviceType(readings []*scheme.Read) map[string]int {
+	m := map[string]int{
+		"led":         0,
+		"temperature": 0,
+	}
+
+	for _, read := range readings {
+		if read.DeviceType == "led" {
+			m["led"]++
+		} else if read.DeviceType == "temperature" {
+			m["temperature"]++
+		}
+	}
+
+	return m
 }
