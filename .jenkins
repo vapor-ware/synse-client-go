@@ -2,7 +2,12 @@
 
 pipeline {
 
-  agent any
+  agent {
+    label 'golang-next'
+  }
+  environment {
+    GITHUB_TOKEN = credentials('vio-bot-gh-token')
+  }
 
   stages {
     stage('Checkout') {
@@ -13,39 +18,24 @@ pipeline {
 
     stage('Lint') {
       steps {
-        script {
-          docker.image('vaporio/jenkins-agent-golang:latest').inside() {
-            sh 'golint -set_exit_status ./...'
-          }
+        container('golang'){
+          sh 'golint -set_exit_status ./...'
         }
       }
     }
 
     stage('Test') {
       steps {
-        script {
-          docker.image('vaporio/jenkins-agent-golang:latest').inside() {
-            sh 'CGO_ENABLED=0 go test -covermode=atomic ./...'
-          }
+        container('golang'){
+          sh 'CGO_ENABLED=0 go test -short -covermode=atomic ./...'
         }
       }
     }
 
     stage('Snapshot Build') {
       steps {
-        script {
-          /* This replicates some of what the docker agent would do if this were
-             running natively in kube. We would version these same params in
-             the agent config. This is a bit of a phaux pre-dep test to getting
-             agents running in kube. the containers are acting just like the
-             host agent would, but in spurts.
-             Note: the importance of the --group-add docker in the parameters.
-             Without it, docker in agent is mysteriously permission
-             locked despite having a GID present in the container.
-          */
-          docker.image('vaporio/jenkins-agent-golang:latest').inside('-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker --group-add docker') {
-            sh 'goreleaser release --snapshot --skip-publish --rm-dist'
-          }
+        container('golang'){
+          sh 'goreleaser release --snapshot --skip-publish --rm-dist'
         }
       }
     }
@@ -60,14 +50,11 @@ pipeline {
       }
       steps {
         script {
-          docker.image('vaporio/jenkins-agent-golang:latest').inside('-v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker -e GITHUB_TOKEN=$GITHUB_TOKEN --group-add docker') {
             withDockerRegistry(registry: [credentialsId: 'vio-docker-hub']) {
               sh 'GOVERSION=$(go version | awk '{print $3}') goreleaser release --rm-dist'
             }
-          }
         }
       }
     }
-
   }
 }
