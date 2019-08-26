@@ -548,7 +548,7 @@ func TestIntegration_TagsOptions(t *testing.T) {
 		expected map[string]int
 	}{
 		{
-			"single tag group, valid tag, single match",
+			"single tag group, single match 1",
 			scheme.ReadOptions{
 				Tags: []string{"system/type:led"},
 			},
@@ -559,18 +559,7 @@ func TestIntegration_TagsOptions(t *testing.T) {
 			},
 		},
 		{
-			"single tag group, valid tag, multiple matches",
-			scheme.ReadOptions{
-				Tags: []string{"foo/bar"},
-			},
-			map[string]int{
-				"total":       4,
-				"led":         2,
-				"temperature": 2,
-			},
-		},
-		{
-			"single tag group, valid tags, single match",
+			"single tag group, single match 2",
 			scheme.ReadOptions{
 				Tags: []string{"system/type:led,foo/bar"},
 			},
@@ -581,7 +570,18 @@ func TestIntegration_TagsOptions(t *testing.T) {
 			},
 		},
 		{
-			"single tag group, invalid tag, no match",
+			"single tag group, multiple matches",
+			scheme.ReadOptions{
+				Tags: []string{"foo/bar"},
+			},
+			map[string]int{
+				"total":       4,
+				"led":         2,
+				"temperature": 2,
+			},
+		},
+		{
+			"single tag group, no match 1",
 			scheme.ReadOptions{
 				Tags: []string{"bar/foo"},
 			},
@@ -592,7 +592,7 @@ func TestIntegration_TagsOptions(t *testing.T) {
 			},
 		},
 		{
-			"single tag group, invalid tags, no match",
+			"single tag group, no match 2",
 			scheme.ReadOptions{
 				Tags: []string{"system/type:led,bar/foo"},
 			},
@@ -603,7 +603,7 @@ func TestIntegration_TagsOptions(t *testing.T) {
 			},
 		},
 		{
-			"multiple tag groups, valid tags, single match",
+			"multiple tag groups, single match",
 			scheme.ReadOptions{
 				Tags: []string{"system/type:led", "bar/foo"},
 			},
@@ -614,7 +614,7 @@ func TestIntegration_TagsOptions(t *testing.T) {
 			},
 		},
 		{
-			"multiple tag groups, valid tags, multiple matches",
+			"multiple tag groups, multiple matches",
 			scheme.ReadOptions{
 				Tags: []string{"system/type:led", "system/type:temperature"},
 			},
@@ -625,7 +625,7 @@ func TestIntegration_TagsOptions(t *testing.T) {
 			},
 		},
 		{
-			"multiple tag groups, valid tags, multiple matches (shared)",
+			"multiple tag groups, multiple matches (shared)",
 			scheme.ReadOptions{
 				Tags: []string{"system/type:led", "foo/bar"},
 			},
@@ -636,9 +636,9 @@ func TestIntegration_TagsOptions(t *testing.T) {
 			},
 		},
 		{
-			"multiple tag groups, invalid tags, no match",
+			"multiple tag groups, no match",
 			scheme.ReadOptions{
-				Tags: []string{"bar/foo/1", "bar/foo/2"},
+				Tags: []string{"bar/foo:1", "bar/foo:2"},
 			},
 			map[string]int{
 				"total":       0,
