@@ -61,12 +61,10 @@ func makePath(components ...string) string {
 	return strings.Join(components, "/")
 }
 
-// structToMapString decodes a struct value into a map[string]string that can
-// be used as query parameters. It assumes that the struct fields follow one of
-// these types: bool, string, int, float, slice.
-func structToMapString(s interface{}) map[string]string {
-	out := map[string]string{}
-	v := ""
+// structToURLValues decodes a struct value into url.Values that can
+// be used as query parameters.
+func structToURLValues(s interface{}) url.Values {
+	out := url.Values{}
 
 	fields := reflect.TypeOf(s)
 	values := reflect.ValueOf(s)
@@ -75,16 +73,14 @@ func structToMapString(s interface{}) map[string]string {
 		field := fields.Field(i)
 		value := values.Field(i)
 
+		v := []string{}
 		switch value.Kind() {
 		case reflect.Slice:
-			s := []string{}
 			for i := 0; i < value.Len(); i++ {
-				s = append(s, fmt.Sprint(value.Index(i)))
+				v = append(v, fmt.Sprint(value.Index(i)))
 			}
-
-			v = strings.Join(s, ",")
 		default:
-			v = fmt.Sprint(value)
+			v = append(v, fmt.Sprint(value))
 		}
 
 		out[strings.ToLower(field.Name)] = v

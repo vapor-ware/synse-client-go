@@ -216,7 +216,7 @@ func (c *httpClient) ReadCache(opts scheme.ReadCacheOptions, out chan<- *scheme.
 	defer close(out)
 	errScheme := new(scheme.Error)
 
-	resp, err := c.setVersioned().R().SetDoNotParseResponse(true).SetQueryParams(structToMapString(opts)).SetError(errScheme).Get(readcacheURI)
+	resp, err := c.setVersioned().R().SetDoNotParseResponse(true).SetMultiValueQueryParams(structToURLValues(opts)).SetError(errScheme).Get(readcacheURI)
 	if err = check(err, errScheme); err != nil {
 		return err
 	}
@@ -281,7 +281,7 @@ func (c *httpClient) GetOptions() *Options {
 // against the Synse Server versioned API.
 func (c *httpClient) getVersionedQueryParams(uri string, params interface{}, okScheme interface{}) error {
 	errScheme := new(scheme.Error)
-	_, err := c.setVersioned().R().SetQueryParams(structToMapString(params)).SetResult(okScheme).SetError(errScheme).Get(uri)
+	_, err := c.setVersioned().R().SetMultiValueQueryParams(structToURLValues(params)).SetResult(okScheme).SetError(errScheme).Get(uri)
 	return check(err, errScheme)
 
 }

@@ -1,6 +1,7 @@
 package synse
 
 import (
+	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -92,14 +93,14 @@ func TestMakePath(t *testing.T) {
 	}
 }
 
-func TestStructToMapString(t *testing.T) {
+func TestStructToURLValues(t *testing.T) {
 	tests := []struct {
 		in       interface{}
-		expected map[string]string
+		expected url.Values
 	}{
 		{
 			struct{}{},
-			map[string]string{},
+			url.Values{},
 		},
 		{
 			struct {
@@ -107,8 +108,8 @@ func TestStructToMapString(t *testing.T) {
 			}{
 				foo: "bar",
 			},
-			map[string]string{
-				"foo": "bar",
+			url.Values{
+				"foo": []string{"bar"},
 			},
 		},
 		{
@@ -117,8 +118,8 @@ func TestStructToMapString(t *testing.T) {
 			}{
 				Foo: "bar",
 			},
-			map[string]string{
-				"foo": "bar",
+			url.Values{
+				"foo": []string{"bar"},
 			},
 		},
 		{
@@ -127,8 +128,8 @@ func TestStructToMapString(t *testing.T) {
 			}{
 				foo: "Bar",
 			},
-			map[string]string{
-				"foo": "Bar",
+			url.Values{
+				"foo": []string{"Bar"},
 			},
 		},
 		{
@@ -137,8 +138,8 @@ func TestStructToMapString(t *testing.T) {
 			}{
 				foo: int(1),
 			},
-			map[string]string{
-				"foo": "1",
+			url.Values{
+				"foo": []string{"1"},
 			},
 		},
 		{
@@ -147,8 +148,8 @@ func TestStructToMapString(t *testing.T) {
 			}{
 				foo: true,
 			},
-			map[string]string{
-				"foo": "true",
+			url.Values{
+				"foo": []string{"true"},
 			},
 		},
 		{
@@ -157,27 +158,24 @@ func TestStructToMapString(t *testing.T) {
 			}{
 				foo: []string{"foo", "bar"},
 			},
-			map[string]string{
-				"foo": "foo,bar",
+			url.Values{
+				"foo": []string{"foo", "bar"},
 			},
 		},
 		{
 			struct {
 				foo []string
-				bar string
 			}{
-				foo: []string{"foo", "bar", "foobar"},
-				bar: "bar",
+				foo: []string{"foo,bar", "bar"},
 			},
-			map[string]string{
-				"foo": "foo,bar,foobar",
-				"bar": "bar",
+			url.Values{
+				"foo": []string{"foo,bar", "bar"},
 			},
 		},
 	}
 
 	for _, tt := range tests {
-		out := structToMapString(tt.in)
+		out := structToURLValues(tt.in)
 		assert.Equal(t, tt.expected, out)
 	}
 }
