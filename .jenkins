@@ -4,13 +4,15 @@ pipeline {
   agent {
     label 'golang-next'
   }
+  environment {
+        GOVERSION = "1.11"
+  }
   stages {
     stage('Checkout') {
       steps {
         checkout scm
       }
     }
-
     stage('Lint') {
       steps {
         container('golang'){
@@ -46,7 +48,7 @@ pipeline {
       steps {
         container('golang'){
             withDockerRegistry(registry: [credentialsId: 'vio-docker-hub']) {
-              sh 'GOVERSION=$(go version | awk '{print $3}') goreleaser release --rm-dist'
+              sh 'goreleaser release --rm-dist'
             }
         }
       }
