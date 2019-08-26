@@ -321,7 +321,7 @@ func (c *websocketClient) ReadDevice(id string) ([]*scheme.Read, error) {
 			Event: requestReadDevice,
 		},
 		Data: scheme.ReadDeviceData{
-			ID: id,
+			Device: id,
 		},
 	}
 
