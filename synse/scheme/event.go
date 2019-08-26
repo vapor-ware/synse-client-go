@@ -80,8 +80,7 @@ type RequestReadDevice struct {
 
 // ReadDeviceData describes the data for request/read_device event.
 type ReadDeviceData struct {
-	ID          string `json:"id" yaml:"id" mapstructure:"id"`
-	ReadOptions `mapstructure:",squash"`
+	ID string `json:"id" yaml:"id" mapstructure:"id"`
 }
 
 // RequestReadCache describes a scheme for request/read_cache event.

@@ -314,15 +314,14 @@ func (c *websocketClient) Read(opts scheme.ReadOptions) ([]*scheme.Read, error) 
 // ReadDevice returns data from a specific device.
 // It is the same as Read() where the label matches the device id tag
 // specified in ReadOptions.
-func (c *websocketClient) ReadDevice(id string, opts scheme.ReadOptions) ([]*scheme.Read, error) {
+func (c *websocketClient) ReadDevice(id string) ([]*scheme.Read, error) {
 	req := scheme.RequestReadDevice{
 		EventMeta: scheme.EventMeta{
 			ID:    c.addCounter(),
 			Event: requestReadDevice,
 		},
 		Data: scheme.ReadDeviceData{
-			ID:          id,
-			ReadOptions: opts,
+			ID: id,
 		},
 	}
 

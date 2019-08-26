@@ -49,7 +49,7 @@ type Client interface {
 	// ReadDevice returns data from a specific device.
 	// It is the same as Read() where the label matches the device id tag
 	// specified in ReadOptions.
-	ReadDevice(string, scheme.ReadOptions) ([]*scheme.Read, error)
+	ReadDevice(string) ([]*scheme.Read, error)
 
 	// ReadCache returns stream reading data from the registered plugins.
 	ReadCache(scheme.ReadCacheOptions, chan<- *scheme.Read) error

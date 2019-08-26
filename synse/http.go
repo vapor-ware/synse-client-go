@@ -202,9 +202,9 @@ func (c *httpClient) Read(opts scheme.ReadOptions) ([]*scheme.Read, error) {
 
 // ReadDevice returns data from a specific device. It is the same as Read()
 // where the label matches the device id tag specified in ReadOptions.
-func (c *httpClient) ReadDevice(id string, opts scheme.ReadOptions) ([]*scheme.Read, error) {
+func (c *httpClient) ReadDevice(id string) ([]*scheme.Read, error) {
 	out := new([]*scheme.Read)
-	if err := c.getVersionedQueryParams(makePath(readURI, id), opts, out); err != nil {
+	if err := c.getVersioned(makePath(readURI, id), out); err != nil {
 		return nil, err
 	}
 
