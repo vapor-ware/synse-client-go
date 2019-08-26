@@ -1,14 +1,9 @@
 #!/usr/bin/env groovy
 
 pipeline {
-
   agent {
     label 'golang-next'
   }
-  environment {
-    GITHUB_TOKEN = credentials('vio-bot-gh-token')
-  }
-
   stages {
     stage('Checkout') {
       steps {
@@ -49,7 +44,7 @@ pipeline {
         GITHUB_TOKEN = credentials('vio-bot-gh-token')
       }
       steps {
-        script {
+        container('golang'){
             withDockerRegistry(registry: [credentialsId: 'vio-docker-hub']) {
               sh 'GOVERSION=$(go version | awk '{print $3}') goreleaser release --rm-dist'
             }
