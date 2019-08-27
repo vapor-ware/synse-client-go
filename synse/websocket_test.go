@@ -1284,8 +1284,7 @@ func TestWebSocketClientV3_ReadDevice_200(t *testing.T) {
 	err = client.Open()
 	assert.NoError(t, err)
 
-	opts := scheme.ReadOptions{}
-	resp, err := client.ReadDevice("1b714cf2-cc56-5c36-9741-fd6a483b5f10", opts)
+	resp, err := client.ReadDevice("1b714cf2-cc56-5c36-9741-fd6a483b5f10")
 	assert.NotNil(t, resp)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, resp)
@@ -1321,8 +1320,7 @@ func TestWebSocketClientV3_ReadDevice_500(t *testing.T) {
 	err = client.Open()
 	assert.NoError(t, err)
 
-	opts := scheme.ReadOptions{}
-	resp, err := client.ReadDevice("1b714cf2-cc56-5c36-9741-fd6a483b5f10", opts)
+	resp, err := client.ReadDevice("1b714cf2-cc56-5c36-9741-fd6a483b5f10")
 	assert.Nil(t, resp)
 	assert.Error(t, err)
 

@@ -341,8 +341,7 @@ func TestIntegration_ReadDevice(t *testing.T) {
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
 
-	opts := scheme.ReadOptions{}
-	readings, err := client.ReadDevice("f041883c-cf87-55d7-a978-3d3103836412", opts)
+	readings, err := client.ReadDevice("f041883c-cf87-55d7-a978-3d3103836412")
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(readings))
 
