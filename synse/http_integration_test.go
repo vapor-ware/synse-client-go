@@ -548,18 +548,7 @@ func TestIntegration_TagsOptions(t *testing.T) {
 		expected map[string]int
 	}{
 		{
-			"single tag, no match",
-			scheme.ReadOptions{
-				Tags: []string{"bar/foo"},
-			},
-			map[string]int{
-				"total":       0,
-				"led":         0,
-				"temperature": 0,
-			},
-		},
-		{
-			"single tag, single match",
+			"single tag group, single match 1",
 			scheme.ReadOptions{
 				Tags: []string{"system/type:led"},
 			},
@@ -570,7 +559,18 @@ func TestIntegration_TagsOptions(t *testing.T) {
 			},
 		},
 		{
-			"single tag, multiple matches",
+			"single tag group, single match 2",
+			scheme.ReadOptions{
+				Tags: []string{"system/type:led,foo/bar"},
+			},
+			map[string]int{
+				"total":       2,
+				"led":         2,
+				"temperature": 0,
+			},
+		},
+		{
+			"single tag group, multiple matches",
 			scheme.ReadOptions{
 				Tags: []string{"foo/bar"},
 			},
@@ -581,9 +581,9 @@ func TestIntegration_TagsOptions(t *testing.T) {
 			},
 		},
 		{
-			"multiple tags, no match",
+			"single tag group, no match 1",
 			scheme.ReadOptions{
-				Tags: []string{"system/type:led", "system/type:temperature"},
+				Tags: []string{"bar/foo"},
 			},
 			map[string]int{
 				"total":       0,
@@ -592,9 +592,20 @@ func TestIntegration_TagsOptions(t *testing.T) {
 			},
 		},
 		{
-			"multiple tags, single match",
+			"single tag group, no match 2",
 			scheme.ReadOptions{
-				Tags: []string{"foo/bar", "system/type:led"},
+				Tags: []string{"system/type:led,bar/foo"},
+			},
+			map[string]int{
+				"total":       0,
+				"led":         0,
+				"temperature": 0,
+			},
+		},
+		{
+			"multiple tag groups, single match",
+			scheme.ReadOptions{
+				Tags: []string{"system/type:led", "bar/foo"},
 			},
 			map[string]int{
 				"total":       2,
@@ -603,18 +614,38 @@ func TestIntegration_TagsOptions(t *testing.T) {
 			},
 		},
 		{
-			"multiple tags, multiple matches",
+			"multiple tag groups, multiple matches",
 			scheme.ReadOptions{
-				Tags: []string{"foo/bar", "system/type:temperature"},
+				Tags: []string{"system/type:led", "system/type:temperature"},
 			},
 			map[string]int{
-				"total":       2,
-				"led":         0,
+				"total":       5,
+				"led":         2,
+				"temperature": 3,
+			},
+		},
+		{
+			"multiple tag groups, multiple matches (shared)",
+			scheme.ReadOptions{
+				Tags: []string{"system/type:led", "foo/bar"},
+			},
+			map[string]int{
+				"total":       4,
+				"led":         2,
 				"temperature": 2,
 			},
 		},
-
-		// TODO - refer to #26: update tests for multiple tag group query.
+		{
+			"multiple tag groups, no match",
+			scheme.ReadOptions{
+				Tags: []string{"bar/foo:1", "bar/foo:2"},
+			},
+			map[string]int{
+				"total":       0,
+				"led":         0,
+				"temperature": 0,
+			},
+		},
 	}
 
 	for _, test := range tests {
