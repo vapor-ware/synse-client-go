@@ -37,12 +37,20 @@ test:  ## Run unit tests
 	@ # Note: this requires go1.10+ in order to do multi-package coverage reports
 	go test -short -race -coverprofile=coverage.out -covermode=atomic ./...
 
-.PHONY: test-integration
-test-integration:  ## Run integration tests
+.PHONY: test-integration-http
+test-integration-http:  ## Run integration tests for http client
 	-docker-compose -f compose/server.yml rm -fsv
 	docker-compose -f compose/server.yml up -d
 	sleep 6
-	go test -race -cover -run Integration ./... || (docker-compose -f compose/server.yml stop; exit 1)
+	go test -race -cover -run IntegrationHTTP ./... || (docker-compose -f compose/server.yml stop; exit 1)
+	docker-compose -f compose/server.yml down
+
+.PHONY: test-integration-websocket
+test-integration-websocket:  ## Run integration tests for websocket client
+	-docker-compose -f compose/server.yml rm -fsv
+	docker-compose -f compose/server.yml up -d
+	sleep 6
+	go test -race -cover -run IntegrationWebSocket ./... || (docker-compose -f compose/server.yml stop; exit 1)
 	docker-compose -f compose/server.yml down
 
 .PHONY: version
@@ -51,6 +59,6 @@ version:  ## Print the version of the client
 
 .PHONY: help
 help:  ## Print usage information
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-16s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-26s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
 
 .DEFAULT_GOAL := help
