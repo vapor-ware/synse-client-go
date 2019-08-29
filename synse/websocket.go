@@ -175,7 +175,7 @@ func (c *websocketClient) Plugins() ([]*scheme.PluginMeta, error) {
 	req := scheme.RequestPlugins{
 		EventMeta: scheme.EventMeta{
 			ID:    c.addCounter(),
-			Event: requestPlugin,
+			Event: requestPlugins,
 		},
 	}
 
@@ -521,6 +521,8 @@ func matchEvent(reqEvent string) string { // nolint
 		respEvent = responseConfig
 	case requestPlugin:
 		respEvent = responsePlugin
+	case requestPlugins:
+		respEvent = responsePluginSummary
 	case requestPluginHealth:
 		respEvent = responsePluginHealth
 	case requestScan:
