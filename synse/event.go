@@ -15,6 +15,9 @@ const (
 	// requestPlugin describes the request/plugin event.
 	requestPlugin = "request/plugin"
 
+	// requestPlugins describes the request/plugins event.
+	requestPlugins = "request/plugins"
+
 	// requestPluginHealth describes the request/plugin_health event.
 	requestPluginHealth = "request/plugin_health"
 
@@ -54,8 +57,11 @@ const (
 	// responseConfig describes the response/config event.
 	responseConfig = "response/config"
 
-	// responsePlugin describes the response/plugin event.
-	responsePlugin = "response/plugin"
+	// responsePlugin describes the response/plugin_info event.
+	responsePlugin = "response/plugin_info"
+
+	// responsePluginSummary describes the response/plugin_summary event.
+	responsePluginSummary = "response/plugin_summary"
 
 	// responsePluginHealth describes the response/plugin_health event.
 	responsePluginHealth = "response/plugin_health"
@@ -64,7 +70,7 @@ const (
 	responseTags = "response/tags"
 
 	// responseDevice describes the response/device event.
-	responseDevice = "response/device"
+	responseDevice = "response/device_info"
 
 	// responseDeviceSummary describes the response/device_summary event.
 	responseDeviceSummary = "response/device_summary"
