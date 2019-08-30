@@ -33,7 +33,10 @@ lint:  ## Lint project source files
 	golint -set_exit_status ./...
 
 .PHONY: test
-test:  ## Run unit tests
+test: test-unit test-integration-http test-integration-websocket  ## Run all tests
+
+.PHONY: test-unit
+test-unit:  ## Run unit tests
 	@ # Note: this requires go1.10+ in order to do multi-package coverage reports
 	go test -short -race -coverprofile=coverage.out -covermode=atomic ./...
 
