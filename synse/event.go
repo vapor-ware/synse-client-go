@@ -45,6 +45,9 @@ const (
 	// requestWriteSync describes the request/write_sync event.
 	requestWriteSync = "request/write_sync"
 
+	// requestTransactions describes the request/transactions event.
+	requestTransactions = "request/transactions"
+
 	// requestTransaction describes the request/transaction event.
 	requestTransaction = "request/transaction"
 
@@ -84,8 +87,11 @@ const (
 	// responseWriteSync describes the response/write_sync event.
 	responseWriteSync = "response/write_sync"
 
-	// responseTransaction describes the response/transaction event.
-	responseTransaction = "response/transaction"
+	// responseTransactionList describes the response/transaction_list event.
+	responseTransactionList = "response/transaction_list"
+
+	// responseTransactionInfo describes the response/transaction_info event.
+	responseTransactionInfo = "response/transaction_info"
 
 	// responseError describes the response/error event.
 	responseError = "response/error"

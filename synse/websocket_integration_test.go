@@ -625,3 +625,43 @@ func TestIntegrationWebSocket_ReadCache(t *testing.T) {
 // 	assert.Empty(t, colorWrite.Context.Transaction)
 // 	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", colorWrite.Device)
 // }
+
+// FIXME - WriteAsync and WriteSync need to be fixed first before enabling
+// this.
+// func TestIntegrationWebSocket_Transaction(t *testing.T) {
+// 	if testing.Short() {
+// 		t.Skip("skipping integration test")
+// 	}
+
+// 	client, err := NewWebSocketClientV3(&Options{
+// 		Address: "localhost:5000",
+// 	})
+// 	assert.NotNil(t, client)
+// 	assert.NoError(t, err)
+
+// 	err = client.Open()
+// 	assert.NoError(t, err)
+
+// 	defer func() {
+// 		err = client.Close()
+// 		assert.NoError(t, err)
+// 	}()
+
+// 	transactions, err := client.Transactions()
+// 	assert.NoError(t, err)
+// 	assert.Equal(t, 4, len(transactions))
+
+// 	for _, id := range transactions {
+// 		transaction, err := client.Transaction(id)
+// 		assert.NoError(t, err)
+// 		assert.NotEmpty(t, transaction.ID)
+// 		assert.NotEmpty(t, transaction.Created)
+// 		assert.NotEmpty(t, transaction.Updated)
+// 		assert.Equal(t, "30s", transaction.Timeout)
+// 		assert.Equal(t, "DONE", transaction.Status)
+// 		assert.Contains(t, []string{"state", "color"}, transaction.Context.Action)
+// 		assert.Contains(t, []string{"on", "blink", "ffffff", "0f0f0f"}, transaction.Context.Data)
+// 		assert.Empty(t, transaction.Message)
+// 		assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", transaction.Device)
+// 	}
+// }

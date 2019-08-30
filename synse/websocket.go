@@ -406,7 +406,7 @@ func (c *websocketClient) Transactions() ([]string, error) {
 	req := scheme.RequestTransactions{
 		EventMeta: scheme.EventMeta{
 			ID:    c.addCounter(),
-			Event: requestTransaction,
+			Event: requestTransactions,
 		},
 	}
 
@@ -541,8 +541,10 @@ func matchEvent(reqEvent string) string { // nolint
 		respEvent = responseWriteSync
 	case requestWriteAsync:
 		respEvent = responseWriteAsync
+	case requestTransactions:
+		respEvent = responseTransactionList
 	case requestTransaction:
-		respEvent = responseTransaction
+		respEvent = responseTransactionInfo
 	default:
 		respEvent = ""
 	}

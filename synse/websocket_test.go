@@ -1693,7 +1693,7 @@ func TestWebSocketClientV3_Transactions_200(t *testing.T) {
 	in := `
 {
    "id":1,
-   "event":"response/transaction",
+   "event":"response/transaction_list",
    "data":[
       "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
       "56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
@@ -1766,7 +1766,7 @@ func TestWebSocketClientV3_Transaction_200(t *testing.T) {
 	in := `
 {
    "id":1,
-   "event":"response/transaction",
+   "event":"response/transaction_info",
    "data":{
       "id":"56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
       "timeout":"10s",
