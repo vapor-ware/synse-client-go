@@ -526,3 +526,102 @@ func TestIntegrationWebSocket_ReadCache(t *testing.T) {
 		}
 	}
 }
+
+// FIXME - got a 500 error response from synse server at 2019-08-30T10:27:42Z,
+// saying An unexpected error occurred., with context: Object of type 'bytes'
+// func TestIntegrationWebSocket_WriteAsync(t *testing.T) {
+// 	if testing.Short() {
+// 		t.Skip("skipping integration test")
+// 	}
+
+// 	client, err := NewWebSocketClientV3(&Options{
+// 		Address: "localhost:5000",
+// 	})
+// 	assert.NotNil(t, client)
+// 	assert.NoError(t, err)
+
+// 	err = client.Open()
+// 	assert.NoError(t, err)
+
+// 	defer func() {
+// 		err = client.Close()
+// 		assert.NoError(t, err)
+// 	}()
+
+// 	writeData := []scheme.WriteData{
+// 		{Action: "state", Data: "on"},
+// 		{Action: "color", Data: "ffffff"},
+// 	}
+// 	writes, err := client.WriteAsync("f041883c-cf87-55d7-a978-3d3103836412", writeData)
+// 	assert.NoError(t, err)
+// 	assert.Equal(t, 2, len(writes))
+
+// 	stateWrite := writes[0]
+// 	assert.NotEmpty(t, stateWrite.ID)
+// 	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", stateWrite.Device)
+// 	assert.Equal(t, "state", stateWrite.Context.Action)
+// 	assert.Equal(t, "on", stateWrite.Context.Data)
+// 	assert.Empty(t, stateWrite.Context.Transaction)
+// 	assert.Equal(t, "30s", stateWrite.Timeout)
+
+// 	colorWrite := writes[1]
+// 	assert.NotEmpty(t, colorWrite.ID)
+// 	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", colorWrite.Device)
+// 	assert.Equal(t, "color", colorWrite.Context.Action)
+// 	assert.Equal(t, "ffffff", colorWrite.Context.Data)
+// 	assert.Empty(t, colorWrite.Context.Transaction)
+// 	assert.Equal(t, "30s", colorWrite.Timeout)
+// }
+
+// FIXME - got a 500 error response from synse server at 2019-08-30T10:27:42Z,
+// saying An unexpected error occurred., with context: Object of type 'bytes'
+// is not JSON serializable
+// func TestIntegrationWebSocket_WriteSync(t *testing.T) {
+// 	if testing.Short() {
+// 		t.Skip("skipping integration test")
+// 	}
+
+// 	client, err := NewWebSocketClientV3(&Options{
+// 		Address: "localhost:5000",
+// 	})
+// 	assert.NotNil(t, client)
+// 	assert.NoError(t, err)
+
+// 	err = client.Open()
+// 	assert.NoError(t, err)
+
+// 	defer func() {
+// 		err = client.Close()
+// 		assert.NoError(t, err)
+// 	}()
+
+// 	writeData := []scheme.WriteData{
+// 		{Action: "state", Data: "blink"},
+// 		{Action: "color", Data: "0f0f0f"},
+// 	}
+// 	writes, err := client.WriteSync("f041883c-cf87-55d7-a978-3d3103836412", writeData)
+// 	assert.NoError(t, err)
+// 	assert.Equal(t, 2, len(writes))
+
+// 	stateWrite := writes[0]
+// 	assert.NotEmpty(t, stateWrite.ID)
+// 	assert.NotEmpty(t, stateWrite.Created)
+// 	assert.NotEmpty(t, stateWrite.Updated)
+// 	assert.Equal(t, "30s", stateWrite.Timeout)
+// 	assert.Equal(t, "DONE", stateWrite.Status)
+// 	assert.Equal(t, "state", stateWrite.Context.Action)
+// 	assert.Equal(t, "blink", stateWrite.Context.Data)
+// 	assert.Empty(t, stateWrite.Context.Transaction)
+// 	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", stateWrite.Device)
+
+// 	colorWrite := writes[1]
+// 	assert.NotEmpty(t, colorWrite.ID)
+// 	assert.NotEmpty(t, colorWrite.Created)
+// 	assert.NotEmpty(t, colorWrite.Updated)
+// 	assert.Equal(t, "30s", colorWrite.Timeout)
+// 	assert.Equal(t, "DONE", colorWrite.Status)
+// 	assert.Equal(t, "color", colorWrite.Context.Action)
+// 	assert.Equal(t, "0f0f0f", colorWrite.Context.Data)
+// 	assert.Empty(t, colorWrite.Context.Transaction)
+// 	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", colorWrite.Device)
+// }
