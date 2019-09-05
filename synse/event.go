@@ -15,6 +15,9 @@ const (
 	// requestPlugin describes the request/plugin event.
 	requestPlugin = "request/plugin"
 
+	// requestPlugins describes the request/plugins event.
+	requestPlugins = "request/plugins"
+
 	// requestPluginHealth describes the request/plugin_health event.
 	requestPluginHealth = "request/plugin_health"
 
@@ -42,6 +45,9 @@ const (
 	// requestWriteSync describes the request/write_sync event.
 	requestWriteSync = "request/write_sync"
 
+	// requestTransactions describes the request/transactions event.
+	requestTransactions = "request/transactions"
+
 	// requestTransaction describes the request/transaction event.
 	requestTransaction = "request/transaction"
 
@@ -54,8 +60,11 @@ const (
 	// responseConfig describes the response/config event.
 	responseConfig = "response/config"
 
-	// responsePlugin describes the response/plugin event.
-	responsePlugin = "response/plugin"
+	// responsePlugin describes the response/plugin_info event.
+	responsePlugin = "response/plugin_info"
+
+	// responsePluginSummary describes the response/plugin_summary event.
+	responsePluginSummary = "response/plugin_summary"
 
 	// responsePluginHealth describes the response/plugin_health event.
 	responsePluginHealth = "response/plugin_health"
@@ -64,7 +73,7 @@ const (
 	responseTags = "response/tags"
 
 	// responseDevice describes the response/device event.
-	responseDevice = "response/device"
+	responseDevice = "response/device_info"
 
 	// responseDeviceSummary describes the response/device_summary event.
 	responseDeviceSummary = "response/device_summary"
@@ -78,8 +87,11 @@ const (
 	// responseWriteSync describes the response/write_sync event.
 	responseWriteSync = "response/write_sync"
 
-	// responseTransaction describes the response/transaction event.
-	responseTransaction = "response/transaction"
+	// responseTransactionList describes the response/transaction_list event.
+	responseTransactionList = "response/transaction_list"
+
+	// responseTransactionInfo describes the response/transaction_info event.
+	responseTransactionInfo = "response/transaction_info"
 
 	// responseError describes the response/error event.
 	responseError = "response/error"

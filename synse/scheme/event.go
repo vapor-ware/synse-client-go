@@ -99,7 +99,7 @@ type RequestWrite struct {
 // RequestWriteData describes the data for request/write_async and
 // request/write_sync event.
 type RequestWriteData struct {
-	ID      string      `json:"id" yaml:"id" mapstructure:"id"`
+	Device  string      `json:"device" yaml:"device" mapstructure:"device"`
 	Payload []WriteData `json:"payload" yaml:"payload" mapstructure:"payload"`
 }
 

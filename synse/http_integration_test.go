@@ -8,7 +8,7 @@ import (
 	"github.com/vapor-ware/synse-client-go/synse/scheme"
 )
 
-func TestIntegration_Status(t *testing.T) {
+func TestIntegrationHTTP_Status(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}
@@ -25,7 +25,7 @@ func TestIntegration_Status(t *testing.T) {
 	assert.NotEmpty(t, status.Timestamp)
 }
 
-func TestIntegration_Version(t *testing.T) {
+func TestIntegrationHTTP_Version(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}
@@ -42,7 +42,7 @@ func TestIntegration_Version(t *testing.T) {
 	assert.Equal(t, "v3", version.APIVersion)
 }
 
-func TestIntegration_Config(t *testing.T) {
+func TestIntegrationHTTP_Config(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}
@@ -67,7 +67,7 @@ func TestIntegration_Config(t *testing.T) {
 	assert.False(t, config.Metrics.Enabled)
 }
 
-func TestIntegration_Plugins(t *testing.T) {
+func TestIntegrationHTTP_Plugins(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}
@@ -91,7 +91,7 @@ func TestIntegration_Plugins(t *testing.T) {
 	assert.True(t, plugin.Active)
 }
 
-func TestIntegration_PluginInfo(t *testing.T) {
+func TestIntegrationHTTP_PluginInfo(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}
@@ -142,7 +142,7 @@ func TestIntegration_PluginInfo(t *testing.T) {
 	// assert.NotEmpty(t, writeCheck.Timestamp)
 }
 
-func TestIntegration_PluginHealth(t *testing.T) {
+func TestIntegrationHTTP_PluginHealth(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}
@@ -164,7 +164,7 @@ func TestIntegration_PluginHealth(t *testing.T) {
 	assert.Equal(t, 0, health.Inactive)
 }
 
-func TestIntegration_Scan(t *testing.T) {
+func TestIntegrationHTTP_Scan(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}
@@ -226,7 +226,7 @@ func TestIntegration_Scan(t *testing.T) {
 	assert.Equal(t, "system/type:led", ledDevice.Tags[2])
 }
 
-func TestIntegration_Tags(t *testing.T) {
+func TestIntegrationHTTP_Tags(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}
@@ -246,7 +246,7 @@ func TestIntegration_Tags(t *testing.T) {
 	assert.Equal(t, "system/type:temperature", tags[2])
 }
 
-func TestIntegration_Info(t *testing.T) {
+func TestIntegrationHTTP_Info(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}
@@ -288,7 +288,7 @@ func TestIntegration_Info(t *testing.T) {
 	assert.Equal(t, 0.0, colorOutput.ScalingFactor)
 }
 
-func TestIntegration_Read(t *testing.T) {
+func TestIntegrationHTTP_Read(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}
@@ -330,7 +330,7 @@ func TestIntegration_Read(t *testing.T) {
 	}
 }
 
-func TestIntegration_ReadDevice(t *testing.T) {
+func TestIntegrationHTTP_ReadDevice(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}
@@ -364,7 +364,7 @@ func TestIntegration_ReadDevice(t *testing.T) {
 	assert.Empty(t, colorRead.Context)
 }
 
-func TestIntegration_ReadCache(t *testing.T) {
+func TestIntegrationHTTP_ReadCache(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}
@@ -422,7 +422,7 @@ func TestIntegration_ReadCache(t *testing.T) {
 	}
 }
 
-func TestIntegration_WriteAsync(t *testing.T) {
+func TestIntegrationHTTP_WriteAsync(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}
@@ -458,7 +458,7 @@ func TestIntegration_WriteAsync(t *testing.T) {
 	assert.Equal(t, "30s", colorWrite.Timeout)
 }
 
-func TestIntegration_WriteSync(t *testing.T) {
+func TestIntegrationHTTP_WriteSync(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}
@@ -500,7 +500,7 @@ func TestIntegration_WriteSync(t *testing.T) {
 	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", colorWrite.Device)
 }
 
-func TestIntegration_Transaction(t *testing.T) {
+func TestIntegrationHTTP_Transaction(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}
@@ -530,7 +530,7 @@ func TestIntegration_Transaction(t *testing.T) {
 	}
 }
 
-func TestIntegration_TagsOptions(t *testing.T) {
+func TestIntegrationHTTP_TagsOptions(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}

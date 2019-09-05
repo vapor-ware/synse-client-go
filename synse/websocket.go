@@ -175,7 +175,7 @@ func (c *websocketClient) Plugins() ([]*scheme.PluginMeta, error) {
 	req := scheme.RequestPlugins{
 		EventMeta: scheme.EventMeta{
 			ID:    c.addCounter(),
-			Event: requestPlugin,
+			Event: requestPlugins,
 		},
 	}
 
@@ -271,14 +271,14 @@ func (c *websocketClient) Tags(opts scheme.TagsOptions) ([]string, error) {
 
 // Info returns the full set of meta info and capabilities for a specific
 // device.
-func (c *websocketClient) Info(id string) (*scheme.Info, error) {
+func (c *websocketClient) Info(device string) (*scheme.Info, error) {
 	req := scheme.RequestInfo{
 		EventMeta: scheme.EventMeta{
 			ID:    c.addCounter(),
 			Event: requestInfo,
 		},
 		Data: scheme.DeviceData{
-			Device: id,
+			Device: device,
 		},
 	}
 
@@ -314,14 +314,14 @@ func (c *websocketClient) Read(opts scheme.ReadOptions) ([]*scheme.Read, error) 
 // ReadDevice returns data from a specific device.
 // It is the same as Read() where the label matches the device id tag
 // specified in ReadOptions.
-func (c *websocketClient) ReadDevice(id string) ([]*scheme.Read, error) {
+func (c *websocketClient) ReadDevice(device string) ([]*scheme.Read, error) {
 	req := scheme.RequestReadDevice{
 		EventMeta: scheme.EventMeta{
 			ID:    c.addCounter(),
 			Event: requestReadDevice,
 		},
 		Data: scheme.ReadDeviceData{
-			Device: id,
+			Device: device,
 		},
 	}
 
@@ -358,14 +358,14 @@ func (c *websocketClient) ReadCache(opts scheme.ReadCacheOptions, out chan<- *sc
 }
 
 // WriteAsync writes data to a device, in an asynchronous manner.
-func (c *websocketClient) WriteAsync(id string, opts []scheme.WriteData) ([]*scheme.Write, error) {
+func (c *websocketClient) WriteAsync(device string, opts []scheme.WriteData) ([]*scheme.Write, error) {
 	req := scheme.RequestWrite{
 		EventMeta: scheme.EventMeta{
 			ID:    c.addCounter(),
 			Event: requestWriteAsync,
 		},
 		Data: scheme.RequestWriteData{
-			ID:      id,
+			Device:  device,
 			Payload: opts,
 		},
 	}
@@ -380,14 +380,14 @@ func (c *websocketClient) WriteAsync(id string, opts []scheme.WriteData) ([]*sch
 }
 
 // WriteSync writes data to a device, waiting for the write to complete.
-func (c *websocketClient) WriteSync(id string, opts []scheme.WriteData) ([]*scheme.Transaction, error) {
+func (c *websocketClient) WriteSync(device string, opts []scheme.WriteData) ([]*scheme.Transaction, error) {
 	req := scheme.RequestWrite{
 		EventMeta: scheme.EventMeta{
 			ID:    c.addCounter(),
 			Event: requestWriteSync,
 		},
 		Data: scheme.RequestWriteData{
-			ID:      id,
+			Device:  device,
 			Payload: opts,
 		},
 	}
@@ -406,7 +406,7 @@ func (c *websocketClient) Transactions() ([]string, error) {
 	req := scheme.RequestTransactions{
 		EventMeta: scheme.EventMeta{
 			ID:    c.addCounter(),
-			Event: requestTransaction,
+			Event: requestTransactions,
 		},
 	}
 
@@ -521,6 +521,8 @@ func matchEvent(reqEvent string) string { // nolint
 		respEvent = responseConfig
 	case requestPlugin:
 		respEvent = responsePlugin
+	case requestPlugins:
+		respEvent = responsePluginSummary
 	case requestPluginHealth:
 		respEvent = responsePluginHealth
 	case requestScan:
@@ -539,8 +541,10 @@ func matchEvent(reqEvent string) string { // nolint
 		respEvent = responseWriteSync
 	case requestWriteAsync:
 		respEvent = responseWriteAsync
+	case requestTransactions:
+		respEvent = responseTransactionList
 	case requestTransaction:
-		respEvent = responseTransaction
+		respEvent = responseTransactionInfo
 	default:
 		respEvent = ""
 	}

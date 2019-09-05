@@ -374,7 +374,7 @@ func TestWebSocketClientV3_Plugins_200(t *testing.T) {
 	in := `
 {
    "id":1,
-   "event":"response/plugin",
+   "event":"response/plugin_summary",
    "data":[
       {
          "description":"a plugin with emulated devices and data",
@@ -472,7 +472,7 @@ func TestWebSocketClientV3_Plugin_200(t *testing.T) {
 	in := `
 {
    "id":1,
-   "event":"response/plugin",
+   "event":"response/plugin_info",
    "data":{
       "active":true,
       "id":"1b714cf2-cc56-5c36-9741-fd6a483b5f10",
@@ -910,7 +910,7 @@ func TestWebSocketClientV3_Info_200(t *testing.T) {
 	in := `
 {
    "id":1,
-   "event":"response/device",
+   "event":"response/device_info",
    "data":{
       "timestamp":"2019-03-20T17:37:07Z",
       "id":"1b714cf2-cc56-5c36-9741-fd6a483b5f10",
@@ -1693,7 +1693,7 @@ func TestWebSocketClientV3_Transactions_200(t *testing.T) {
 	in := `
 {
    "id":1,
-   "event":"response/transaction",
+   "event":"response/transaction_list",
    "data":[
       "56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
       "56a32eba-1aa6-4868-84ee-fe01af8b2e6c",
@@ -1766,7 +1766,7 @@ func TestWebSocketClientV3_Transaction_200(t *testing.T) {
 	in := `
 {
    "id":1,
-   "event":"response/transaction",
+   "event":"response/transaction_info",
    "data":{
       "id":"56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
       "timeout":"10s",
