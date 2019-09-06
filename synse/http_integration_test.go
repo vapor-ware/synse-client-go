@@ -192,6 +192,7 @@ func TestIntegrationHTTP_Scan(t *testing.T) {
 	assert.Equal(t, "foo/bar", tempDevice1.Tags[0])
 	assert.Equal(t, "system/id:89fd576d-462c-53be-bcb6-7870e70c304a", tempDevice1.Tags[1])
 	assert.Equal(t, "system/type:temperature", tempDevice1.Tags[2])
+	assert.Equal(t, map[string]interface{}{"model": "emul8-temp"}, tempDevice1.Metadata)
 
 	tempDevice2 := devices[1]
 	assert.Equal(t, "9907bdfa-75e1-5af5-8385-87184f356b22", tempDevice2.ID)
@@ -203,6 +204,7 @@ func TestIntegrationHTTP_Scan(t *testing.T) {
 	assert.Equal(t, "foo/bar", tempDevice2.Tags[0])
 	assert.Equal(t, "system/id:9907bdfa-75e1-5af5-8385-87184f356b22", tempDevice2.Tags[1])
 	assert.Equal(t, "system/type:temperature", tempDevice2.Tags[2])
+	assert.Equal(t, map[string]interface{}{"model": "emul8-temp"}, tempDevice2.Metadata)
 
 	tempDevice3 := devices[2]
 	assert.Equal(t, "b9324904-385b-581d-b790-5e53eaabfd20", tempDevice3.ID)
@@ -213,6 +215,7 @@ func TestIntegrationHTTP_Scan(t *testing.T) {
 	assert.Equal(t, 2, len(tempDevice3.Tags))
 	assert.Equal(t, "system/id:b9324904-385b-581d-b790-5e53eaabfd20", tempDevice3.Tags[0])
 	assert.Equal(t, "system/type:temperature", tempDevice3.Tags[1])
+	assert.Equal(t, map[string]interface{}{"model": "emul8-temp"}, tempDevice3.Metadata)
 
 	ledDevice := devices[3]
 	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", ledDevice.ID)
@@ -224,6 +227,7 @@ func TestIntegrationHTTP_Scan(t *testing.T) {
 	assert.Equal(t, "foo/bar", ledDevice.Tags[0])
 	assert.Equal(t, "system/id:f041883c-cf87-55d7-a978-3d3103836412", ledDevice.Tags[1])
 	assert.Equal(t, "system/type:led", ledDevice.Tags[2])
+	assert.Equal(t, map[string]interface{}{"model": "emul8-led"}, ledDevice.Metadata)
 }
 
 func TestIntegrationHTTP_Tags(t *testing.T) {
