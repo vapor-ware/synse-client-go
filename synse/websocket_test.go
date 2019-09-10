@@ -730,7 +730,10 @@ func TestWebSocketClientV3_Scan_200(t *testing.T) {
             "type:temperature",
             "temperature",
             "vio/fan-sensor"
-         ]
+         ],
+         "metadata": {
+           "foo": "bar"
+         }
       },
       {
          "id":"1b714cf2-cc56-5c36-9741-fd6a483b5f12",
@@ -741,7 +744,8 @@ func TestWebSocketClientV3_Scan_200(t *testing.T) {
          "tags":[
             "type:led",
             "led"
-         ]
+         ],
+         "metadata": {}
       }
    ]
 }`
@@ -757,6 +761,9 @@ func TestWebSocketClientV3_Scan_200(t *testing.T) {
 				"temperature",
 				"vio/fan-sensor",
 			},
+			Metadata: map[string]interface{}{
+				"foo": "bar",
+			},
 		},
 		{
 			ID:     "1b714cf2-cc56-5c36-9741-fd6a483b5f12",
@@ -767,6 +774,7 @@ func TestWebSocketClientV3_Scan_200(t *testing.T) {
 				"type:led",
 				"led",
 			},
+			Metadata: map[string]interface{}{},
 		},
 	}
 
