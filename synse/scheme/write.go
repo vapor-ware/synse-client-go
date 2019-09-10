@@ -11,7 +11,7 @@ type Write struct {
 // WriteData describes an unit in the POST body for the `/write` endpoint. This
 // can also be used in a websocket request event payload.
 type WriteData struct {
-	Transaction string      `json:"transaction" yaml:"transaction" mapstructure:"transaction"`
-	Action      string      `json:"action" yaml:"action" mapstructure:"action"`
-	Data        interface{} `json:"data" yaml:"data" mapstructure:"data"`
+	Transaction string      `json:"transaction,omitempty" yaml:"transaction,omitempty" mapstructure:"transaction"`
+	Action      string      `json:"action,omitempty" yaml:"action,omitempty" mapstructure:"action"`
+	Data        interface{} `json:"data,omitempty" yaml:"data,omitempty" mapstructure:"data"`
 }
