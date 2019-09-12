@@ -1,55 +1,63 @@
 #!/usr/bin/env groovy
 
 pipeline {
+
   agent {
-    label 'golang-next'
+    label 'golang-alpha'
   }
-  environment {
-        GOVERSION = "1.11"
-  }
+
   stages {
     stage('Checkout') {
       steps {
         checkout scm
       }
     }
-    stage('Lint') {
-      steps {
-        container('golang'){
-          sh 'golint -set_exit_status ./...'
+
+    stage('Checks') {
+      parallel {
+
+        stage('Lint') {
+          steps {
+            container('golang'){
+              sh 'golint -set_exit_status ./...'
+            }
+          }
+        }
+
+        stage('Test') {
+          environment {
+            CGO_ENABLED = 0
+          }
+          steps {
+            container('golang'){
+              sh 'go test -short -covermode=atomic ./...'
+            }
+          }
+        }
+
+        stage('Snapshot Build') {
+          steps {
+            container('golang'){
+              sh 'goreleaser release --debug --snapshot --skip-publish --rm-dist'
+            }
+          }
         }
       }
     }
 
-    stage('Test') {
-      steps {
-        container('golang'){
-          sh 'CGO_ENABLED=0 go test -short -covermode=atomic ./...'
-        }
-      }
-    }
-
-    stage('Snapshot Build') {
-      steps {
-        container('golang'){
-          sh 'goreleaser release --snapshot --skip-publish --rm-dist'
-        }
-      }
-    }
 
     stage('Tagged Release') {
       when {
-        // example matches: 1.2.3, 1.2.3-dev
-        tag pattern: '(0|[1-9]*)\\.(0|[1-9]*)\\.(0|[1-9]*)(-(\\S*))?$', comparator: "REGEXP"
+        buildingTag()
       }
       environment {
         GITHUB_TOKEN = credentials('vio-bot-gh-token')
       }
       steps {
         container('golang'){
-            withDockerRegistry(registry: [credentialsId: 'vio-docker-hub']) {
-              sh 'goreleaser release --rm-dist'
-            }
+          withDockerRegistry(registry: [credentialsId: 'vio-docker-hub']) {
+            sh 'goreleaser release --debug --rm-dist'
+          }
         }
       }
     }
