@@ -509,44 +509,42 @@ func (c *websocketClient) makeRequest(req, resp interface{}) error {
 
 // matchEvent returns a corresponding response event for a given request event.
 func matchEvent(reqEvent string) string {
-	var respEvent string
-
 	switch reqEvent {
 	case requestStatus:
-		respEvent = responseStatus
+		return responseStatus
 	case requestVersion:
-		respEvent = responseVersion
+		return responseVersion
 	case requestConfig:
-		respEvent = responseConfig
+		return responseConfig
 	case requestPlugin:
-		respEvent = responsePlugin
+		return responsePluginInfo
 	case requestPlugins:
-		respEvent = responsePluginSummary
+		return responsePluginSummary
 	case requestPluginHealth:
-		respEvent = responsePluginHealth
+		return responsePluginHealth
 	case requestScan:
-		respEvent = responseDeviceSummary
+		return responseDeviceSummary
 	case requestTags:
-		respEvent = responseTags
+		return responseTags
 	case requestInfo:
-		respEvent = responseDevice
+		return responseDeviceInfo
 	case requestRead:
-		respEvent = responseReading
+		return responseReading
 	case requestReadDevice:
-		respEvent = responseReading
+		return responseReading
+	case requestReadStream:
+		return responseReading
 	case requestReadCache:
-		respEvent = responseReading
+		return responseReading
 	case requestWriteSync:
-		respEvent = responseWriteSync
+		return responseTransactionStatus
 	case requestWriteAsync:
-		respEvent = responseWriteAsync
+		return responseTransactionInfo
 	case requestTransactions:
-		respEvent = responseTransactionList
+		return responseTransactionList
 	case requestTransaction:
-		respEvent = responseTransactionInfo
+		return responseTransactionStatus
 	default:
-		respEvent = ""
+		return ""
 	}
-
-	return respEvent
 }
