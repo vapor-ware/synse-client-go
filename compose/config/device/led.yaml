@@ -11,3 +11,5 @@ devices:
           name: emulator-led
         data:
           id: 1
+        context:
+          model: emul8-led

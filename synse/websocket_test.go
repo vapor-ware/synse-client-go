@@ -1495,7 +1495,7 @@ func TestWebSocketClientV3_WriteAsync_200(t *testing.T) {
 	in := `
 {
    "id":1,
-   "event":"response/write_async",
+   "event":"response/transaction_info",
    "data":[
       {
          "id":"56a32eba-1aa6-4868-84ee-fe01af8b2e6d",
@@ -1603,7 +1603,7 @@ func TestWebSocketClientV3_WriteSync_200(t *testing.T) {
 	in := `
 {
    "id":1,
-   "event":"response/write_sync",
+   "event":"response/transaction_status",
    "data":[
       {
          "id":"56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
@@ -1774,7 +1774,7 @@ func TestWebSocketClientV3_Transaction_200(t *testing.T) {
 	in := `
 {
    "id":1,
-   "event":"response/transaction_info",
+   "event":"response/transaction_status",
    "data":{
       "id":"56a32eba-1aa6-4868-84ee-fe01af8b2e6b",
       "timeout":"10s",

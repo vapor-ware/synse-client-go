@@ -212,86 +212,82 @@ func TestIntegrationWebSocket_PluginHealth(t *testing.T) {
 	assert.Equal(t, 0, health.Inactive)
 }
 
-// FIXME - got a 500 error response from synse server at 2019-08-29T15:55:52Z,
-// saying An unexpected error occurred., with context: object of type
-// 'NoneType' has no len()
-// func TestIntegrationWebSocket_Scan(t *testing.T) {
-// 	if testing.Short() {
-// 		t.Skip("skipping integration test")
-// 	}
+func TestIntegrationWebSocket_Scan(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
 
-// 	client, err := NewWebSocketClientV3(&Options{
-// 		Address: "localhost:5000",
-// 	})
-// 	assert.NotNil(t, client)
-// 	assert.NoError(t, err)
+	client, err := NewWebSocketClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
 
-// 	err = client.Open()
-// 	assert.NoError(t, err)
+	err = client.Open()
+	assert.NoError(t, err)
 
-// 	defer func() {
-// 		err = client.Close()
-// 		assert.NoError(t, err)
-// 	}()
+	defer func() {
+		err = client.Close()
+		assert.NoError(t, err)
+	}()
 
-// 	opts := scheme.ScanOptions{}
-// 	devices, err := client.Scan(opts)
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, 4, len(devices))
+	opts := scheme.ScanOptions{}
+	devices, err := client.Scan(opts)
+	assert.NoError(t, err)
+	assert.Equal(t, 4, len(devices))
 
-// 	// since scan responses are sorted by default, the devices order should be
-// 	// consistent.
-// 	tempDevice1 := devices[0]
-// 	assert.Equal(t, "89fd576d-462c-53be-bcb6-7870e70c304a", tempDevice1.ID)
-// 	assert.Empty(t, tempDevice1.Alias)
-// 	assert.Equal(t, "Synse Temperature Sensor 2", tempDevice1.Info)
-// 	assert.Equal(t, "temperature", tempDevice1.Type)
-// 	assert.Equal(t, "4032ffbe-80db-5aa5-b794-f35c88dff85c", tempDevice1.Plugin)
-// 	assert.Equal(t, 3, len(tempDevice1.Tags))
-// 	assert.Equal(t, "foo/bar", tempDevice1.Tags[0])
-// 	assert.Equal(t, "system/id:89fd576d-462c-53be-bcb6-7870e70c304a", tempDevice1.Tags[1])
-// 	assert.Equal(t, "system/type:temperature", tempDevice1.Tags[2])
-//  assert.Equal(t, map[string]interface{}{"model": "emul8-temp"}, tempDevice1.Metadata)
+	// since scan responses are sorted by default, the devices order should be
+	// consistent.
+	tempDevice1 := devices[0]
+	assert.Equal(t, "89fd576d-462c-53be-bcb6-7870e70c304a", tempDevice1.ID)
+	assert.Empty(t, tempDevice1.Alias)
+	assert.Equal(t, "Synse Temperature Sensor 2", tempDevice1.Info)
+	assert.Equal(t, "temperature", tempDevice1.Type)
+	assert.Equal(t, "4032ffbe-80db-5aa5-b794-f35c88dff85c", tempDevice1.Plugin)
+	assert.Equal(t, 3, len(tempDevice1.Tags))
+	assert.Equal(t, "foo/bar", tempDevice1.Tags[0])
+	assert.Equal(t, "system/id:89fd576d-462c-53be-bcb6-7870e70c304a", tempDevice1.Tags[1])
+	assert.Equal(t, "system/type:temperature", tempDevice1.Tags[2])
+	assert.Equal(t, map[string]interface{}{"model": "emul8-temp"}, tempDevice1.Metadata)
 
-// 	tempDevice2 := devices[1]
-// 	assert.Equal(t, "9907bdfa-75e1-5af5-8385-87184f356b22", tempDevice2.ID)
-// 	assert.Empty(t, tempDevice2.Alias)
-// 	assert.Equal(t, "Synse Temperature Sensor 1", tempDevice2.Info)
-// 	assert.Equal(t, "temperature", tempDevice2.Type)
-// 	assert.Equal(t, "4032ffbe-80db-5aa5-b794-f35c88dff85c", tempDevice2.Plugin)
-// 	assert.Equal(t, 3, len(tempDevice2.Tags))
-// 	assert.Equal(t, "foo/bar", tempDevice2.Tags[0])
-// 	assert.Equal(t, "system/id:9907bdfa-75e1-5af5-8385-87184f356b22", tempDevice2.Tags[1])
-// 	assert.Equal(t, "system/type:temperature", tempDevice2.Tags[2])
-//  assert.Equal(t, map[string]interface{}{"model": "emul8-temp"}, tempDevice2.Metadata)
+	tempDevice2 := devices[1]
+	assert.Equal(t, "9907bdfa-75e1-5af5-8385-87184f356b22", tempDevice2.ID)
+	assert.Empty(t, tempDevice2.Alias)
+	assert.Equal(t, "Synse Temperature Sensor 1", tempDevice2.Info)
+	assert.Equal(t, "temperature", tempDevice2.Type)
+	assert.Equal(t, "4032ffbe-80db-5aa5-b794-f35c88dff85c", tempDevice2.Plugin)
+	assert.Equal(t, 3, len(tempDevice2.Tags))
+	assert.Equal(t, "foo/bar", tempDevice2.Tags[0])
+	assert.Equal(t, "system/id:9907bdfa-75e1-5af5-8385-87184f356b22", tempDevice2.Tags[1])
+	assert.Equal(t, "system/type:temperature", tempDevice2.Tags[2])
+	assert.Equal(t, map[string]interface{}{"model": "emul8-temp"}, tempDevice2.Metadata)
 
-// 	tempDevice3 := devices[2]
-// 	assert.Equal(t, "b9324904-385b-581d-b790-5e53eaabfd20", tempDevice3.ID)
-// 	assert.Equal(t, "emulator-temp", tempDevice3.Alias)
-// 	assert.Equal(t, "Synse Temperature Sensor 3", tempDevice3.Info)
-// 	assert.Equal(t, "temperature", tempDevice3.Type)
-// 	assert.Equal(t, "4032ffbe-80db-5aa5-b794-f35c88dff85c", tempDevice3.Plugin)
-// 	assert.Equal(t, 2, len(tempDevice3.Tags))
-// 	assert.Equal(t, "system/id:b9324904-385b-581d-b790-5e53eaabfd20", tempDevice3.Tags[0])
-// 	assert.Equal(t, "system/type:temperature", tempDevice3.Tags[1])
-//  assert.Equal(t, map[string]interface{}{"model": "emul8-temp"}, tempDevice3.Metadata)
+	tempDevice3 := devices[2]
+	assert.Equal(t, "b9324904-385b-581d-b790-5e53eaabfd20", tempDevice3.ID)
+	assert.Equal(t, "emulator-temp", tempDevice3.Alias)
+	assert.Equal(t, "Synse Temperature Sensor 3", tempDevice3.Info)
+	assert.Equal(t, "temperature", tempDevice3.Type)
+	assert.Equal(t, "4032ffbe-80db-5aa5-b794-f35c88dff85c", tempDevice3.Plugin)
+	assert.Equal(t, 2, len(tempDevice3.Tags))
+	assert.Equal(t, "system/id:b9324904-385b-581d-b790-5e53eaabfd20", tempDevice3.Tags[0])
+	assert.Equal(t, "system/type:temperature", tempDevice3.Tags[1])
+	assert.Equal(t, map[string]interface{}{"model": "emul8-temp"}, tempDevice3.Metadata)
 
-// 	ledDevice := devices[3]
-// 	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", ledDevice.ID)
-// 	assert.Equal(t, "emulator-led", ledDevice.Alias)
-// 	assert.Equal(t, "Synse LED", ledDevice.Info)
-// 	assert.Equal(t, "led", ledDevice.Type)
-// 	assert.Equal(t, "4032ffbe-80db-5aa5-b794-f35c88dff85c", ledDevice.Plugin)
-// 	assert.Equal(t, 3, len(ledDevice.Tags))
-// 	assert.Equal(t, "foo/bar", ledDevice.Tags[0])
-// 	assert.Equal(t, "system/id:f041883c-cf87-55d7-a978-3d3103836412", ledDevice.Tags[1])
-// 	assert.Equal(t, "system/type:led", ledDevice.Tags[2])
-//  assert.Equal(t, map[string]interface{}{"model": "emul8-temp"}, ledDevice.Metadata)
-// }
+	ledDevice := devices[3]
+	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", ledDevice.ID)
+	assert.Equal(t, "emulator-led", ledDevice.Alias)
+	assert.Equal(t, "Synse LED", ledDevice.Info)
+	assert.Equal(t, "led", ledDevice.Type)
+	assert.Equal(t, "4032ffbe-80db-5aa5-b794-f35c88dff85c", ledDevice.Plugin)
+	assert.Equal(t, 3, len(ledDevice.Tags))
+	assert.Equal(t, "foo/bar", ledDevice.Tags[0])
+	assert.Equal(t, "system/id:f041883c-cf87-55d7-a978-3d3103836412", ledDevice.Tags[1])
+	assert.Equal(t, "system/type:led", ledDevice.Tags[2])
+	assert.Equal(t, map[string]interface{}{"model": "emul8-led"}, ledDevice.Metadata)
+}
 
-// FIXME - got a 500 error response from synse server at 2019-08-29T15:59:15Z,
-// saying An unexpected error occurred., with context: tags() argument after *
-// must be an iterable, not NoneType
+// FIXME - issuing request and response seem to work, however, the result is
+// 0, instead of 3?
 // func TestIntegrationWebSocket_Tags(t *testing.T) {
 // 	if testing.Short() {
 // 		t.Skip("skipping integration test")
@@ -370,58 +366,55 @@ func TestIntegrationWebSocket_Info(t *testing.T) {
 	assert.Equal(t, 0.0, colorOutput.ScalingFactor)
 }
 
-// FIXME - got a 500 error response from synse server at 2019-08-29T16:05:38Z,
-// saying An unexpected error occurred., with context: object of type
-// 'NoneType' has no len()
-// func TestIntegrationWebSocket_Read(t *testing.T) {
-// 	if testing.Short() {
-// 		t.Skip("skipping integration test")
-// 	}
+func TestIntegrationWebSocket_Read(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
 
-// 	client, err := NewWebSocketClientV3(&Options{
-// 		Address: "localhost:5000",
-// 	})
-// 	assert.NotNil(t, client)
-// 	assert.NoError(t, err)
+	client, err := NewWebSocketClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
 
-// 	err = client.Open()
-// 	assert.NoError(t, err)
+	err = client.Open()
+	assert.NoError(t, err)
 
-// 	defer func() {
-// 		err = client.Close()
-// 		assert.NoError(t, err)
-// 	}()
+	defer func() {
+		err = client.Close()
+		assert.NoError(t, err)
+	}()
 
-// 	opts := scheme.ReadOptions{}
-// 	readings, err := client.Read(opts)
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, 5, len(readings))
+	opts := scheme.ReadOptions{}
+	readings, err := client.Read(opts)
+	assert.NoError(t, err)
+	assert.Equal(t, 5, len(readings))
 
-// 	counts := countDeviceType(readings)
-// 	assert.Equal(t, 2, counts["led"])
-// 	assert.Equal(t, 3, counts["temperature"])
+	counts := countDeviceType(readings)
+	assert.Equal(t, 2, counts["led"])
+	assert.Equal(t, 3, counts["temperature"])
 
-// 	for _, read := range readings {
-// 		if read.DeviceType == "led" {
-// 			assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", read.Device)
-// 			assert.NotEmpty(t, read.Timestamp)
-// 			assert.Contains(t, []string{"state", "color"}, read.Type)
-// 			assert.Empty(t, read.Unit)
-// 			assert.Contains(t, []string{"off", "000000"}, read.Value)
-// 			assert.Empty(t, read.Context)
-// 		} else if read.DeviceType == "temperature" {
-// 			assert.Contains(t, []string{"89fd576d-462c-53be-bcb6-7870e70c304a", "9907bdfa-75e1-5af5-8385-87184f356b22", "b9324904-385b-581d-b790-5e53eaabfd20"}, read.Device)
-// 			assert.NotEmpty(t, read.Timestamp)
-// 			assert.Equal(t, "temperature", read.Type)
-// 			assert.Equal(t, "celsius", read.Unit.Name)
-// 			assert.Equal(t, "C", read.Unit.Symbol)
-// 			assert.NotEmpty(t, read.Value)
-// 			assert.Empty(t, read.Context)
-// 		} else {
-// 			t.Error("unexpected reading device type in response")
-// 		}
-// 	}
-// }
+	for _, read := range readings {
+		if read.DeviceType == "led" {
+			assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", read.Device)
+			assert.NotEmpty(t, read.Timestamp)
+			assert.Contains(t, []string{"state", "color"}, read.Type)
+			assert.Empty(t, read.Unit)
+			assert.Contains(t, []string{"off", "000000"}, read.Value)
+			assert.Equal(t, read.Context, map[string]interface{}{"model": "emul8-led"})
+		} else if read.DeviceType == "temperature" {
+			assert.Contains(t, []string{"89fd576d-462c-53be-bcb6-7870e70c304a", "9907bdfa-75e1-5af5-8385-87184f356b22", "b9324904-385b-581d-b790-5e53eaabfd20"}, read.Device)
+			assert.NotEmpty(t, read.Timestamp)
+			assert.Equal(t, "temperature", read.Type)
+			assert.Equal(t, "celsius", read.Unit.Name)
+			assert.Equal(t, "C", read.Unit.Symbol)
+			assert.NotEmpty(t, read.Value)
+			assert.Equal(t, read.Context, map[string]interface{}{"model": "emul8-temp"})
+		} else {
+			t.Error("unexpected reading device type in response")
+		}
+	}
+}
 
 func TestIntegrationWebSocket_ReadDevice(t *testing.T) {
 	if testing.Short() {
@@ -453,7 +446,7 @@ func TestIntegrationWebSocket_ReadDevice(t *testing.T) {
 	assert.Equal(t, "led", stateRead.DeviceType)
 	assert.Empty(t, stateRead.Unit)
 	assert.Equal(t, "off", stateRead.Value)
-	assert.Empty(t, stateRead.Context)
+	assert.Equal(t, stateRead.Context, map[string]interface{}{"model": "emul8-led"})
 
 	colorRead := readings[1]
 	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", colorRead.Device)
@@ -462,7 +455,7 @@ func TestIntegrationWebSocket_ReadDevice(t *testing.T) {
 	assert.Equal(t, "led", colorRead.DeviceType)
 	assert.Empty(t, colorRead.Unit)
 	assert.Equal(t, "000000", colorRead.Value)
-	assert.Empty(t, colorRead.Context)
+	assert.Equal(t, colorRead.Context, map[string]interface{}{"model": "emul8-led"})
 }
 
 func TestIntegrationWebSocket_ReadCache(t *testing.T) {
@@ -507,7 +500,7 @@ func TestIntegrationWebSocket_ReadCache(t *testing.T) {
 				assert.Contains(t, []string{"state", "color"}, read.Type)
 				assert.Empty(t, read.Unit)
 				assert.Contains(t, []string{"off", "000000"}, read.Value)
-				assert.Empty(t, read.Context)
+				assert.Equal(t, read.Context, map[string]interface{}{"model": "emul8-led"})
 			} else if read.DeviceType == "temperature" {
 				assert.Contains(t, []string{"89fd576d-462c-53be-bcb6-7870e70c304a", "9907bdfa-75e1-5af5-8385-87184f356b22", "b9324904-385b-581d-b790-5e53eaabfd20"}, read.Device)
 				assert.NotEmpty(t, read.Timestamp)
@@ -515,7 +508,7 @@ func TestIntegrationWebSocket_ReadCache(t *testing.T) {
 				assert.Equal(t, "celsius", read.Unit.Name)
 				assert.Equal(t, "C", read.Unit.Symbol)
 				assert.NotEmpty(t, read.Value)
-				assert.Empty(t, read.Context)
+				assert.Equal(t, read.Context, map[string]interface{}{"model": "emul8-temp"})
 			} else {
 				t.Error("unexpected reading device type in response")
 			}
@@ -531,141 +524,137 @@ func TestIntegrationWebSocket_ReadCache(t *testing.T) {
 	}
 }
 
-// FIXME - got a 500 error response from synse server at 2019-08-30T10:27:42Z,
-// saying An unexpected error occurred., with context: Object of type 'bytes'
-// func TestIntegrationWebSocket_WriteAsync(t *testing.T) {
-// 	if testing.Short() {
-// 		t.Skip("skipping integration test")
-// 	}
+func TestIntegrationWebSocket_WriteAsync(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
 
-// 	client, err := NewWebSocketClientV3(&Options{
-// 		Address: "localhost:5000",
-// 	})
-// 	assert.NotNil(t, client)
-// 	assert.NoError(t, err)
+	client, err := NewWebSocketClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
 
-// 	err = client.Open()
-// 	assert.NoError(t, err)
+	err = client.Open()
+	assert.NoError(t, err)
 
-// 	defer func() {
-// 		err = client.Close()
-// 		assert.NoError(t, err)
-// 	}()
+	defer func() {
+		err = client.Close()
+		assert.NoError(t, err)
+	}()
 
-// 	writeData := []scheme.WriteData{
-// 		{Action: "state", Data: "on"},
-// 		{Action: "color", Data: "ffffff"},
-// 	}
-// 	writes, err := client.WriteAsync("f041883c-cf87-55d7-a978-3d3103836412", writeData)
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, 2, len(writes))
+	writeData := []scheme.WriteData{
+		{Action: "state", Data: "on"},
+		{Action: "color", Data: "ffffff"},
+	}
+	writes, err := client.WriteAsync("f041883c-cf87-55d7-a978-3d3103836412", writeData)
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(writes))
 
-// 	stateWrite := writes[0]
-// 	assert.NotEmpty(t, stateWrite.ID)
-// 	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", stateWrite.Device)
-// 	assert.Equal(t, "state", stateWrite.Context.Action)
-// 	assert.Equal(t, "on", stateWrite.Context.Data)
-// 	assert.Empty(t, stateWrite.Context.Transaction)
-// 	assert.Equal(t, "30s", stateWrite.Timeout)
+	stateWrite := writes[0]
+	assert.NotEmpty(t, stateWrite.ID)
+	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", stateWrite.Device)
+	assert.Equal(t, "state", stateWrite.Context.Action)
+	assert.Equal(t, "on", stateWrite.Context.Data)
+	assert.Empty(t, stateWrite.Context.Transaction)
+	assert.Equal(t, "30s", stateWrite.Timeout)
 
-// 	colorWrite := writes[1]
-// 	assert.NotEmpty(t, colorWrite.ID)
-// 	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", colorWrite.Device)
-// 	assert.Equal(t, "color", colorWrite.Context.Action)
-// 	assert.Equal(t, "ffffff", colorWrite.Context.Data)
-// 	assert.Empty(t, colorWrite.Context.Transaction)
-// 	assert.Equal(t, "30s", colorWrite.Timeout)
-// }
+	colorWrite := writes[1]
+	assert.NotEmpty(t, colorWrite.ID)
+	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", colorWrite.Device)
+	assert.Equal(t, "color", colorWrite.Context.Action)
+	assert.Equal(t, "ffffff", colorWrite.Context.Data)
+	assert.Empty(t, colorWrite.Context.Transaction)
+	assert.Equal(t, "30s", colorWrite.Timeout)
+}
 
 // FIXME - got a 500 error response from synse server at 2019-08-30T10:27:42Z,
 // saying An unexpected error occurred., with context: Object of type 'bytes'
 // is not JSON serializable
-// func TestIntegrationWebSocket_WriteSync(t *testing.T) {
-// 	if testing.Short() {
-// 		t.Skip("skipping integration test")
-// 	}
+func TestIntegrationWebSocket_WriteSync(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
 
-// 	client, err := NewWebSocketClientV3(&Options{
-// 		Address: "localhost:5000",
-// 	})
-// 	assert.NotNil(t, client)
-// 	assert.NoError(t, err)
+	client, err := NewWebSocketClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
 
-// 	err = client.Open()
-// 	assert.NoError(t, err)
+	err = client.Open()
+	assert.NoError(t, err)
 
-// 	defer func() {
-// 		err = client.Close()
-// 		assert.NoError(t, err)
-// 	}()
+	defer func() {
+		err = client.Close()
+		assert.NoError(t, err)
+	}()
 
-// 	writeData := []scheme.WriteData{
-// 		{Action: "state", Data: "blink"},
-// 		{Action: "color", Data: "0f0f0f"},
-// 	}
-// 	writes, err := client.WriteSync("f041883c-cf87-55d7-a978-3d3103836412", writeData)
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, 2, len(writes))
+	writeData := []scheme.WriteData{
+		{Action: "state", Data: "blink"},
+		{Action: "color", Data: "0f0f0f"},
+	}
+	writes, err := client.WriteSync("f041883c-cf87-55d7-a978-3d3103836412", writeData)
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(writes))
 
-// 	stateWrite := writes[0]
-// 	assert.NotEmpty(t, stateWrite.ID)
-// 	assert.NotEmpty(t, stateWrite.Created)
-// 	assert.NotEmpty(t, stateWrite.Updated)
-// 	assert.Equal(t, "30s", stateWrite.Timeout)
-// 	assert.Equal(t, "DONE", stateWrite.Status)
-// 	assert.Equal(t, "state", stateWrite.Context.Action)
-// 	assert.Equal(t, "blink", stateWrite.Context.Data)
-// 	assert.Empty(t, stateWrite.Context.Transaction)
-// 	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", stateWrite.Device)
+	stateWrite := writes[0]
+	assert.NotEmpty(t, stateWrite.ID)
+	assert.NotEmpty(t, stateWrite.Created)
+	assert.NotEmpty(t, stateWrite.Updated)
+	assert.Equal(t, "30s", stateWrite.Timeout)
+	assert.Equal(t, "DONE", stateWrite.Status)
+	assert.Equal(t, "state", stateWrite.Context.Action)
+	assert.Equal(t, "blink", stateWrite.Context.Data)
+	assert.Empty(t, stateWrite.Context.Transaction)
+	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", stateWrite.Device)
 
-// 	colorWrite := writes[1]
-// 	assert.NotEmpty(t, colorWrite.ID)
-// 	assert.NotEmpty(t, colorWrite.Created)
-// 	assert.NotEmpty(t, colorWrite.Updated)
-// 	assert.Equal(t, "30s", colorWrite.Timeout)
-// 	assert.Equal(t, "DONE", colorWrite.Status)
-// 	assert.Equal(t, "color", colorWrite.Context.Action)
-// 	assert.Equal(t, "0f0f0f", colorWrite.Context.Data)
-// 	assert.Empty(t, colorWrite.Context.Transaction)
-// 	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", colorWrite.Device)
-// }
+	colorWrite := writes[1]
+	assert.NotEmpty(t, colorWrite.ID)
+	assert.NotEmpty(t, colorWrite.Created)
+	assert.NotEmpty(t, colorWrite.Updated)
+	assert.Equal(t, "30s", colorWrite.Timeout)
+	assert.Equal(t, "DONE", colorWrite.Status)
+	assert.Equal(t, "color", colorWrite.Context.Action)
+	assert.Equal(t, "0f0f0f", colorWrite.Context.Data)
+	assert.Empty(t, colorWrite.Context.Transaction)
+	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", colorWrite.Device)
+}
 
-// FIXME - WriteAsync and WriteSync need to be fixed first before enabling
-// this.
-// func TestIntegrationWebSocket_Transaction(t *testing.T) {
-// 	if testing.Short() {
-// 		t.Skip("skipping integration test")
-// 	}
+func TestIntegrationWebSocket_Transaction(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
 
-// 	client, err := NewWebSocketClientV3(&Options{
-// 		Address: "localhost:5000",
-// 	})
-// 	assert.NotNil(t, client)
-// 	assert.NoError(t, err)
+	client, err := NewWebSocketClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
 
-// 	err = client.Open()
-// 	assert.NoError(t, err)
+	err = client.Open()
+	assert.NoError(t, err)
 
-// 	defer func() {
-// 		err = client.Close()
-// 		assert.NoError(t, err)
-// 	}()
+	defer func() {
+		err = client.Close()
+		assert.NoError(t, err)
+	}()
 
-// 	transactions, err := client.Transactions()
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, 4, len(transactions))
+	transactions, err := client.Transactions()
+	assert.NoError(t, err)
+	assert.Equal(t, 4, len(transactions))
 
-// 	for _, id := range transactions {
-// 		transaction, err := client.Transaction(id)
-// 		assert.NoError(t, err)
-// 		assert.NotEmpty(t, transaction.ID)
-// 		assert.NotEmpty(t, transaction.Created)
-// 		assert.NotEmpty(t, transaction.Updated)
-// 		assert.Equal(t, "30s", transaction.Timeout)
-// 		assert.Equal(t, "DONE", transaction.Status)
-// 		assert.Contains(t, []string{"state", "color"}, transaction.Context.Action)
-// 		assert.Contains(t, []string{"on", "blink", "ffffff", "0f0f0f"}, transaction.Context.Data)
-// 		assert.Empty(t, transaction.Message)
-// 		assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", transaction.Device)
-// 	}
-// }
+	for _, id := range transactions {
+		transaction, err := client.Transaction(id)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, transaction.ID)
+		assert.NotEmpty(t, transaction.Created)
+		assert.NotEmpty(t, transaction.Updated)
+		assert.Equal(t, "30s", transaction.Timeout)
+		assert.Equal(t, "DONE", transaction.Status)
+		assert.Contains(t, []string{"state", "color"}, transaction.Context.Action)
+		assert.Contains(t, []string{"on", "blink", "ffffff", "0f0f0f"}, transaction.Context.Data)
+		assert.Empty(t, transaction.Message)
+		assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", transaction.Device)
+	}
+}

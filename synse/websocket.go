@@ -495,7 +495,7 @@ func (c *websocketClient) makeRequest(req, resp interface{}) error {
 	}
 
 	if matchEvent(v.FieldByName("Event").String()) != re.Event {
-		return errors.Errorf("%v did not match %v", v.FieldByName("Event"), re.Event)
+		return errors.Errorf("(%v) %v did not match %v", v.FieldByName("Event"), matchEvent(v.FieldByName("Event").String()), re.Event)
 	}
 
 	// Handle successful response.

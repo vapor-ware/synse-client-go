@@ -81,17 +81,18 @@ const (
 	// responseReading describes the response/reading event.
 	responseReading = "response/reading"
 
+	// FIXME (etd) - will need to rename some of these
 	// responseWriteAsync describes the response/write_async event.
-	responseWriteAsync = "response/write_async"
+	responseWriteAsync = "response/transaction_info"
 
 	// responseWriteSync describes the response/write_sync event.
-	responseWriteSync = "response/write_sync"
+	responseWriteSync = "response/transaction_status"
 
 	// responseTransactionList describes the response/transaction_list event.
 	responseTransactionList = "response/transaction_list"
 
 	// responseTransactionInfo describes the response/transaction_info event.
-	responseTransactionInfo = "response/transaction_info"
+	responseTransactionInfo = "response/transaction_status"
 
 	// responseError describes the response/error event.
 	responseError = "response/error"

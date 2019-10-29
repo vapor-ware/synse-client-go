@@ -13,8 +13,8 @@ type Scan struct {
 
 // ScanOptions describes the query parameters for `/scan` endpoint.
 type ScanOptions struct {
-	NS    string   `json:"ns" yaml:"ns" mapstructure:"ns"`
-	Tags  []string `json:"tags" yaml:"tags" mapstructure:"tags"`
-	Force bool     `json:"force" yaml:"force" mapstructure:"force"`
-	Sort  []string `json:"sort" yaml:"sort" mapstructure:"sort"`
+	NS    string   `json:"ns,omitempty" yaml:"ns,omitempty" mapstructure:"ns"`
+	Tags  []string `json:"tags,omitempty" yaml:"tags,omitempty" mapstructure:"tags"`
+	Force bool     `json:"force,omitempty" yaml:"force,omitempty" mapstructure:"force"`
+	Sort  []string `json:"sort,omitempty" yaml:"sort,omitempty" mapstructure:"sort"`
 }
