@@ -45,7 +45,6 @@ pipeline {
       }
     }
 
-
     stage('Tagged Release') {
       when {
         buildingTag()

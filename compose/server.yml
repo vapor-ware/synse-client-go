@@ -2,7 +2,6 @@
 # server.yml
 #
 # Runs Synse Server and its Emulator Plugin configured to communicate over TCP.
-#
 # This is used for integration testing.
 #
 
@@ -12,24 +11,22 @@ services:
     container_name: synse-server
     image: vaporio/synse-server:latest
     ports:
-    - "5000:5000"
-    environment:
-      # Run the server in debug mode
-      SYNSE_LOGGING: debug
-      # Register a TCP plugin with hostname 'emulator', port 5001
-      SYNSE_PLUGIN_TCP: emulator:5001
+    - '5000:5000'
     links:
     - emulator
+    environment:
+      SYNSE_LOGGING: debug
+      SYNSE_PLUGIN_TCP: emulator:5001
 
   emulator:
     container_name: emulator
     image: vaporio/emulator-plugin:latest
     expose:
-    - "5001"
-    command: ["--debug"]
+    - '5001'
+    command: ['--debug']
     volumes:
-      - ./config:/tmp/config
-      - ./config/device:/tmp/device
+    - ./config:/tmp/config
+    - ./config/device:/tmp/device
     environment:
       PLUGIN_CONFIG: /tmp/config
       PLUGIN_DEVICE_CONFIG: /tmp/device
