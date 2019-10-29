@@ -319,7 +319,7 @@ func TestIntegrationHTTP_Read(t *testing.T) {
 			assert.Contains(t, []string{"state", "color"}, read.Type)
 			assert.Empty(t, read.Unit)
 			assert.Contains(t, []string{"off", "000000"}, read.Value)
-			assert.Empty(t, read.Context)
+			assert.Equal(t, read.Context, map[string]interface{}{"model": "emul8-led"})
 		} else if read.DeviceType == "temperature" {
 			assert.Contains(t, []string{"89fd576d-462c-53be-bcb6-7870e70c304a", "9907bdfa-75e1-5af5-8385-87184f356b22", "b9324904-385b-581d-b790-5e53eaabfd20"}, read.Device)
 			assert.NotEmpty(t, read.Timestamp)
@@ -327,7 +327,7 @@ func TestIntegrationHTTP_Read(t *testing.T) {
 			assert.Equal(t, "celsius", read.Unit.Name)
 			assert.Equal(t, "C", read.Unit.Symbol)
 			assert.NotEmpty(t, read.Value)
-			assert.Empty(t, read.Context)
+			assert.Equal(t, read.Context, map[string]interface{}{"model": "emul8-temp"})
 		} else {
 			t.Error("unexpected reading device type in response")
 		}
@@ -356,7 +356,7 @@ func TestIntegrationHTTP_ReadDevice(t *testing.T) {
 	assert.Equal(t, "led", stateRead.DeviceType)
 	assert.Empty(t, stateRead.Unit)
 	assert.Equal(t, "off", stateRead.Value)
-	assert.Empty(t, stateRead.Context)
+	assert.Equal(t, stateRead.Context, map[string]interface{}{"model": "emul8-led"})
 
 	colorRead := readings[1]
 	assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", colorRead.Device)
@@ -365,7 +365,7 @@ func TestIntegrationHTTP_ReadDevice(t *testing.T) {
 	assert.Equal(t, "led", colorRead.DeviceType)
 	assert.Empty(t, colorRead.Unit)
 	assert.Equal(t, "000000", colorRead.Value)
-	assert.Empty(t, colorRead.Context)
+	assert.Equal(t, colorRead.Context, map[string]interface{}{"model": "emul8-led"})
 }
 
 func TestIntegrationHTTP_ReadCache(t *testing.T) {
@@ -402,7 +402,7 @@ func TestIntegrationHTTP_ReadCache(t *testing.T) {
 				assert.Contains(t, []string{"state", "color"}, read.Type)
 				assert.Empty(t, read.Unit)
 				assert.Contains(t, []string{"off", "000000"}, read.Value)
-				assert.Empty(t, read.Context)
+				assert.Equal(t, read.Context, map[string]interface{}{"model": "emul8-led"})
 			} else if read.DeviceType == "temperature" {
 				assert.Contains(t, []string{"89fd576d-462c-53be-bcb6-7870e70c304a", "9907bdfa-75e1-5af5-8385-87184f356b22", "b9324904-385b-581d-b790-5e53eaabfd20"}, read.Device)
 				assert.NotEmpty(t, read.Timestamp)
@@ -410,7 +410,7 @@ func TestIntegrationHTTP_ReadCache(t *testing.T) {
 				assert.Equal(t, "celsius", read.Unit.Name)
 				assert.Equal(t, "C", read.Unit.Symbol)
 				assert.NotEmpty(t, read.Value)
-				assert.Empty(t, read.Context)
+				assert.Equal(t, read.Context, map[string]interface{}{"model": "emul8-temp"})
 			} else {
 				t.Error("unexpected reading device type in response")
 			}

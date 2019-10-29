@@ -9,13 +9,19 @@ devices:
           - foo/bar
         data:
           id: 1
+        context:
+          model: emul8-temp
       - info: Synse Temperature Sensor 2
         tags:
           - foo/bar
         data:
           id: 2
+        context:
+          model: emul8-temp
       - info: Synse Temperature Sensor 3
         alias:
           name: emulator-temp
         data:
           id: 3
+        context:
+          model: emul8-temp
