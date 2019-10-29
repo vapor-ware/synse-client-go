@@ -508,8 +508,7 @@ func (c *websocketClient) makeRequest(req, resp interface{}) error {
 }
 
 // matchEvent returns a corresponding response event for a given request event.
-// FIXME - disable linting because of cyclomatic complexity due to gocyclo.
-func matchEvent(reqEvent string) string { // nolint
+func matchEvent(reqEvent string) string {
 	var respEvent string
 
 	switch reqEvent {

@@ -12,8 +12,7 @@ build:  ## Build the library - this will verify correctness but will not produce
 .PHONY: clean
 clean:  ## Remove temporary files and build artifacts
 	go clean -v
-	rm -rf dist
-	rm -f ${BIN_NAME} coverage.out
+	rm -rf dist coverage.out
 
 .PHONY: cover
 cover: test  ## Run unit tests and open the coverage report
@@ -25,7 +24,7 @@ fmt:  ## Run goimports on all go source files
 
 .PHONY: github-tag
 github-tag:  ## Create and push a tag with the current client version
-	git tag -a ${PKG_VERSION} -m "Synse Go Client v${PKG_VERSION}"
+	git tag -a ${PKG_VERSION} -m "Synse Go Client version ${PKG_VERSION}"
 	git push -u origin ${PKG_VERSION}
 
 .PHONY: lint
@@ -33,12 +32,15 @@ lint:  ## Lint project source files
 	golint -set_exit_status ./...
 
 .PHONY: test
-test: test-unit test-integration-http test-integration-websocket  ## Run all tests
+test: test-unit test-integration  ## Run all tests (unit, integration)
 
 .PHONY: test-unit
 test-unit:  ## Run unit tests
 	@ # Note: this requires go1.10+ in order to do multi-package coverage reports
 	go test -short -race -coverprofile=coverage.out -covermode=atomic ./...
+
+.PHONY: test-integration
+test-integration: test-integration-http test-integration-websocket  ## Run integration tests
 
 .PHONY: test-integration-http
 test-integration-http:  ## Run integration tests for http client
@@ -57,7 +59,7 @@ test-integration-websocket:  ## Run integration tests for websocket client
 	docker-compose -f compose/server.yml down
 
 .PHONY: version
-version:  ## Print the version of the client
+version:  ## Print the package version
 	@echo "$(PKG_VERSION)"
 
 .PHONY: help

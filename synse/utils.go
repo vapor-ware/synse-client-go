@@ -30,7 +30,7 @@ func setDefaults(opts *Options) error {
 	return nil
 }
 
-// setTLS registers the certificates with configured optionss.
+// setTLS registers the certificates with configured options.
 func setTLS(opts *Options) (tls.Certificate, error) {
 	if opts.TLS.CertFile == "" && opts.TLS.KeyFile == "" {
 		return tls.Certificate{}, errors.New("no certificates are specified")

@@ -2,53 +2,54 @@
 [![Godoc](https://godoc.org/github.com/vapor-ware/synse-client-go/synse?status.svg)](https://godoc.org/github.com/vapor-ware/synse-client-go/synse)
 [![Go Report Card](https://goreportcard.com/badge/github.com/vapor-ware/synse-client-go)](https://goreportcard.com/report/github.com/vapor-ware/synse-client-go)
 
-# synse-client-go
+# Synse Client (Golang)
 
-This repo contains a HTTP and WebSocket client for interacting with Synse
-Server API, written in Go. For more information about the API, please visit its
-specification at [HTTP
-API](https://github.com/vapor-ware/synse-server/blob/master/proposals/v3/api.md),
-and [WebSocket
-API](https://github.com/vapor-ware/synse-server/blob/master/proposals/v3/api-websocket.md).
+The official HTTP and WebSocket client for interacting with the Synse Server API,
+written in Go.
+
+For details on the Synse Server API, see the
+[API Documentation](https://synse.readthedocs.io/en/latest/server/api.v3/).
 
 ## Installing
 
+This package can be installed via `go get`
+
 ```
-git clone https://github.com/vapor-ware/synse-client-go.git
+go get github.com/vapor-ware/synse-client-go
 ```
 
 ## Using
 
 ### Initializing
 
-For both HTTP client and WebSocket client, in order to initialize their
-instances, we need to pass in the [configuration
-options](https://godoc.org/github.com/vapor-ware/synse-client-go/synse#Options),
-namely the Synse Server's address that we need to interface with, other
-associated HTTP or WebSocket configs, and TLS communication. For example:
+Both the HTTP and WebSocket client must be initialized with
+[configuration options](https://godoc.org/github.com/vapor-ware/synse-client-go/synse#Options).
+These options identify the Synse Server instance to communicate with as well as
+set other connection-related capabilities (timeout, TLS, etc).
+
 ```go
 import "github.com/vapor-ware/synse-client-go/synse"
 
 func main() {
-  opts := &synse.Options{
-    Address: "localhost",
-  }
+	opts := &synse.Options{
+		Address: "localhost",
+	}
 
-  client, err := NewHTTPClientV3(opts)
-  // or client, err := NewWebSocketClientV3(opts)
+	client, err := NewHTTPClientV3(opts)
+	// or client, err := NewWebSocketClientV3(opts)
 }
 ```
 
 ### API
 
-Below is the map of client methods with their corresponding HTTP and WebSocket API.
+The table below describes which API endpoint/event correspond with each client method.
 
 | Method | HTTP endpoint | WebSocket request |
 | ------ | ------------- | ----------------- |
 | `Status()` | `/test` | `request/status` |
 | `Version()` | `/version` | `request/version` |
 | `Config()` | `/v3/config` | `request/config` |
-| `Plugins()` | `/v3/plugin` | `request/plugin` |
+| `Plugins()` | `/v3/plugin` | `request/plugins` |
 | `Plugin(string)` | `/v3/plugin/{plugin_id}` | `request/plugin` |
 | `PluginHealth()` | `/v3/plugin/health` | `request/plugin_health` |
 | `Scan(scheme.ScanOptions)` | `/v3/scan` | `request/scan` |
@@ -59,30 +60,34 @@ Below is the map of client methods with their corresponding HTTP and WebSocket A
 | `ReadCache(scheme.ReadCacheOptions)` | `/v3/readcache` | `request/read_cache` |
 | `WriteAsync(string, []scheme.WriteData)` | `/v3/write/{device_id}` | `request/write_async` |
 | `WriteSync(string, []scheme.WriteData)` | `/v3/write/wait/{device_id}` | `request/write_sync` |
-| `Transactions()` | `/v3/transaction` | `request/transaction` |
+| `Transactions()` | `/v3/transaction` | `request/transactions` |
 | `Transaction(string)` | `/v3/transaction/{transaction_id}` | `request/transaction` |
 
-Other than these:
+Additionally, there are a few client methods which do not correspond to an API endpoint:
 
 | Method | Description |
 | ------ | ----------- |
 | `GetOptions()` | Return the current config options of the client. |
-| `Open()` | Open the WebSocket connection between the client and Synse Server. *Not applicable for a HTTP client.* |
-| `Close()` | Close the WebSocket connection between the client and Synse Server. *Not applicable for a HTTP client.* |
+| `Open()` | Open the WebSocket connection between the client and Synse Server. *WebSocket client only.* |
+| `Close()` | Close the WebSocket connection between the client and Synse Server. *WebSocket client only.* |
 
 For more information about the response scheme, please refer to the
 [documentation](https://godoc.org/github.com/vapor-ware/synse-client-go/synse#Client).
 
-
 ## Developing
 
-To lint and format the project:
+To provide a simple and uniform development flow, Makefile targets should be used for
+basic development actions. To lint and format the project source code:
+
 ```
 make lint
 make fmt
 ```
 
 To run all unit tests:
+
 ```
 make test
 ```
+
+For a full accounting of available targets, see the Makefile or run `make help`.

@@ -11,14 +11,14 @@ type Options struct {
 	// Address specifies the URL of Synse Server in the format `host[:port]`.
 	Address string `default:"-"`
 
-	// HTTP speciifies the options for http protocol, used by a http client.
+	// HTTP specifies the options for http protocol, used by a http client.
 	HTTP HTTPOptions
 
-	// WebSocket speciifies the options for websocket protocol, used by a
+	// WebSocket specifies the options for websocket protocol, used by a
 	// websocket client.
 	WebSocket WebSocketOptions
 
-	// TLS sepcifies the options for TLS/SSL communication.
+	// TLS specifies the options for TLS/SSL communication.
 	TLS TLSOptions
 }
 
@@ -64,7 +64,7 @@ type TLSOptions struct {
 	CertFile string `default:"-"`
 	KeyFile  string `default:"-"`
 
-	// Enabled specifies whethere tls is enabled.
+	// Enabled specifies whether tls is enabled.
 	Enabled bool `default:"false"`
 
 	// SkipVerify specifies whether the client can skip certificate check. If
