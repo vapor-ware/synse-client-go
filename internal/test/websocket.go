@@ -98,6 +98,43 @@ func (s WebSocketServer) Serve(resp string) {
 	)
 }
 
+// Stream issues a requests and writes back a stream of response data.
+func (s WebSocketServer) Stream(responses []string) {
+	s.mux.HandleFunc(
+		fmt.Sprintf("/%s/%s", s.version, s.entryRoute),
+		func(w http.ResponseWriter, r *http.Request) {
+			c, err := upgrader.Upgrade(w, r, nil)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+
+			defer func() {
+				if err := c.Close(); err != nil {
+					fmt.Println(err)
+					return
+				}
+			}()
+
+			for {
+				_, _, err := c.ReadMessage()
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+
+				for _, resp := range responses {
+					err = c.WriteMessage(websocket.TextMessage, []byte(resp))
+					if err != nil {
+						fmt.Println(err)
+						return
+					}
+				}
+			}
+		},
+	)
+}
+
 // SetTLS starts TLS using the configured options.
 func (s WebSocketServer) SetTLS(cfg *tls.Config) {
 	s.tls = cfg

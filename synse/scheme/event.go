@@ -89,6 +89,12 @@ type RequestReadCache struct {
 	Data      ReadCacheOptions `json:"data" yaml:"data" mapstructure:"data"`
 }
 
+// RequestReadStream describes a scheme for the request/read_stream event.
+type RequestReadStream struct {
+	EventMeta `mapstructure:",squash"`
+	Data      ReadStreamOptions `json:"data" yaml:"data" mapstructure:"data"`
+}
+
 // RequestWrite describes a scheme for request/write_async and
 // request/write_sync event.
 type RequestWrite struct {

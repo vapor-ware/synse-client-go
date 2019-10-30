@@ -51,8 +51,12 @@ type Client interface {
 	// specified in ReadOptions.
 	ReadDevice(string) ([]*scheme.Read, error)
 
-	// ReadCache returns stream reading data from the registered plugins.
+	// ReadCache returns cached reading data from the registered plugins.
 	ReadCache(scheme.ReadCacheOptions, chan<- *scheme.Read) error
+
+	// ReadStream returns a stream of current reading data from the
+	// registered plugins.
+	ReadStream(scheme.ReadStreamOptions, chan<- *scheme.Read, chan struct{}) error
 
 	// WriteAsync writes data to a device, in an asynchronous manner.
 	WriteAsync(string, []scheme.WriteData) ([]*scheme.Write, error)

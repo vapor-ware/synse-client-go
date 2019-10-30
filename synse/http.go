@@ -211,7 +211,7 @@ func (c *httpClient) ReadDevice(id string) ([]*scheme.Read, error) {
 	return *out, nil
 }
 
-// ReadCache returns stream reading data from the registered plugins.
+// ReadCache returns cached reading data from the registered plugins.
 func (c *httpClient) ReadCache(opts scheme.ReadCacheOptions, out chan<- *scheme.Read) error {
 	defer close(out)
 	errScheme := new(scheme.Error)
@@ -230,6 +230,11 @@ func (c *httpClient) ReadCache(opts scheme.ReadCacheOptions, out chan<- *scheme.
 		out <- read
 	}
 	return nil
+}
+
+// ReadStream returns a stream of current reading data from the registered plugins.
+func (c *httpClient) ReadStream(opts scheme.ReadStreamOptions, out chan<- *scheme.Read, stop chan struct{}) error {
+	return errors.New("Streamed readings is not currently supported via the HTTP API")
 }
 
 // WriteAsync writes data to a device, in an asynchronous manner.
