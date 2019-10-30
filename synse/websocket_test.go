@@ -2,6 +2,7 @@ package synse
 
 import (
 	"crypto/tls"
+	"sync"
 	"testing"
 	"time"
 
@@ -1485,6 +1486,214 @@ func TestWebSocketClientV3_ReadCache_500(t *testing.T) {
 			break
 		}
 	}
+	assert.Empty(t, results)
+
+	err = client.Close()
+	assert.NoError(t, err)
+}
+
+func TestWebSocketClientV3_ReadStream_200(t *testing.T) {
+	in := []string{
+		`{
+   "id":1,
+   "event":"response/reading",
+   "data": {
+      "device":"1b714cf2-cc56-5c36-9741-fd6a483b5f10",
+      "device_type":"led",
+      "type":"state",
+      "value":"off",
+      "timestamp":"2019-03-20T17:37:07Z",
+      "unit":null
+   }
+}`,
+		`{
+   "id":1,
+   "event":"response/reading",
+   "data": {
+      "device":"1b714cf2-cc56-5c36-9741-fd6a483b5f11",
+      "device_type":"led",
+      "type":"color",
+      "value":"000000",
+      "timestamp":"2019-03-20T17:37:07Z",
+      "unit":null
+   }
+}`,
+		`{
+   "id":1,
+   "event":"response/reading",
+   "data":{
+      "device":"fd6a483b5f10-cc56-5c36-9741-1b714cf2",
+      "device_type":"temperature",
+      "type":"temperature",
+      "value":20.3,
+      "timestamp":"2019-03-20T17:37:07Z",
+      "unit":{
+         "symbol":"C",
+         "name":"degrees celsius"
+      },
+      "context":{
+         "host":"127.0.0.1",
+         "sample_rate":8
+      }
+   }
+}`,
+	}
+	expected := []*scheme.Read{
+		{
+			Device:     "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
+			DeviceType: "led",
+			Type:       "state",
+			Value:      "off",
+			Timestamp:  "2019-03-20T17:37:07Z",
+			Unit:       scheme.UnitOptions{},
+		},
+		{
+			Device:     "1b714cf2-cc56-5c36-9741-fd6a483b5f11",
+			DeviceType: "led",
+			Type:       "color",
+			Value:      "000000",
+			Timestamp:  "2019-03-20T17:37:07Z",
+			Unit:       scheme.UnitOptions{},
+		},
+		{
+			Device:     "fd6a483b5f10-cc56-5c36-9741-1b714cf2",
+			DeviceType: "temperature",
+			Type:       "temperature",
+			Value:      20.3,
+			Timestamp:  "2019-03-20T17:37:07Z",
+			Unit: scheme.UnitOptions{
+				Name:   "degrees celsius",
+				Symbol: "C",
+			},
+			Context: map[string]interface{}{
+				"host":        "127.0.0.1",
+				"sample_rate": float64(8),
+			},
+		},
+	}
+
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
+
+	server.Stream(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	opts := scheme.ReadStreamOptions{}
+	readings := make(chan *scheme.Read, 4)
+	stop := make(chan struct{})
+
+	go func() {
+		_ = client.ReadStream(opts, readings, stop)
+	}()
+
+	var results []*scheme.Read
+	var once sync.Once
+
+	closer := time.After(1 * time.Second)
+	timeout := time.After(2 * time.Second)
+
+	for {
+		var done bool
+		select {
+		case r, open := <-readings:
+			if !open {
+				done = true
+				break
+			}
+			results = append(results, r)
+
+		case <-closer:
+			once.Do(func() {
+				close(stop)
+			})
+
+		case <-timeout:
+			// If the test does not complete after 2s, error.
+			//t.Fatal("timeout: failed getting read stream data from channel")
+			done = true
+			break
+		}
+
+		if done {
+			break
+		}
+	}
+	assert.Equal(t, expected, results)
+
+	err = client.Close()
+	assert.NoError(t, err)
+}
+
+func TestWebSocketClientV3_ReadStream_500(t *testing.T) {
+	in := `
+{
+   "id":-1,
+   "event":"response/error",
+   "data":{
+      "http_code":500,
+      "description":"unknown error",
+      "timestamp":"2019-03-20T17:37:07Z",
+      "context":"unknown error"
+   }
+}`
+
+	server := test.NewWebSocketServerV3()
+	defer server.Close()
+
+	server.Serve(in)
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: server.URL,
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	opts := scheme.ReadStreamOptions{}
+	readings := make(chan *scheme.Read, 1)
+	stop := make(chan struct{})
+
+	defer close(readings)
+
+	go func() {
+		err := client.ReadStream(opts, readings, stop)
+		assert.Error(t, err)
+	}()
+
+	var results []*scheme.Read
+
+	timeout := time.After(2 * time.Second)
+	closer := time.After(1 * time.Second)
+	var once sync.Once
+
+readLoop:
+	for {
+		select {
+		case r := <-readings:
+			results = append(results, r)
+
+		case <-closer:
+			once.Do(func() {
+				close(stop)
+			})
+			break readLoop
+
+		case <-timeout:
+			// If the test does not complete after 2s, error.
+			t.Fatal("timeout: failed getting read stream data from channel")
+		}
+	}
+
 	assert.Empty(t, results)
 
 	err = client.Close()

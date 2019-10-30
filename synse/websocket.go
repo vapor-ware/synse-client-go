@@ -4,7 +4,6 @@ package synse
 
 import (
 	"crypto/tls"
-	"encoding/json"
 	"reflect"
 	"sync/atomic"
 
@@ -106,6 +105,7 @@ func (c *websocketClient) Open() error {
 // Close closes the websocket connection between the client and Synse Server.
 // It's up to the user to close the connection after finish using it.
 func (c *websocketClient) Close() error {
+	// FIXME (etd): I think this will panic if close is called before connect.
 	err := c.connection.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 	if err != nil {
 		return errors.Wrap(err, "failed to close the connection gracefully")
@@ -125,7 +125,7 @@ func (c *websocketClient) Status() (*scheme.Status, error) {
 	}
 
 	resp := new(scheme.Status)
-	err := c.makeRequest(req, resp)
+	err := c.makeRequestResponse(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +143,7 @@ func (c *websocketClient) Version() (*scheme.Version, error) {
 	}
 
 	resp := new(scheme.Version)
-	err := c.makeRequest(req, resp)
+	err := c.makeRequestResponse(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +161,7 @@ func (c *websocketClient) Config() (*scheme.Config, error) {
 	}
 
 	resp := new(scheme.Config)
-	err := c.makeRequest(req, resp)
+	err := c.makeRequestResponse(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -180,7 +180,7 @@ func (c *websocketClient) Plugins() ([]*scheme.PluginMeta, error) {
 	}
 
 	resp := new([]*scheme.PluginMeta)
-	err := c.makeRequest(req, resp)
+	err := c.makeRequestResponse(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -201,7 +201,7 @@ func (c *websocketClient) Plugin(id string) (*scheme.Plugin, error) {
 	}
 
 	resp := new(scheme.Plugin)
-	err := c.makeRequest(req, resp)
+	err := c.makeRequestResponse(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -219,7 +219,7 @@ func (c *websocketClient) PluginHealth() (*scheme.PluginHealth, error) {
 	}
 
 	resp := new(scheme.PluginHealth)
-	err := c.makeRequest(req, resp)
+	err := c.makeRequestResponse(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -241,7 +241,7 @@ func (c *websocketClient) Scan(opts scheme.ScanOptions) ([]*scheme.Scan, error) 
 	}
 
 	resp := new([]*scheme.Scan)
-	err := c.makeRequest(req, resp)
+	err := c.makeRequestResponse(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -261,7 +261,7 @@ func (c *websocketClient) Tags(opts scheme.TagsOptions) ([]string, error) {
 	}
 
 	resp := new([]string)
-	err := c.makeRequest(req, resp)
+	err := c.makeRequestResponse(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -283,7 +283,7 @@ func (c *websocketClient) Info(device string) (*scheme.Info, error) {
 	}
 
 	resp := new(scheme.Info)
-	err := c.makeRequest(req, resp)
+	err := c.makeRequestResponse(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -303,7 +303,7 @@ func (c *websocketClient) Read(opts scheme.ReadOptions) ([]*scheme.Read, error) 
 	}
 
 	resp := new([]*scheme.Read)
-	err := c.makeRequest(req, resp)
+	err := c.makeRequestResponse(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -326,7 +326,7 @@ func (c *websocketClient) ReadDevice(device string) ([]*scheme.Read, error) {
 	}
 
 	resp := new([]*scheme.Read)
-	err := c.makeRequest(req, resp)
+	err := c.makeRequestResponse(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -334,7 +334,7 @@ func (c *websocketClient) ReadDevice(device string) ([]*scheme.Read, error) {
 	return *resp, nil
 }
 
-// ReadCache returns stream reading data from the registered plugins.
+// ReadCache returns cached reading data from the registered plugins.
 func (c *websocketClient) ReadCache(opts scheme.ReadCacheOptions, out chan<- *scheme.Read) error {
 	defer close(out)
 
@@ -347,12 +347,61 @@ func (c *websocketClient) ReadCache(opts scheme.ReadCacheOptions, out chan<- *sc
 	}
 
 	resp := new([]*scheme.Read)
-	err := c.makeRequest(req, resp)
+	err := c.makeRequestResponse(req, resp)
 	if err != nil {
 		return err
 	}
 	for _, r := range *resp {
 		out <- r
+	}
+	return nil
+}
+
+// ReadStream returns a stream of current reading data from the registered plugins.
+func (c *websocketClient) ReadStream(opts scheme.ReadStreamOptions, out chan<- *scheme.Read, stop chan struct{}) error {
+
+	req := scheme.RequestReadStream{
+		EventMeta: scheme.EventMeta{
+			ID:    c.addCounter(),
+			Event: requestReadStream,
+		},
+		Data: opts,
+	}
+
+	resp := &scheme.Read{}
+	proxy := make(chan interface{})
+	go func() {
+		for {
+			data, open := <-proxy
+			if !open {
+				return
+			}
+			out <- data.(*scheme.Read)
+		}
+	}()
+
+	err := c.streamRequest(req, resp, proxy, stop)
+	if err != nil {
+		return errors.Wrap(err, "failed to stream reading data")
+	}
+
+	// If we got here, the stream has been terminated (e.g. via the `stop` channel)
+	// and the WebSocket session is still active (e.g. we did not error, panic, or
+	// exit the program). The client has stopped listening for readings, but we must
+	// tell the server to stop sending them as well.
+	req = scheme.RequestReadStream{
+		EventMeta: scheme.EventMeta{
+			ID:    c.addCounter(),
+			Event: requestReadStream,
+		},
+		Data: scheme.ReadStreamOptions{
+			Stop: true,
+		},
+	}
+
+	err = c.makeRequest(req)
+	if err != nil {
+		return errors.Wrap(err, "failed to stop server-side read stream")
 	}
 	return nil
 }
@@ -371,7 +420,7 @@ func (c *websocketClient) WriteAsync(device string, opts []scheme.WriteData) ([]
 	}
 
 	resp := new([]*scheme.Write)
-	err := c.makeRequest(req, resp)
+	err := c.makeRequestResponse(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -393,7 +442,7 @@ func (c *websocketClient) WriteSync(device string, opts []scheme.WriteData) ([]*
 	}
 
 	resp := new([]*scheme.Transaction)
-	err := c.makeRequest(req, resp)
+	err := c.makeRequestResponse(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -411,7 +460,7 @@ func (c *websocketClient) Transactions() ([]string, error) {
 	}
 
 	resp := new([]string)
-	err := c.makeRequest(req, resp)
+	err := c.makeRequestResponse(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -432,7 +481,7 @@ func (c *websocketClient) Transaction(id string) (*scheme.Transaction, error) {
 	}
 
 	resp := new(scheme.Transaction)
-	err := c.makeRequest(req, resp)
+	err := c.makeRequestResponse(req, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -453,31 +502,78 @@ func (c *websocketClient) addCounter() uint64 {
 // makeRequest issues a request event, reads its response event and parse the
 // response back.
 // FIXME - refer to #22. Need to think more about how async will work in this case.
-func (c *websocketClient) makeRequest(req, resp interface{}) error {
+func (c *websocketClient) makeRequestResponse(req, resp interface{}) error {
 	// Write to the connection.
 	err := c.connection.WriteJSON(req)
 	if err != nil {
 		return errors.Wrap(err, "failed to write to connection")
 	}
 
+	return c.readResponse(req, resp)
+}
+
+// makeRequest issues a request event. It does not attempt to read back a response
+// for the request.
+func (c *websocketClient) makeRequest(req interface{}) error {
+	err := c.connection.WriteJSON(req)
+	if err != nil {
+		return errors.Wrap(err, "failed to issue request")
+	}
+	return nil
+}
+
+// readResponse reads the response for a given request.
+func (c *websocketClient) readResponse(req, resp interface{}) error {
 	// Read from the connection.
-	_, r, err := c.connection.NextReader()
-	if err != nil {
-		return errors.Wrap(err, "failed to get the next data message")
-	}
-
-	// Decode the response into a proper scheme.
 	var re scheme.Response
-	err = json.NewDecoder(r).Decode(&re)
+	err := c.connection.ReadJSON(&re)
 	if err != nil {
-		return errors.Wrap(err, "failed to decode json message into a proper scheme")
+		return errors.Wrap(err, "failed to read response message")
+	}
+	return c.parseResponseMessage(re, req, resp)
+}
+
+func (c *websocketClient) streamRequest(req, resp interface{}, stream chan interface{}, stop chan struct{}) error {
+	defer close(stream)
+
+	err := c.connection.WriteJSON(req)
+	if err != nil {
+		return errors.Wrap(err, "failed to send request")
 	}
 
-	// Handle error response.
-	if re.Event == responseError {
+	for {
+		// If the stop channel is closed, terminate the stream.
+		select {
+		case _, open := <-stop:
+			if !open {
+				return nil
+			}
+		default:
+			// Do nothing and continue on. The next iteration of the
+			// loop will check again whether the stream should stop.
+		}
+
+		var response scheme.Response
+		err := c.connection.ReadJSON(&response)
+		if err != nil {
+			return errors.Wrap(err, "failed to read data from stream")
+		}
+
+		respInst := reflect.New(reflect.TypeOf(resp).Elem()).Interface()
+		err = c.parseResponseMessage(response, req, respInst)
+		if err != nil {
+			return errors.Wrap(err, "failed to parse response message")
+		}
+
+		stream <- respInst
+	}
+}
+
+func (c *websocketClient) parseResponseMessage(r scheme.Response, req, resp interface{}) error {
+	if r.Event == responseError {
 		var e scheme.Error
 
-		err = mapstructure.Decode(re.Data, &e)
+		err := mapstructure.Decode(r.Data, &e)
 		if err != nil {
 			return errors.Wrap(err, "failed to decode map into a proper scheme")
 		}
@@ -490,16 +586,16 @@ func (c *websocketClient) makeRequest(req, resp interface{}) error {
 
 	// Verify if the request and response metadata are matched.
 	v := reflect.ValueOf(req)
-	if v.FieldByName("ID").Uint() != re.ID {
-		return errors.Errorf("%v did not match %v", v.FieldByName("ID"), re.ID)
+	if v.FieldByName("ID").Uint() != r.ID {
+		return errors.Errorf("response id mismatch: %v != %v", v.FieldByName("ID"), r.ID)
 	}
 
-	if matchEvent(v.FieldByName("Event").String()) != re.Event {
-		return errors.Errorf("(%v) %v did not match %v", v.FieldByName("Event"), matchEvent(v.FieldByName("Event").String()), re.Event)
+	if matchEvent(v.FieldByName("Event").String()) != r.Event {
+		return errors.Errorf("(%v) %v did not match %v", v.FieldByName("Event"), matchEvent(v.FieldByName("Event").String()), r.Event)
 	}
 
 	// Handle successful response.
-	err = mapstructure.Decode(re.Data, resp)
+	err := mapstructure.Decode(r.Data, resp)
 	if err != nil {
 		return errors.Wrap(err, "failed to decode map into a proper scheme")
 	}

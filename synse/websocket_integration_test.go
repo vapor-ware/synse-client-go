@@ -1,6 +1,7 @@
 package synse
 
 import (
+	"sync"
 	"testing"
 	"time"
 
@@ -524,6 +525,81 @@ func TestIntegrationWebSocket_ReadCache(t *testing.T) {
 	}
 }
 
+func TestIntegrationWebSocket_ReadStream(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+
+	client, err := NewWebSocketClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	err = client.Open()
+	assert.NoError(t, err)
+
+	defer func() {
+		err = client.Close()
+		assert.NoError(t, err)
+	}()
+
+	opts := scheme.ReadStreamOptions{}
+	readings := make(chan *scheme.Read, 1)
+	stop := make(chan struct{})
+
+	defer close(readings)
+
+	go func() {
+		_ = client.ReadStream(opts, readings, stop)
+	}()
+
+	stopper := time.After(3 * time.Second)
+	timeout := time.After(5 * time.Second)
+	var once sync.Once
+
+	count := 0
+
+readLoop:
+	for {
+		select {
+		case read := <-readings:
+			count++
+
+			if read.DeviceType == "led" {
+				assert.Equal(t, "f041883c-cf87-55d7-a978-3d3103836412", read.Device)
+				assert.NotEmpty(t, read.Timestamp)
+				assert.Contains(t, []string{"state", "color"}, read.Type)
+				assert.Empty(t, read.Unit)
+				assert.Contains(t, []string{"off", "000000"}, read.Value)
+				assert.Equal(t, read.Context, map[string]interface{}{"model": "emul8-led"})
+			} else if read.DeviceType == "temperature" {
+				assert.Contains(t, []string{"89fd576d-462c-53be-bcb6-7870e70c304a", "9907bdfa-75e1-5af5-8385-87184f356b22", "b9324904-385b-581d-b790-5e53eaabfd20"}, read.Device)
+				assert.NotEmpty(t, read.Timestamp)
+				assert.Equal(t, "temperature", read.Type)
+				assert.Equal(t, "celsius", read.Unit.Name)
+				assert.Equal(t, "C", read.Unit.Symbol)
+				assert.NotEmpty(t, read.Value)
+				assert.Equal(t, read.Context, map[string]interface{}{"model": "emul8-temp"})
+			} else {
+				t.Error("unexpected reading device type in response")
+			}
+
+		case <-stopper:
+			once.Do(func() {
+				close(stop)
+			})
+			break readLoop
+
+		case <-timeout:
+			// if the test does not complete after 2s, error.
+			t.Fatal("timeout: failed getting read stream data from channel")
+		}
+	}
+
+	assert.Greater(t, count, 0)
+}
+
 func TestIntegrationWebSocket_WriteAsync(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
@@ -568,9 +644,6 @@ func TestIntegrationWebSocket_WriteAsync(t *testing.T) {
 	assert.Equal(t, "30s", colorWrite.Timeout)
 }
 
-// FIXME - got a 500 error response from synse server at 2019-08-30T10:27:42Z,
-// saying An unexpected error occurred., with context: Object of type 'bytes'
-// is not JSON serializable
 func TestIntegrationWebSocket_WriteSync(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
