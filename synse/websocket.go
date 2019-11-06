@@ -105,12 +105,18 @@ func (c *websocketClient) Open() error {
 // Close closes the websocket connection between the client and Synse Server.
 // It's up to the user to close the connection after finish using it.
 func (c *websocketClient) Close() error {
-	// FIXME (etd): I think this will panic if close is called before connect.
-	err := c.connection.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
-	if err != nil {
-		return errors.Wrap(err, "failed to close the connection gracefully")
+	if c.connection != nil {
+		err := c.connection.WriteMessage(
+			websocket.CloseMessage,
+			websocket.FormatCloseMessage(
+				websocket.CloseNormalClosure,
+				"",
+			),
+		)
+		if err != nil {
+			return errors.Wrap(err, "failed to close the connection gracefully")
+		}
 	}
-
 	return nil
 }
 

@@ -71,6 +71,16 @@ func TestNewWebSocketClientV3_ValidAddressAndTimeout(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestWebSocketClientV3_Close(t *testing.T) {
+	client, err := NewWebSocketClientV3(&Options{
+		Address: "localhost:5000",
+	})
+	assert.NoError(t, err)
+
+	err = client.Close()
+	assert.NoError(t, err)
+}
+
 func TestWebSocketClientV3_Status_200(t *testing.T) {
 	in := `
 {
