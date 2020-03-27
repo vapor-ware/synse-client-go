@@ -201,7 +201,6 @@ func TestHTTPClientV3_Config_200(t *testing.T) {
 {
    "logging":"info",
    "pretty_json":true,
-   "locale":"en_US",
    "cache":{
       "device":{
          "ttl":20,
@@ -248,7 +247,6 @@ func TestHTTPClientV3_Config_200(t *testing.T) {
 	expected := &scheme.Config{
 		Logging:    "info",
 		PrettyJSON: true,
-		Locale:     "en_US",
 		Cache: scheme.CacheOptions{
 			Device: scheme.DeviceOptions{
 				TTL:          int(20),

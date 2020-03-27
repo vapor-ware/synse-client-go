@@ -82,7 +82,6 @@ func TestIntegrationWebSocket_Config(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "debug", config.Logging)
 	assert.True(t, config.PrettyJSON)
-	assert.Equal(t, "en_US", config.Locale)
 	assert.Equal(t, 1, len(config.Plugin.TCP))
 	assert.Equal(t, "emulator:5001", config.Plugin.TCP[0])
 	assert.Equal(t, 0, len(config.Plugin.Unix))
