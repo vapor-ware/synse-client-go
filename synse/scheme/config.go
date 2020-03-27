@@ -2,7 +2,6 @@ package scheme
 
 // Config describes a response for `/config` endpoint.
 type Config struct {
-	Locale     string           `json:"locale" yaml:"locale" mapstructure:"locale"`
 	Logging    string           `json:"logging" yaml:"logging" mapstructure:"logging"`
 	Plugin     PluginOptions    `json:"plugin" yaml:"plugin" mapstructure:"plugin"`
 	Cache      CacheOptions     `json:"cache" yaml:"cache" mapstructure:"cache"`

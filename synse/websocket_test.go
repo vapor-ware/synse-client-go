@@ -237,7 +237,6 @@ func TestWebSocketClientV3_Config_200(t *testing.T) {
    "data":{
       "logging":"info",
       "pretty_json":true,
-      "locale":"en_US",
       "cache":{
          "device":{
             "ttl":20
@@ -284,7 +283,6 @@ func TestWebSocketClientV3_Config_200(t *testing.T) {
 	expected := &scheme.Config{
 		Logging:    "info",
 		PrettyJSON: true,
-		Locale:     "en_US",
 		Cache: scheme.CacheOptions{
 			Device: scheme.DeviceOptions{
 				TTL: int(20),
@@ -662,7 +660,7 @@ func TestWebSocketClientV3_PluginHealth_200(t *testing.T) {
 			"1b714cf2-cc56-5c36-9741-fd6a483b5f11",
 			"1b714cf2-cc56-5c36-9741-fd6a483b5f12",
 		},
-		Unhealthy: []string(nil),
+		Unhealthy: []string{},
 		Active:    int(3),
 		Inactive:  int(0),
 	}
