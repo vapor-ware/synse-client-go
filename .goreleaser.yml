@@ -3,6 +3,7 @@ project_name: synse-client-go
 before:
   hooks:
     - go mod download
+    - rm -rf dist
 builds:
   -
     # hack: goreleaser will always try to build, but will fail if there is
