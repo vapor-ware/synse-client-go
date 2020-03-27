@@ -16,8 +16,6 @@ builds:
       - goos: linux
 archives:
   - format: tar.gz
-checksum:
-  name_template: 'checksums-{{ .Tag }}.txt'
 release:
   github:
     owner: vapor-ware
