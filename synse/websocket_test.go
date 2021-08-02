@@ -33,8 +33,8 @@ func TestNewWebSocketClientV3_NoTLSCertificates(t *testing.T) {
 			Enabled: true,
 		},
 	})
-	assert.Nil(t, client)
-	assert.Error(t, err)
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
 }
 
 func TestNewWebSocketClientV3_defaults(t *testing.T) {
@@ -1627,7 +1627,6 @@ func TestWebSocketClientV3_ReadStream_200(t *testing.T) {
 			// If the test does not complete after 2s, error.
 			//t.Fatal("timeout: failed getting read stream data from channel")
 			done = true
-			break
 		}
 
 		if done {

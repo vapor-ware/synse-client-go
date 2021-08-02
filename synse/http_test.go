@@ -32,8 +32,8 @@ func TestNewHTTPClientV3_NoTLSCertificates(t *testing.T) {
 			Enabled: true,
 		},
 	})
-	assert.Nil(t, client)
-	assert.Error(t, err)
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
 }
 
 func TestNewHTTPClientV3_defaults(t *testing.T) {

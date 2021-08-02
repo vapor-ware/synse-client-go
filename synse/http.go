@@ -73,11 +73,13 @@ func createHTTPClient(opts *Options) (*resty.Client, error) {
 		return nil, err
 	}
 
+	if cert != nil {
+		client = client.SetCertificates(*cert)
+	}
+
 	// NOTE - refer to #24. If not disable linting, a warning will happen:
 	// TLS InsecureSkipVerify may be true.,HIGH,LOW (gosec)
-	return client.
-		SetCertificates(cert).
-		SetTLSClientConfig(&tls.Config{InsecureSkipVerify: opts.TLS.SkipVerify}), nil // nolint
+	return client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: opts.TLS.SkipVerify}), nil // nolint
 }
 
 // Open opens the connection between the client and Synse Server. This fulfils
