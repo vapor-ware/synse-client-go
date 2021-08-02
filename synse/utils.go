@@ -31,17 +31,18 @@ func setDefaults(opts *Options) error {
 }
 
 // setTLS registers the certificates with configured options.
-func setTLS(opts *Options) (tls.Certificate, error) {
+func setTLS(opts *Options) (*tls.Certificate, error) {
 	if opts.TLS.CertFile == "" && opts.TLS.KeyFile == "" {
-		return tls.Certificate{}, errors.New("no certificates are specified")
+		// return &tls.Certificate{}, errors.New("no certificates are specified")
+		return nil, nil
 	}
 
 	cert, err := tls.LoadX509KeyPair(opts.TLS.CertFile, opts.TLS.KeyFile)
 	if err != nil {
-		return tls.Certificate{}, errors.Wrap(err, "failed to set client certificates")
+		return nil, errors.Wrap(err, "failed to set client certificates")
 	}
 
-	return cert, nil
+	return &cert, nil
 }
 
 // buildURL builds up a complete URL from given scheme, host and path.

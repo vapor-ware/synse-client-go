@@ -79,10 +79,15 @@ func createWebSocketClient(opts *Options) (*websocket.Dialer, error) {
 		return nil, err
 	}
 
+	certs := []tls.Certificate{}
+	if cert != nil {
+		certs = append(certs, *cert)
+	}
+
 	return &websocket.Dialer{
 		HandshakeTimeout: opts.WebSocket.HandshakeTimeout,
 		TLSClientConfig: &tls.Config{
-			Certificates: []tls.Certificate{cert},
+			Certificates: certs,
 
 			// NOTE - refer to #24. If not disable linting, a warning will happen:
 			// TLS InsecureSkipVerify may be true.,HIGH,LOW (gosec)
