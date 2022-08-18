@@ -2,7 +2,7 @@
 # synse-client-go
 #
 
-PKG_VERSION := 1.0.0
+PKG_VERSION := v1.0.0
 
 
 .PHONY: build
@@ -36,7 +36,6 @@ test: test-unit test-integration  ## Run all tests (unit, integration)
 
 .PHONY: test-unit
 test-unit:  ## Run unit tests
-	@ # Note: this requires go1.10+ in order to do multi-package coverage reports
 	go test -short -race -coverprofile=coverage.out -covermode=atomic ./...
 
 .PHONY: test-integration

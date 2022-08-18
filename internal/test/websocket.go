@@ -39,11 +39,11 @@ type WebSocketServer struct {
 }
 
 // NewWebSocketServerV3 returns an instance of a mock websocket server for v3 API.
-func NewWebSocketServerV3() WebSocketServer {
+func NewWebSocketServerV3() *WebSocketServer {
 	m := http.NewServeMux()
 	s := httptest.NewServer(m)
 
-	return WebSocketServer{
+	return &WebSocketServer{
 		URL:        s.URL[7:], // remove `http://` prefix
 		server:     s,
 		mux:        m,
@@ -53,11 +53,11 @@ func NewWebSocketServerV3() WebSocketServer {
 }
 
 // NewWebSocketTLSServerV3 returns an instance of a mock websocket tls server for v3 API.
-func NewWebSocketTLSServerV3() WebSocketServer {
+func NewWebSocketTLSServerV3() *WebSocketServer {
 	m := http.NewServeMux()
 	s := httptest.NewTLSServer(m)
 
-	return WebSocketServer{
+	return &WebSocketServer{
 		URL:        s.URL[8:], // remove `https://` prefix
 		server:     s,
 		mux:        m,
@@ -67,7 +67,7 @@ func NewWebSocketTLSServerV3() WebSocketServer {
 }
 
 // Serve reads a request event and writes back a given response.
-func (s WebSocketServer) Serve(resp string) {
+func (s *WebSocketServer) Serve(resp string) {
 	s.mux.HandleFunc(
 		fmt.Sprintf("/%s/%s", s.version, s.entryRoute),
 		func(w http.ResponseWriter, r *http.Request) {
@@ -99,7 +99,7 @@ func (s WebSocketServer) Serve(resp string) {
 }
 
 // Stream issues a requests and writes back a stream of response data.
-func (s WebSocketServer) Stream(responses []string) {
+func (s *WebSocketServer) Stream(responses []string) {
 	s.mux.HandleFunc(
 		fmt.Sprintf("/%s/%s", s.version, s.entryRoute),
 		func(w http.ResponseWriter, r *http.Request) {
@@ -136,16 +136,16 @@ func (s WebSocketServer) Stream(responses []string) {
 }
 
 // SetTLS starts TLS using the configured options.
-func (s WebSocketServer) SetTLS(cfg *tls.Config) {
+func (s *WebSocketServer) SetTLS(cfg *tls.Config) {
 	s.tls = cfg
 }
 
 // GetCertificates returns the certificate used by the server.
-func (s WebSocketServer) GetCertificates() *x509.Certificate {
+func (s *WebSocketServer) GetCertificates() *x509.Certificate {
 	return s.server.Certificate()
 }
 
 // Close closes the connection.
-func (s WebSocketServer) Close() {
+func (s *WebSocketServer) Close() {
 	s.server.Close()
 }
