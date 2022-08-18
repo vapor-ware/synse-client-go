@@ -6,9 +6,9 @@ import (
 	"crypto/tls"
 	"encoding/json"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
 	"github.com/vapor-ware/synse-client-go/synse/scheme"
-	"gopkg.in/resty.v1"
 )
 
 // httpClient implements a http client.
@@ -218,7 +218,7 @@ func (c *httpClient) ReadCache(opts scheme.ReadCacheOptions, out chan<- *scheme.
 	defer close(out)
 	errScheme := new(scheme.Error)
 
-	resp, err := c.setVersioned().R().SetDoNotParseResponse(true).SetMultiValueQueryParams(structToURLValues(opts)).SetError(errScheme).Get(readcacheURI)
+	resp, err := c.setVersioned().R().SetDoNotParseResponse(true).SetQueryParamsFromValues(structToURLValues(opts)).SetError(errScheme).Get(readcacheURI)
 	if err = check(err, errScheme); err != nil {
 		return err
 	}
@@ -288,7 +288,7 @@ func (c *httpClient) GetOptions() *Options {
 // against the Synse Server versioned API.
 func (c *httpClient) getVersionedQueryParams(uri string, params interface{}, okScheme interface{}) error {
 	errScheme := new(scheme.Error)
-	_, err := c.setVersioned().R().SetMultiValueQueryParams(structToURLValues(params)).SetResult(okScheme).SetError(errScheme).Get(uri)
+	_, err := c.setVersioned().R().SetQueryParamsFromValues(structToURLValues(params)).SetResult(okScheme).SetError(errScheme).Get(uri)
 	return check(err, errScheme)
 
 }
@@ -315,12 +315,12 @@ func (c *httpClient) postVersioned(uri string, body interface{}, okScheme interf
 
 // setUnversioned returns a client that uses unversioned host URL.
 func (c *httpClient) setUnversioned() *resty.Client {
-	return c.client.SetHostURL(buildURL(c.scheme, c.options.Address))
+	return c.client.SetBaseURL(buildURL(c.scheme, c.options.Address))
 }
 
 // setVersioned returns a client that uses versioned host URL.
 func (c *httpClient) setVersioned() *resty.Client {
-	return c.client.SetHostURL(buildURL(c.scheme, c.options.Address, c.apiVersion))
+	return c.client.SetBaseURL(buildURL(c.scheme, c.options.Address, c.apiVersion))
 }
 
 // check validates returned response from the Synse Server.

@@ -32,11 +32,11 @@ type HTTPServer struct {
 }
 
 // NewHTTPServerV3 returns an instance of a mock http server for v3 API.
-func NewHTTPServerV3() HTTPServer {
+func NewHTTPServerV3() *HTTPServer {
 	m := http.NewServeMux()
 	s := httptest.NewServer(m)
 
-	return HTTPServer{
+	return &HTTPServer{
 		URL:     s.URL[7:], // remove `http://` prefix
 		server:  s,
 		mux:     m,
@@ -45,11 +45,11 @@ func NewHTTPServerV3() HTTPServer {
 }
 
 // NewHTTPSServerV3 returns an instance of a mock https server for v3 API.
-func NewHTTPSServerV3() HTTPServer {
+func NewHTTPSServerV3() *HTTPServer {
 	m := http.NewServeMux()
 	s := httptest.NewTLSServer(m)
 
-	return HTTPServer{
+	return &HTTPServer{
 		URL:     s.URL[8:], // remove `https://`
 		server:  s,
 		mux:     m,
@@ -58,27 +58,27 @@ func NewHTTPSServerV3() HTTPServer {
 }
 
 // ServeUnversioned serves an unversioned endpoint.
-func (s HTTPServer) ServeUnversioned(t *testing.T, uri string, statusCode int, response interface{}) {
+func (s *HTTPServer) ServeUnversioned(t *testing.T, uri string, statusCode int, response interface{}) {
 	serve(s.mux, t, uri, statusCode, response)
 }
 
 // ServeVersioned serves a versioned endpoint.
-func (s HTTPServer) ServeVersioned(t *testing.T, uri string, statusCode int, response interface{}) {
+func (s *HTTPServer) ServeVersioned(t *testing.T, uri string, statusCode int, response interface{}) {
 	serve(s.mux, t, fmt.Sprintf("/%v%v", s.version, uri), statusCode, response)
 }
 
 // SetTLS starts TLS using the configured options.
-func (s HTTPServer) SetTLS(cfg *tls.Config) {
+func (s *HTTPServer) SetTLS(cfg *tls.Config) {
 	s.tls = cfg
 }
 
 // GetCertificates returns the certificate used by the server.
-func (s HTTPServer) GetCertificates() *x509.Certificate {
+func (s *HTTPServer) GetCertificates() *x509.Certificate {
 	return s.server.Certificate()
 }
 
 // Close closes the unversioned server connection.
-func (s HTTPServer) Close() {
+func (s *HTTPServer) Close() {
 	s.server.Close()
 }
 

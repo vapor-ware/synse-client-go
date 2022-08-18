@@ -1663,6 +1663,14 @@ func TestWebSocketClientV3_ReadStream_500(t *testing.T) {
 	assert.NotNil(t, client)
 	assert.NoError(t, err)
 
+	var results []*scheme.Read
+
+	defer func() {
+		err := client.Close()
+		assert.NoError(t, err)
+		assert.Empty(t, results)
+	}()
+
 	err = client.Open()
 	assert.NoError(t, err)
 
@@ -1672,18 +1680,13 @@ func TestWebSocketClientV3_ReadStream_500(t *testing.T) {
 
 	defer close(readings)
 
-	go func() {
-		err := client.ReadStream(opts, readings, stop)
-		assert.Error(t, err)
-	}()
-
-	var results []*scheme.Read
+	err = client.ReadStream(opts, readings, stop)
+	assert.Error(t, err)
 
 	timeout := time.After(2 * time.Second)
 	closer := time.After(1 * time.Second)
 	var once sync.Once
 
-readLoop:
 	for {
 		select {
 		case r := <-readings:
@@ -1693,18 +1696,13 @@ readLoop:
 			once.Do(func() {
 				close(stop)
 			})
-			break readLoop
+			return
 
 		case <-timeout:
 			// If the test does not complete after 2s, error.
 			t.Fatal("timeout: failed getting read stream data from channel")
 		}
 	}
-
-	assert.Empty(t, results)
-
-	err = client.Close()
-	assert.NoError(t, err)
 }
 
 func TestWebSocketClientV3_WriteAsync_200(t *testing.T) {
