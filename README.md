@@ -1,4 +1,4 @@
-[![Build Status](https://github.com/vapor-ware/synse-client-go/workflows/build/badge.svg)](https://github.com/vapor-ware/synse-sdk/actions)
+[![Build Status](https://github.com/vapor-ware/synse-client-go/workflows/build/badge.svg)](https://github.com/vapor-ware/synse-client-go/actions)
 [![Godoc](https://godoc.org/github.com/vapor-ware/synse-client-go/synse?status.svg)](https://godoc.org/github.com/vapor-ware/synse-client-go/synse)
 [![Go Report Card](https://goreportcard.com/badge/github.com/vapor-ware/synse-client-go)](https://goreportcard.com/report/github.com/vapor-ware/synse-client-go)
 

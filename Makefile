@@ -2,7 +2,7 @@
 # synse-client-go
 #
 
-PKG_VERSION := v1.0.0
+PKG_VERSION := v1.1.0
 
 
 .PHONY: build
