@@ -5,6 +5,7 @@ package synse
 import (
 	"crypto/tls"
 	"encoding/json"
+	"net/url"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
@@ -35,6 +36,12 @@ func NewHTTPClientV3(opts *Options) (Client, error) {
 		return nil, errors.Wrap(err, "failed to create a http client")
 	}
 
+	u, err := url.ParseRequestURI(opts.Address)
+	if err == nil && u != nil && u.Scheme == "https" {
+		opts.TLS.Enabled = true
+		opts.Address = u.Host
+	}
+
 	s := "http"
 	if opts.TLS.Enabled {
 		s = "https"
@@ -61,7 +68,8 @@ func createHTTPClient(opts *Options) (*resty.Client, error) {
 		SetTimeout(opts.HTTP.Timeout).
 		SetRetryCount(int(opts.HTTP.Retry.Count)).
 		SetRetryWaitTime(opts.HTTP.Retry.WaitTime).
-		SetRetryMaxWaitTime(opts.HTTP.Retry.MaxWaitTime)
+		SetRetryMaxWaitTime(opts.HTTP.Retry.MaxWaitTime).
+		SetRedirectPolicy(resty.FlexibleRedirectPolicy(opts.HTTP.Redirects))
 
 	if !opts.TLS.Enabled {
 		return client, nil

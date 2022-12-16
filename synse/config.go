@@ -29,6 +29,9 @@ type HTTPOptions struct {
 
 	// Retry specifies the options for retry mechanism.
 	Retry RetryOptions
+
+	// Redirects specifies the max number of allowed http redirects
+	Redirects int `default:"5"`
 }
 
 // WebSocketOptions is the config options for websocket protocol.

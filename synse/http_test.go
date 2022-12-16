@@ -52,6 +52,7 @@ func TestNewHTTPClientV3_defaults(t *testing.T) {
 	assert.Empty(t, client.GetOptions().TLS.KeyFile)
 	assert.False(t, client.GetOptions().TLS.Enabled)
 	assert.False(t, client.GetOptions().TLS.SkipVerify)
+	assert.Equal(t, 5, client.GetOptions().HTTP.Redirects)
 }
 
 func TestNewHTTPClientV3_ValidAddress(t *testing.T) {
@@ -59,6 +60,17 @@ func TestNewHTTPClientV3_ValidAddress(t *testing.T) {
 		Address: "localhost:5000",
 	})
 	assert.NotNil(t, client)
+	assert.NoError(t, err)
+}
+
+func TestNewHTTPClientV3_AddressWithHTTPS(t *testing.T) {
+	client, err := NewHTTPClientV3(&Options{
+		Address: "https://example.com",
+	})
+	assert.NotNil(t, client)
+	assert.NoError(t, err)
+
+	_, err = client.Status()
 	assert.NoError(t, err)
 }
 
