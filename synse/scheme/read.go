@@ -4,6 +4,7 @@ package scheme
 type Read struct {
 	Device     string                 `json:"device" yaml:"device" mapstructure:"device"`
 	DeviceType string                 `json:"device_type" yaml:"device_type" mapstructure:"device_type"`
+	DeviceInfo string                 `json:"device_info" yaml:"device_info" mapstructure:"device_info"`
 	Type       string                 `json:"type" yaml:"type" mapstructure:"type"`
 	Value      interface{}            `json:"value" yaml:"value" mapstructure:"value"`
 	Timestamp  string                 `json:"timestamp" yaml:"timestamp" mapstructure:"timestamp"`

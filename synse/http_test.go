@@ -1073,6 +1073,7 @@ func TestHTTPClientV3_ReadDevice_200(t *testing.T) {
   {
     "device": "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
     "device_type": "temperature",
+    "device_info": "Synse Temperature Sensor",
     "type": "temperature",
     "value": 20.3,
     "timestamp": "2019-03-20T17:37:07Z",
@@ -1091,6 +1092,7 @@ func TestHTTPClientV3_ReadDevice_200(t *testing.T) {
 		{
 			Device:     "1b714cf2-cc56-5c36-9741-fd6a483b5f10",
 			DeviceType: "temperature",
+			DeviceInfo: "Synse Temperature Sensor",
 			Type:       "temperature",
 			Value:      float64(20.3),
 			Timestamp:  "2019-03-20T17:37:07Z",
